@@ -1,9 +1,0 @@
-{
-  "framework": "other",
-  "buildCommand": "npm install",
-  "outputDirectory": "public",
-  "env": {
-    "GEMINI_API_KEY": "",
-    "JWT_SECRET": ""
-  }
-}

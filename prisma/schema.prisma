@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  name          String?
+  targetScore   Float?       @default(6.5)
+  currentLevel  String?      @default("Intermediate")
+  submissions   Submission[]
+  createdAt     DateTime     @default(now())
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  skill       Skill
+  band        Float
+  descriptors Json // TR, CC, LR, GRA scores and feedback
+  feedback    Json // strengths, weaknesses, suggestions
+  rawScore    Int?
+  createdAt   DateTime @default(now())
+}
+
+enum Skill {
+  LISTENING
+  READING
+  WRITING
+  SPEAKING
+}

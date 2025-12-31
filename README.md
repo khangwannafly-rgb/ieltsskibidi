@@ -1,60 +1,36 @@
-# IELTS Free Tutor (Node + Static Frontend)
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Tính năng
-- Tạo đề ngẫu nhiên chuẩn IELTS (Speaking, Writing, Reading, Listening, Vocabulary)
-- Chấm và giải thích bằng Gemini (Google Generative Language API)
-- Web Speech API: phát âm và ghi âm transcript
-- Auth JWT cơ bản, lưu tiến độ vào file JSON (free, không DB)
-- Dashboard hiển thị lịch sử và biểu đồ
+## Getting Started
 
-## Cấu trúc
-- `server.js`: Backend Express, endpoints `/api/auth/*`, `/api/progress`, `/api/tutor`, `/api/prompt`, `/api/health`
-- `public/`: Frontend tĩnh dùng JS thuần
-- `data/`: Lưu người dùng và tiến độ
+First, run the development server:
 
-## Chạy local
-1. `npm install`
-2. Tạo `.env`:
-   - `GEMINI_API_KEY=<YOUR_GEMINI_KEY>`
-   - `JWT_SECRET=<random_long_string>`
-3. `npm start`
-4. Mở `http://localhost:3000`
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-## Deploy qua GitHub + Vercel
-### Đẩy mã lên GitHub
-1. `git init`
-2. `git add .`
-3. `git commit -m "init"`
-4. Tạo repo trên GitHub
-5. `git remote add origin https://github.com/<your-username>/<repo>.git`
-6. `git branch -M main`
-7. `git push -u origin main`
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### Kết nối Vercel
-1. Đăng nhập `https://vercel.com` bằng GitHub
-2. “Add New Project” → chọn repo
-3. Thiết lập:
-   - Framework: Other
-   - Output directory: `public`
-   - Build command: `npm install`
-   - Start command: `node server.js`
-4. Environment Variables:
-   - `GEMINI_API_KEY`
-   - `JWT_SECRET`
-5. Deploy, kiểm tra:
-   - `https://<project>.vercel.app/api/health`
-   - `https://<project>.vercel.app/`
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## CI cơ bản (GitHub Actions)
-Workflow có sẵn ở `.github/workflows/ci.yml`, cài dependencies và kiểm tra build script.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Khắc phục lỗi Gemini
-- Nếu `gemini_error` 404 model:
-  - Tạo API key từ AI Studio `ai.google.dev`
-  - Bật Generative Language API trong Google Cloud
-  - Kiểm tra `GET /api/models` phải thấy model Gemini text
+## Learn More
 
-## Bảo mật
-- Không commit `.env`, đã chặn trong `.gitignore`
-- Không để lộ API key ở frontend
+To learn more about Next.js, take a look at the following resources:
 
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
