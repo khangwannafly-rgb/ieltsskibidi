@@ -152,9 +152,51 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-32 pb-24">
+    <div className="relative max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-32 pb-24 overflow-hidden">
+      {/* Welcome Header */}
+      {user && (
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-4 mb-8"
+        >
+          <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-500/20">
+            {user.name.charAt(0)}
+          </div>
+          <div>
+            <h2 className="text-2xl font-black text-white tracking-tight">Chào mừng trở lại, {user.name}! 👋</h2>
+            <p className="text-slate-500 text-sm font-medium">Hôm nay bạn muốn luyện tập kỹ năng nào?</p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Background Decorative Elements */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-[128px] -z-10 animate-float" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-fuchsia-600/10 rounded-full blur-[128px] -z-10 animate-float" style={{ animationDelay: '-3s' }} />
+      
+      {/* Stats Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-4"
+      >
+        {[
+          { label: 'Bài tập hoàn thành', value: submissions.length, icon: Target, color: 'text-indigo-400' },
+          { label: 'Band trung bình', value: currentBand.toFixed(1), icon: TrendingUp, color: 'text-emerald-400' },
+          { label: 'Mục tiêu', value: targetBand.toFixed(1), icon: Star, color: 'text-amber-400' },
+          { label: 'Điểm mạnh nhất', value: getStrengthsText().split(' ')[1] || '---', icon: Zap, color: 'text-rose-400' },
+        ].map((stat, i) => (
+          <div key={i} className="glass-card flex flex-col items-center justify-center p-6 text-center space-y-2 border-white/5 bg-slate-900/40">
+            <stat.icon className={`w-6 h-6 ${stat.color} mb-2`} />
+            <div className="text-3xl font-black text-white">{stat.value}</div>
+            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</div>
+          </div>
+        ))}
+      </motion.div>
+
       {/* Hero Section */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-16">
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-16 relative">
         <div className="flex-1 space-y-8 text-center lg:text-left">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
@@ -162,7 +204,7 @@ export default function Dashboard() {
             className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-[0.3em] mb-4"
           >
             <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            AI Learning Dashboard
+            AI Learning Dashboard v2.0
           </motion.div>
           
           <motion.h1 
@@ -171,7 +213,7 @@ export default function Dashboard() {
             className="premium-title"
           >
             Chinh phục <br />
-            <span className="gradient-text">IELTS</span> cùng AI
+            <span className="gradient-text">IELTS</span> cùng IELTS SKIBIDI
           </motion.h1>
 
           <motion.p 
@@ -180,7 +222,7 @@ export default function Dashboard() {
             transition={{ delay: 0.2 }}
             className="premium-subtitle"
           >
-            Hệ thống luyện thi IELTS thông minh ứng dụng AI. <br />
+            Nền tảng luyện thi IELTS ứng dụng trí tuệ nhân tạo thế hệ mới. <br />
             Mục tiêu của bạn là Band <span className="text-indigo-400 font-black tracking-wider underline decoration-indigo-500/30 underline-offset-8">{targetBand.toFixed(1)}</span>. 
           </motion.p>
 
@@ -194,7 +236,10 @@ export default function Dashboard() {
               Bắt đầu luyện tập
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <button className="btn-secondary">Xem lộ trình học</button>
+            <button className="btn-secondary group relative overflow-hidden">
+              <span className="relative z-10">Xem lộ trình học</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
+            </button>
           </motion.div>
         </div>
 
@@ -237,33 +282,32 @@ export default function Dashboard() {
       {/* Skills Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
         {skills.map((skill, index) => (
-          <Link href={skill.href} key={skill.name}>
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 * index }}
-              whileHover={{ y: -12, scale: 1.02 }}
-              className={`glass-card glass-shine group h-full !p-8 border-white/5 bg-slate-900/40 hover:bg-slate-900/60 ${skill.borderColor}`}
+          <motion.div
+            key={skill.name}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 * index }}
+          >
+            <Link 
+              href={skill.href} 
+              className={`group glass-card h-full flex flex-col items-start gap-6 border-transparent ${skill.borderColor} glass-shine bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500`}
             >
-              <div className="space-y-8">
-                <div className={`${skill.bgColor} w-16 h-16 rounded-[1.5rem] flex items-center justify-center ${skill.color} group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-white/5 shadow-inner`}>
-                  <skill.icon className="w-8 h-8" />
-                </div>
-                
-                <div className="space-y-3">
-                  <h3 className="text-2xl font-black text-white group-hover:gradient-text transition-all duration-300 tracking-tight">{skill.name}</h3>
-                  <p className="text-slate-400 font-medium leading-relaxed line-clamp-3 text-sm">
-                    {skill.desc}
-                  </p>
-                </div>
-
-                <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] ${skill.color} pt-2`}>
-                  Luyện tập ngay
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-                </div>
+              <div className={`p-4 rounded-2xl ${skill.bgColor} ${skill.color} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+                <skill.icon className="w-8 h-8" />
               </div>
-            </motion.div>
-          </Link>
+              <div className="space-y-3">
+                <h3 className="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">
+                  {skill.name}
+                </h3>
+                <p className="text-slate-400 text-sm leading-relaxed line-clamp-3">
+                  {skill.desc}
+                </p>
+              </div>
+              <div className={`mt-auto pt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${skill.color} opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0`}>
+                Luyện tập ngay <ArrowRight className="w-3 h-3" />
+              </div>
+            </Link>
+          </motion.div>
         ))}
       </div>
 
