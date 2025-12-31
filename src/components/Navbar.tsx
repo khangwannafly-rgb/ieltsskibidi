@@ -36,7 +36,7 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 pt-4 px-4 pointer-events-none">
+    <div className="fixed top-0 left-0 right-0 z-[100] pt-4 px-4 pointer-events-none">
       <motion.nav 
         className="mx-auto max-w-6xl pointer-events-auto"
         initial={{ y: 0, opacity: 1 }}
@@ -49,8 +49,8 @@ export default function Navbar() {
           ease: [0.22, 1, 0.36, 1]
         }}
       >
-        <div className="glass bg-slate-900/80 border-slate-800/50 rounded-2xl px-6 h-16 flex items-center justify-between shadow-lg transition-colors duration-300">
-          <Link href="/" className="text-2xl font-black tracking-tight gradient-text">
+        <div className="glass bg-slate-900/90 border-slate-800/50 rounded-2xl px-6 h-16 flex items-center justify-between shadow-2xl backdrop-blur-xl transition-all duration-300">
+          <Link href="/" className="text-2xl font-black tracking-tight gradient-text hover:scale-105 transition-transform">
             IELTS SKIBIDI
           </Link>
           

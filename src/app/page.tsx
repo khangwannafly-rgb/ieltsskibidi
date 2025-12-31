@@ -152,7 +152,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="relative max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-32 pb-24 overflow-hidden">
+    <div className="relative max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-40 pb-24 overflow-hidden">
       {/* Welcome Header */}
       {user && (
         <motion.div 

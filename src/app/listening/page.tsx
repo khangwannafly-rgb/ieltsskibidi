@@ -172,9 +172,9 @@ export default function ListeningPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-20 flex flex-col">
+    <div className="min-h-screen bg-slate-950 pt-24 flex flex-col">
       {/* Top Header */}
-      <div className="h-20 bg-slate-900/80 backdrop-blur-xl text-white flex items-center justify-between px-10 sticky top-0 z-40 border-b border-white/5 shadow-2xl">
+      <div className="h-20 bg-slate-900/80 backdrop-blur-xl text-white flex items-center justify-between px-10 sticky top-[80px] z-40 border-b border-white/5 shadow-2xl">
         <div className="flex items-center gap-6">
           <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 border border-white/10">
             <Headphones className="w-6 h-6 text-white" />
