@@ -413,23 +413,3 @@ export default function ListeningPage() {
     </div>
   );
 }
-                <button 
-                  onClick={() => setSubmitted(false)}
-                  className="btn-primary w-full py-6 text-2xl shadow-xl shadow-indigo-900/20"
-                >
-                  Xem lại lỗi sai
-                </button>
-                <button 
-                    onClick={() => window.location.reload()}
-                    className="w-full py-4 text-slate-500 dark:text-slate-400 font-black uppercase tracking-[0.3em] text-xs hover:text-indigo-600 dark:hover:text-white transition-all hover:tracking-[0.4em]"
-                  >
-                    Làm bài khác
-                  </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
