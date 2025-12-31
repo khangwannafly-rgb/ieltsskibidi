@@ -181,7 +181,7 @@ export default function SpeakingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-48 pb-20 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-950 pt-8 pb-20 relative overflow-hidden">
       {/* Background Orbs */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden -z-10">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-pulse" />

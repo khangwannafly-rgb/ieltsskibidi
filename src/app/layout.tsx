@@ -38,7 +38,7 @@ export default function RootLayout({
           <UserProvider>
             <Onboarding />
             <Navbar />
-            <main className="min-h-[calc(100vh-64px)]">
+            <main className="min-h-[calc(100vh-64px)] pt-32">
               {children}
             </main>
           </UserProvider>
