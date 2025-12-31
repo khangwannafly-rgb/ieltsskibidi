@@ -1,9 +1,10 @@
-import { model } from "@/lib/gemini";
+import { getGeminiModel } from "@/lib/gemini";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { type = "task2", targetScore = 6.5 } = await req.json();
+    const model = getGeminiModel();
 
     const prompt = `You are an official IELTS test designer. Generate a high-quality, authentic IELTS Writing ${type} question.
     

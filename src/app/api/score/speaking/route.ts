@@ -1,9 +1,10 @@
-import { model } from "@/lib/gemini";
+import { getGeminiModel } from "@/lib/gemini";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { transcript, questions } = await req.json();
+    const model = getGeminiModel();
 
     if (!transcript) {
       return NextResponse.json({ error: "Transcript is required" }, { status: 400 });

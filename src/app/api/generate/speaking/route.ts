@@ -1,9 +1,10 @@
-import { model } from "@/lib/gemini";
+import { getGeminiModel } from "@/lib/gemini";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { part, topic, targetScore = 6.5 } = await req.json();
+    const model = getGeminiModel();
 
     let prompt = "";
     if (part === 1) {

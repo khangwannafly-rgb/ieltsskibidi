@@ -1,9 +1,10 @@
-import { model } from "@/lib/gemini";
+import { getGeminiModel } from "@/lib/gemini";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { question, essay, task_type = "task2" } = await req.json();
+    const model = getGeminiModel();
 
     if (!question || !essay) {
       return NextResponse.json({ error: "Question and essay are required" }, { status: 400 });

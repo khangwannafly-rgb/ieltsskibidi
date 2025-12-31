@@ -1,9 +1,10 @@
-import { model } from "@/lib/gemini";
+import { getGeminiModel } from "@/lib/gemini";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { targetScore = 6.5 } = await req.json();
+    const model = getGeminiModel();
     const prompt = `You are an IELTS Listening test designer. Generate a high-quality, authentic IELTS Listening Section (Part 1, 2, 3, or 4) with exactly 10 questions.
     
     Section Requirements:

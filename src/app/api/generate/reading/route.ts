@@ -1,9 +1,10 @@
-import { model } from "@/lib/gemini";
+import { getGeminiModel } from "@/lib/gemini";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
     const { targetScore = 6.5 } = await req.json();
+    const model = getGeminiModel();
     const prompt = `You are an IELTS Reading test creator for Cambridge. Generate a high-quality, authentic IELTS Academic Reading passage (Section 1, 2, or 3) with exactly 13-14 questions.
     
     Passage Requirements:
