@@ -282,77 +282,73 @@ export default function ListeningPage() {
           </div>
 
           <div className="space-y-16">
-            {(data.sections || [1, 2, 3, 4]).map((section: any, sIdx: number) => (
-              <div key={sIdx} className="space-y-10">
-                <div className="flex items-center gap-8">
-                  <div className="h-px flex-1 bg-white/5" />
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">Part {sIdx + 1}</span>
-                    <h2 className="text-2xl font-black text-white tracking-tight">{section.title || `Listening Section ${sIdx + 1}`}</h2>
-                  </div>
-                  <div className="h-px flex-1 bg-white/5" />
+            <div className="space-y-10">
+              <div className="flex items-center gap-8">
+                <div className="h-px flex-1 bg-white/5" />
+                <div className="flex flex-col items-center gap-2">
+                  <span className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.3em]">{data.section_type || "Listening Section"}</span>
+                  <h2 className="text-2xl font-black text-white tracking-tight">{data.context || "Bài nghe IELTS"}</h2>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {data.questions
-                    .filter((q: any) => section.questionsRange ? (q.id >= section.questionsRange[0] && q.id <= section.questionsRange[1]) : (q.section === (sIdx + 1)))
-                    .map((q: any) => (
-                      <div key={q.id} className="glass-card !p-8 hover:bg-slate-900/60 transition-all border-white/5 shadow-sm">
-                        <div className="flex gap-6">
-                          <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-black text-lg border border-white/10 shadow-lg group-hover:bg-emerald-600 transition-colors">
-                            {q.id}
-                          </span>
-                          <div className="flex-1 space-y-6">
-                            <p className="text-white font-bold text-lg leading-relaxed">{q.question}</p>
-                            
-                            <input 
-                              type="text"
-                              disabled={submitted}
-                              placeholder="Nhập câu trả lời..."
-                              value={userAnswers[q.id] || ''}
-                              onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                              className="w-full p-5 rounded-2xl border border-white/5 bg-slate-950/50 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all text-lg font-medium text-white placeholder:text-slate-700"
-                            />
-
-                            {submitted && (
-                              <motion.div 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className={`p-6 rounded-[2rem] border relative overflow-hidden ${
-                                  userAnswers[q.id]?.toLowerCase().trim() === data.answers.find((a: any) => a.id === q.id).correct_answer.toLowerCase().trim()
-                                  ? 'bg-emerald-500/5 border-emerald-500/20'
-                                  : 'bg-rose-500/5 border-rose-500/20'
-                                }`}
-                              >
-                                <div className="flex items-start gap-4 relative">
-                                  <div className={`mt-1 p-1.5 rounded-lg ${
-                                    userAnswers[q.id]?.toLowerCase().trim() === data.answers.find((a: any) => a.id === q.id).correct_answer.toLowerCase().trim()
-                                    ? 'bg-emerald-500 text-white'
-                                    : 'bg-rose-500 text-white'
-                                  }`}>
-                                    <CheckCircle className="w-4 h-4" />
-                                  </div>
-                                  <div className="space-y-3">
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                                      Đáp án đúng: <span className="text-emerald-400 ml-2">{data.answers.find((a: any) => a.id === q.id).correct_answer}</span>
-                                    </p>
-                                    <div className="space-y-2">
-                                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 block">Phân tích chuyên sâu:</span>
-                                      <p className="text-slate-300 text-sm font-medium leading-relaxed italic">
-                                        {data.answers.find((a: any) => a.id === q.id).explanation}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
+                <div className="h-px flex-1 bg-white/5" />
               </div>
-            ))}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {data.questions.map((q: any, idx: number) => (
+                  <div key={q.id} className="glass-card !p-8 hover:bg-slate-900/60 transition-all border-white/5 shadow-sm">
+                    <div className="flex gap-6">
+                      <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-black text-lg border border-white/10 shadow-lg group-hover:bg-emerald-600 transition-colors">
+                        {idx + 1}
+                      </span>
+                      <div className="flex-1 space-y-6">
+                        <p className="text-white font-bold text-lg leading-relaxed">{q.question}</p>
+                        
+                        <input 
+                          type="text"
+                          disabled={submitted}
+                          placeholder="Nhập câu trả lời..."
+                          value={userAnswers[q.id] || ''}
+                          onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                          className="w-full p-5 rounded-2xl border border-white/5 bg-slate-950/50 focus:ring-4 focus:ring-emerald-500/10 outline-none transition-all text-lg font-medium text-white placeholder:text-slate-700"
+                        />
+
+                        {submitted && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`p-6 rounded-[2rem] border relative overflow-hidden ${
+                              userAnswers[q.id]?.toLowerCase().trim() === data.answers.find((a: any) => a.id === q.id).correct_answer.toLowerCase().trim()
+                              ? 'bg-emerald-500/5 border-emerald-500/20'
+                              : 'bg-rose-500/5 border-rose-500/20'
+                            }`}
+                          >
+                            <div className="flex items-start gap-4 relative">
+                              <div className={`mt-1 p-1.5 rounded-lg ${
+                                userAnswers[q.id]?.toLowerCase().trim() === data.answers.find((a: any) => a.id === q.id).correct_answer.toLowerCase().trim()
+                                ? 'bg-emerald-500 text-white'
+                                : 'bg-rose-500 text-white'
+                              }`}>
+                                <CheckCircle className="w-4 h-4" />
+                              </div>
+                              <div className="space-y-3">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                                  Đáp án đúng: <span className="text-emerald-400 ml-2">{data.answers.find((a: any) => a.id === q.id).correct_answer}</span>
+                                </p>
+                                <div className="space-y-2">
+                                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 block">Phân tích chuyên sâu:</span>
+                                  <p className="text-slate-300 text-sm font-medium leading-relaxed italic">
+                                    {data.answers.find((a: any) => a.id === q.id).explanation}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -8,6 +8,7 @@ import { BookOpen, Headphones, PenTool, Mic, ArrowRight, Zap, Target, TrendingUp
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 
 const mockDescriptorData = [
   { subject: 'TR / FC', A: 7.5, fullMark: 9 },
@@ -66,6 +67,11 @@ const skills = [
 
 export default function Dashboard() {
   const { user } = useUser();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   // Calculate real progress from submissions
   const submissions = user?.submissions || [];
@@ -91,11 +97,39 @@ export default function Dashboard() {
   // Real Descriptor Data for Radar Chart (using latest Writing/Speaking if available)
   const latestDetailedSub = submissions.find(sub => sub.skill === 'writing' || sub.skill === 'speaking');
   const descriptorData = latestDetailedSub ? [
-    { subject: 'TR / FC', A: latestDetailedSub.skill === 'writing' ? latestDetailedSub.details.criteria_scores.task_achievement : latestDetailedSub.details.criteria.fluency_and_coherence.score, fullMark: 9 },
-    { subject: 'CC', A: latestDetailedSub.skill === 'writing' ? latestDetailedSub.details.criteria_scores.coherence_and_cohesion : latestDetailedSub.details.criteria.lexical_resource.score, fullMark: 9 },
-    { subject: 'LR', A: latestDetailedSub.skill === 'writing' ? latestDetailedSub.details.criteria_scores.lexical_resource : latestDetailedSub.details.criteria.grammatical_range_and_accuracy.score, fullMark: 9 },
-    { subject: 'GRA', A: latestDetailedSub.skill === 'writing' ? latestDetailedSub.details.criteria_scores.grammatical_range_and_accuracy : latestDetailedSub.details.criteria.pronunciation.score, fullMark: 9 },
-    { subject: 'PR', A: latestDetailedSub.skill === 'speaking' ? latestDetailedSub.details.criteria.pronunciation.score : 0, fullMark: 9 },
+    { 
+      subject: 'TR / FC', 
+      A: latestDetailedSub.skill === 'writing' 
+        ? latestDetailedSub.details.criteria_scores.task_achievement 
+        : latestDetailedSub.details.criteria.fluency_and_coherence.score, 
+      fullMark: 9 
+    },
+    { 
+      subject: 'CC / LR', 
+      A: latestDetailedSub.skill === 'writing' 
+        ? latestDetailedSub.details.criteria_scores.coherence_and_cohesion 
+        : latestDetailedSub.details.criteria.lexical_resource.score, 
+      fullMark: 9 
+    },
+    { 
+      subject: 'LR / GRA', 
+      A: latestDetailedSub.skill === 'writing' 
+        ? latestDetailedSub.details.criteria_scores.lexical_resource 
+        : latestDetailedSub.details.criteria.grammatical_range_and_accuracy.score, 
+      fullMark: 9 
+    },
+    { 
+      subject: 'GRA / PR', 
+      A: latestDetailedSub.skill === 'writing' 
+        ? latestDetailedSub.details.criteria_scores.grammatical_range_and_accuracy 
+        : latestDetailedSub.details.criteria.pronunciation.score, 
+      fullMark: 9 
+    },
+    { 
+      subject: 'Overall', 
+      A: latestDetailedSub.band, 
+      fullMark: 9 
+    },
   ] : mockDescriptorData;
 
   const getStrengthsText = () => {
@@ -247,22 +281,24 @@ export default function Dashboard() {
             <h2 className="text-2xl font-black text-white tracking-tight">Cơ cấu Kỹ năng</h2>
             <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Phân tích chi tiết theo tiêu chí</p>
           </div>
-          <div className="h-[320px] -mx-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={descriptorData}>
-                <PolarGrid stroke="#334155" strokeDasharray="3 3" opacity={0.5} />
-                <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} />
-                <PolarRadiusAxis angle={30} domain={[0, 9]} tick={false} axisLine={false} />
-                <Radar 
-                  name="Thí sinh" 
-                  dataKey="A" 
-                  stroke="#6366f1" 
-                  strokeWidth={3}
-                  fill="#6366f1" 
-                  fillOpacity={0.2} 
-                />
-              </RadarChart>
-            </ResponsiveContainer>
+          <div className="h-[320px] -mx-4 min-h-[320px]">
+            {isMounted && (
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={descriptorData}>
+                  <PolarGrid stroke="#334155" strokeDasharray="3 3" opacity={0.5} />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 9]} tick={false} axisLine={false} />
+                  <Radar 
+                    name="Thí sinh" 
+                    dataKey="A" 
+                    stroke="#6366f1" 
+                    strokeWidth={3}
+                    fill="#6366f1" 
+                    fillOpacity={0.2} 
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            )}
           </div>
           <div className="pt-8 border-t border-white/5 flex items-start gap-4 text-slate-400 text-sm font-medium leading-relaxed bg-indigo-500/5 -mx-10 -mb-10 p-10 rounded-b-[2rem]">
             <div className="mt-1 p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
@@ -291,46 +327,48 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-          <div className="h-[320px] -mx-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={progressData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.3} />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
-                  dy={15}
-                />
-                <YAxis 
-                  domain={[0, 9]} 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
-                  dx={-10}
-                />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#0f172a', 
-                    borderRadius: '1.25rem', 
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-                    padding: '1rem'
-                  }}
-                  itemStyle={{ color: '#fff', fontWeight: 900 }}
-                  labelStyle={{ color: '#64748b', marginBottom: '0.5rem', fontWeight: 900, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="band" 
-                  stroke="#6366f1" 
-                  strokeWidth={5} 
-                  dot={{ r: 6, fill: '#6366f1', strokeWidth: 3, stroke: '#1e293b' }}
-                  activeDot={{ r: 8, fill: '#fff', strokeWidth: 4, stroke: '#6366f1' }}
-                  animationDuration={2000}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="h-[320px] -mx-4 min-h-[320px]">
+            {isMounted && (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={progressData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.3} />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
+                    dy={15}
+                  />
+                  <YAxis 
+                    domain={[0, 9]} 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
+                    dx={-10}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#0f172a', 
+                      borderRadius: '1.25rem', 
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                      padding: '1rem'
+                    }}
+                    itemStyle={{ color: '#fff', fontWeight: 900 }}
+                    labelStyle={{ color: '#64748b', marginBottom: '0.5rem', fontWeight: 900, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="band" 
+                    stroke="#6366f1" 
+                    strokeWidth={5} 
+                    dot={{ r: 6, fill: '#6366f1', strokeWidth: 3, stroke: '#1e293b' }}
+                    activeDot={{ r: 8, fill: '#fff', strokeWidth: 4, stroke: '#6366f1' }}
+                    animationDuration={2000}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </motion.div>
       </div>

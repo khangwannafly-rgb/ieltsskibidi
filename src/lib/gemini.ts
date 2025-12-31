@@ -1,17 +1,29 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai"
 
-const apiKey = process.env.GEMINI_API_KEY || ""
-const genAI = new GoogleGenerativeAI(apiKey)
-const model = genAI.getGenerativeModel({ 
-  model: "gemini-flash-latest",
-})
+let genAI: GoogleGenerativeAI | null = null;
+let model: GenerativeModel | null = null;
 
 // Kiểm tra API Key khi thực sự sử dụng để tránh lỗi lúc build trên Vercel
-export const getGeminiModel = () => {
-  if (!process.env.GEMINI_API_KEY) {
-    // Trong môi trường build, không throw error mà trả về null hoặc xử lý nhẹ nhàng
-    // Nhưng ở đây chúng ta muốn throw khi thực sự gọi API ở runtime
-    throw new Error("Missing GEMINI_API_KEY environment variable")
+export const getGeminiModel = (): GenerativeModel => {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    // Trong môi trường build, trả về một proxy object để tránh lỗi module evaluation
+    // Lỗi sẽ chỉ thực sự xảy ra khi hàm generateContent được gọi ở runtime
+    console.warn("Warning: GEMINI_API_KEY is missing. AI features will fail at runtime.");
+    return {
+      generateContent: async () => {
+        throw new Error("Missing GEMINI_API_KEY environment variable. Please add it to Vercel environment variables.");
+      }
+    } as unknown as GenerativeModel;
   }
-  return model
+
+  if (!genAI || !model) {
+    genAI = new GoogleGenerativeAI(apiKey);
+    model = genAI.getGenerativeModel({ 
+      model: "gemini-flash-latest",
+    });
+  }
+  
+  return model;
 }
