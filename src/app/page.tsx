@@ -152,13 +152,13 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="relative max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-40 pb-24 overflow-hidden">
+    <div className="relative max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-52 pb-24 overflow-hidden">
       {/* Welcome Header */}
       {user && (
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-8"
+          className="flex items-center gap-4 mb-12"
         >
           <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-500/20">
             {user.name.charAt(0)}

@@ -149,7 +149,7 @@ export default function ReadingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-24 flex flex-col">
+    <div className="min-h-screen bg-slate-950 pt-36 flex flex-col">
       {/* Top Navigation Bar */}
       <div className="h-20 bg-slate-900/80 backdrop-blur-xl text-white flex items-center justify-between px-10 sticky top-[80px] z-40 border-b border-white/5 shadow-2xl">
         <div className="flex items-center gap-6">

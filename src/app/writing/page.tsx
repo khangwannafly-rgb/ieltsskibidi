@@ -146,7 +146,7 @@ export default function WritingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-40 pb-24">
+    <div className="min-h-screen bg-slate-950 pt-52 pb-24">
       <div className="max-w-[1400px] mx-auto px-6 space-y-16">
         {/* Header Section */}
         {!question && (
