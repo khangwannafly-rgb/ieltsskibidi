@@ -196,8 +196,8 @@ export default function ReadingPage() {
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
           {/* Passage Section */}
           <div className="w-full lg:w-1/2 overflow-y-auto p-12 bg-slate-900/30 border-r border-white/5">
-            <div className="max-w-3xl mx-auto prose prose-invert prose-slate">
-              <ReactMarkdown className="markdown-passage">
+            <div className="max-w-3xl mx-auto prose prose-invert prose-slate markdown-passage">
+              <ReactMarkdown>
                 {data.passage}
               </ReactMarkdown>
             </div>
