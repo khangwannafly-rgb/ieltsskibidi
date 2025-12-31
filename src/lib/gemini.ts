@@ -1,29 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
-// Khởi tạo biến bên ngoài để sử dụng lại (singleton pattern)
-let genAI: GoogleGenerativeAI | null = null;
-let model: any = null;
+const apiKey = process.env.GEMINI_API_KEY || ""
+const genAI = new GoogleGenerativeAI(apiKey)
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-flash-latest",
+})
 
+// Kiểm tra API Key khi thực sự sử dụng để tránh lỗi lúc build trên Vercel
 export const getGeminiModel = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  
-  // Nếu không có API Key, trả về một mock object để tránh lỗi lúc build (Next.js pre-rendering)
-  // Lỗi sẽ chỉ xảy ra khi thực sự gọi hàm generateContent() tại runtime
-  if (!apiKey) {
-    console.warn("Warning: GEMINI_API_KEY is missing. AI features will not work.");
-    return {
-      generateContent: async () => {
-        throw new Error("Missing GEMINI_API_KEY. Please add it to your environment variables.");
-      }
-    } as any;
+  if (!process.env.GEMINI_API_KEY) {
+    // Trong môi trường build, không throw error mà trả về null hoặc xử lý nhẹ nhàng
+    // Nhưng ở đây chúng ta muốn throw khi thực sự gọi API ở runtime
+    throw new Error("Missing GEMINI_API_KEY environment variable")
   }
-
-  if (!genAI) {
-    genAI = new GoogleGenerativeAI(apiKey);
-    model = genAI.getGenerativeModel({ 
-      model: "gemini-flash-latest",
-    });
-  }
-  
-  return model;
+  return model
 }
