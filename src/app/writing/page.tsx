@@ -120,7 +120,14 @@ export default function WritingPage() {
           </div>
           <div className="space-y-4">
             <h2 className="text-4xl font-black text-white tracking-tight">Lỗi hệ thống</h2>
-            <p className="text-slate-400 font-medium leading-relaxed">Không thể kết nối với AI để tạo đề bài. Vui lòng thử lại sau giây lát.</p>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              {question.error || "Không thể kết nối với AI để tạo đề bài. Vui lòng thử lại sau giây lát."}
+            </p>
+            {question.code === "MISSING_API_KEY" && (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold mt-4">
+                Mẹo: Hãy kiểm tra xem bạn đã thêm GEMINI_API_KEY vào Environment Variables trên Vercel chưa.
+              </div>
+            )}
           </div>
           <button 
             onClick={() => generateTask(taskType)}

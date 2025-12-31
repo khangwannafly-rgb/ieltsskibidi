@@ -13,7 +13,9 @@ export const getGeminiModel = (): GenerativeModel => {
     console.warn("Warning: GEMINI_API_KEY is missing. AI features will fail at runtime.");
     return {
       generateContent: async () => {
-        throw new Error("Missing GEMINI_API_KEY environment variable. Please add it to Vercel environment variables.");
+        const error = new Error("Missing GEMINI_API_KEY environment variable. Please add it to Vercel environment variables.");
+        (error as any).code = "MISSING_API_KEY";
+        throw error;
       }
     } as unknown as GenerativeModel;
   }

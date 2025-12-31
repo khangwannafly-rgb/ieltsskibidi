@@ -48,19 +48,35 @@ export async function POST(req: Request) {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    const text = response.text().trim();
+    
+    // Tìm kiếm JSON trong phản hồi (tránh các ký tự thừa hoặc markdown)
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}') + 1;
+    
+    if (jsonStart === -1 || jsonEnd === 0) {
+      throw new Error("AI response does not contain valid JSON");
+    }
+    
+    const jsonString = text.substring(jsonStart, jsonEnd);
     
     try {
-      const data = JSON.parse(text);
+      const data = JSON.parse(jsonString);
       return NextResponse.json(data);
     } catch (parseError) {
-      console.error("JSON parse error:", text);
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      const data = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(text);
-      return NextResponse.json(data);
+      console.error("Failed to parse AI JSON:", jsonString);
+      throw new Error("Failed to parse AI response as JSON");
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating writing task:", error);
-    return NextResponse.json({ error: "Failed to generate writing task" }, { status: 500 });
+    
+    if (error.code === "MISSING_API_KEY" || error.message?.includes("GEMINI_API_KEY")) {
+      return NextResponse.json({ 
+        error: "Cấu hình API Key bị thiếu. Vui lòng thêm GEMINI_API_KEY vào biến môi trường trên Vercel.",
+        code: "MISSING_API_KEY"
+      }, { status: 500 });
+    }
+    
+    return NextResponse.json({ error: "Failed to generate writing task: " + (error.message || "Unknown error") }, { status: 500 });
   }
 }

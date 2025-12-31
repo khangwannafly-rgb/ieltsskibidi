@@ -155,7 +155,14 @@ export default function SpeakingPage() {
           </div>
           <div className="space-y-3">
             <h2 className="text-3xl font-black text-white tracking-tight">Rất tiếc!</h2>
-            <p className="text-slate-400 font-medium leading-relaxed">Không thể tạo câu hỏi ngay lúc này. Vui lòng thử lại sau.</p>
+            <p className="text-slate-400 font-medium leading-relaxed">
+              {data.error || "Không thể tạo câu hỏi ngay lúc này. Vui lòng thử lại sau."}
+            </p>
+            {data.code === "MISSING_API_KEY" && (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold mt-4">
+                Mẹo: Hãy kiểm tra xem bạn đã thêm GEMINI_API_KEY vào Environment Variables trên Vercel chưa.
+              </div>
+            )}
           </div>
           <button 
             onClick={() => generateTask(part)}
