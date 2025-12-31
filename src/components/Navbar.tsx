@@ -13,41 +13,36 @@ export default function Navbar() {
 
   useEffect(() => {
     const controlNavbar = () => {
-      if (typeof window !== 'undefined') {
-        const currentScrollY = window.scrollY;
-        
-        // Show navbar if scrolling up or at the top
-        if (currentScrollY < lastScrollY || currentScrollY < 50) {
-          setIsVisible(true);
-        } 
-        // Hide navbar if scrolling down and not at the top
-        else if (currentScrollY > lastScrollY && currentScrollY > 50) {
-          setIsVisible(false);
-        }
-        
-        setLastScrollY(currentScrollY);
+      const currentScrollY = window.scrollY;
+      
+      // Chỉ ẩn khi cuộn xuống quá 100px
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      } else {
+        setIsVisible(true);
       }
+      
+      setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', controlNavbar);
-    return () => {
-      window.removeEventListener('scroll', controlNavbar);
-    };
+    window.addEventListener('scroll', controlNavbar, { passive: true });
+    return () => window.removeEventListener('scroll', controlNavbar);
   }, [lastScrollY]);
 
   return (
-    <motion.nav 
-      className="sticky top-4 z-50 mx-auto max-w-6xl px-4"
-      initial={{ y: 0, opacity: 1 }}
-      animate={{ 
-        y: isVisible ? 0 : -100,
-        opacity: isVisible ? 1 : 0
-      }}
-      transition={{ 
-        duration: 0.3,
-        ease: "easeInOut"
-      }}
-    >
+    <div className="fixed top-0 left-0 right-0 z-50 pt-4 px-4 pointer-events-none">
+      <motion.nav 
+        className="mx-auto max-w-6xl pointer-events-auto"
+        initial={{ y: 0, opacity: 1 }}
+        animate={{ 
+          y: isVisible ? 0 : -120,
+          opacity: isVisible ? 1 : 0
+        }}
+        transition={{ 
+          duration: 0.4,
+          ease: [0.22, 1, 0.36, 1] // Custom cubic-bezier for smoother feel
+        }}
+      >
       <div className="glass bg-slate-900/80 border-slate-800/50 rounded-2xl px-6 h-16 flex items-center justify-between shadow-lg transition-colors duration-300">
         <Link href="/" className="text-2xl font-black tracking-tight gradient-text">
           IELTS SKIBIDI
@@ -91,5 +86,6 @@ export default function Navbar() {
         </div>
       </div>
     </motion.nav>
+    </div>
   );
 }
