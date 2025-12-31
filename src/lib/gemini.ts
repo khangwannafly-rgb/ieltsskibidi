@@ -1,12 +1,17 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error("Missing GEMINI_API_KEY environment variable")
-}
+const apiKey = process.env.GEMINI_API_KEY || ""
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+const genAI = new GoogleGenerativeAI(apiKey)
 
-// Use gemini-flash-latest which is available in this environment
 export const model = genAI.getGenerativeModel({ 
   model: "gemini-flash-latest",
 })
+
+// Kiểm tra API Key khi thực sự sử dụng để tránh lỗi lúc build trên Vercel
+export const getGeminiModel = () => {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error("Missing GEMINI_API_KEY environment variable")
+  }
+  return model
+}
