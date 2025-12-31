@@ -128,6 +128,11 @@ export default function WritingPage() {
                 Mẹo: Hãy kiểm tra xem bạn đã thêm GEMINI_API_KEY vào Environment Variables trên Vercel chưa.
               </div>
             )}
+            {question.code === "LEAKED_API_KEY" && (
+              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold mt-4">
+                Mẹo: Hãy tạo API Key mới tại Google AI Studio, sau đó cập nhật lại biến GEMINI_API_KEY trên Vercel.
+              </div>
+            )}
           </div>
           <button 
             onClick={() => generateTask(taskType)}

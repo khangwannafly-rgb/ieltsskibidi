@@ -69,6 +69,13 @@ export async function POST(req: Request) {
       }, { status: 500 });
     }
 
+    if (error.message?.includes("leaked") || error.message?.includes("403 Forbidden")) {
+      return NextResponse.json({ 
+        error: "API Key của bạn đã bị lộ (leaked) và bị Google vô hiệu hóa. Vui lòng tạo API Key mới tại Google AI Studio và cập nhật lại trên Vercel.",
+        code: "LEAKED_API_KEY"
+      }, { status: 403 });
+    }
+
     return NextResponse.json({ 
       error: error.message || "Không thể kết nối với AI để tạo đề bài" 
     }, { status: 500 });
