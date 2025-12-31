@@ -48,6 +48,12 @@ export default function WritingPage() {
           task_type: taskType
         }),
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to score writing task");
+      }
+
       const data = await res.json();
       setResult(data);
 
@@ -133,19 +139,19 @@ export default function WritingPage() {
         {/* Header Section */}
         {!question && (
           <div className="flex flex-col lg:flex-row justify-between items-end gap-12 border-b border-white/5 pb-12">
-            <div className="space-y-4 flex-1">
+            <div className="space-y-6 flex-1">
               <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] border border-indigo-500/20"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] border border-indigo-500/20"
               >
                 <Sparkles className="w-3 h-3" />
                 AI-Powered Learning
               </motion.div>
-              <h1 className="text-7xl font-black tracking-tighter leading-none text-white">
+              <h1 className="premium-title">
                 Writing <span className="gradient-text">Mastery</span>
               </h1>
-              <p className="text-slate-400 font-medium text-xl max-w-2xl">
+              <p className="premium-subtitle">
                 Luyện tập viết luận Task 1 & 2 với phản hồi chi tiết từ AI dựa trên các tiêu chí chấm điểm IELTS chính thức.
               </p>
             </div>

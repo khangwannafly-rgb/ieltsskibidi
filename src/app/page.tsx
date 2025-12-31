@@ -155,36 +155,34 @@ export default function Dashboard() {
     <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-32 pb-24">
       {/* Hero Section */}
       <div className="flex flex-col lg:flex-row justify-between items-center gap-16">
-        <div className="text-center lg:text-left space-y-8 flex-1">
-          <motion.div 
+        <div className="flex-1 space-y-8 text-center lg:text-left">
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-black uppercase tracking-[0.2em] border border-indigo-500/20"
+            className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-[0.3em] mb-4"
           >
-            <Zap className="w-3 h-3 animate-pulse" />
-            Chào mừng trở lại, {user?.name || 'Chiến binh IELTS'}
+            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+            AI Learning Dashboard
           </motion.div>
           
-          <div className="space-y-4">
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-7xl md:text-8xl font-black tracking-tight leading-[0.9] text-white"
-            >
-              Nâng Tầm <br />
-              <span className="gradient-text">Chứng Chỉ IELTS</span>
-            </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="text-slate-400 font-medium text-xl max-w-xl leading-relaxed"
-            >
-              Hệ thống luyện thi IELTS thông minh ứng dụng AI. <br />
-              Mục tiêu của bạn là Band <span className="text-indigo-400 font-black tracking-wider underline decoration-indigo-500/30 underline-offset-8">{targetBand.toFixed(1)}</span>. 
-            </motion.p>
-          </div>
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="premium-title"
+          >
+            Chinh phục <br />
+            <span className="gradient-text">IELTS</span> cùng AI
+          </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="premium-subtitle"
+          >
+            Hệ thống luyện thi IELTS thông minh ứng dụng AI. <br />
+            Mục tiêu của bạn là Band <span className="text-indigo-400 font-black tracking-wider underline decoration-indigo-500/30 underline-offset-8">{targetBand.toFixed(1)}</span>. 
+          </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -207,7 +205,7 @@ export default function Dashboard() {
           className="relative group w-full lg:w-auto"
         >
           <div className="absolute inset-0 bg-indigo-500/20 blur-[120px] rounded-full group-hover:bg-indigo-500/30 transition-all duration-700" />
-          <div className="relative glass-premium border-white/10 text-center space-y-8 min-w-[340px] shadow-2xl">
+          <div className="relative glass-premium border-white/10 text-center space-y-8 min-w-[340px] shadow-2xl animate-float">
             <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2.5rem] bg-indigo-600 shadow-2xl shadow-indigo-500/40 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
               <Target className="w-12 h-12 text-white" />
             </div>
@@ -245,7 +243,7 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
               whileHover={{ y: -12, scale: 1.02 }}
-              className={`glass-card group h-full !p-8 border-white/5 bg-slate-900/40 hover:bg-slate-900/60 ${skill.borderColor}`}
+              className={`glass-card glass-shine group h-full !p-8 border-white/5 bg-slate-900/40 hover:bg-slate-900/60 ${skill.borderColor}`}
             >
               <div className="space-y-8">
                 <div className={`${skill.bgColor} w-16 h-16 rounded-[1.5rem] flex items-center justify-center ${skill.color} group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-white/5 shadow-inner`}>

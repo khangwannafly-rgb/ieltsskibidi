@@ -210,11 +210,11 @@ export default function ListeningPage() {
               </div>
             </div>
             
-            <div className="space-y-4">
-              <h1 className="text-7xl font-black text-white tracking-tighter leading-none">
+            <div className="space-y-6">
+              <h1 className="premium-title">
                 Phòng <span className="text-emerald-500">Nghe</span>
               </h1>
-              <p className="text-slate-400 font-medium text-xl leading-relaxed">
+              <p className="premium-subtitle">
                 Luyện tập kỹ năng nghe với các tình huống hội thoại và độc thoại mô phỏng kỳ thi IELTS thực tế.
               </p>
             </div>

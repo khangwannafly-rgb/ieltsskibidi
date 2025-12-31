@@ -175,11 +175,11 @@ export default function ReadingPage() {
             <div className="w-24 h-24 bg-indigo-500/10 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 border border-white/5 shadow-inner">
               <BookOpen className="w-12 h-12 text-indigo-400" />
             </div>
-            <div className="space-y-4">
-              <h1 className="text-7xl font-black text-white tracking-tighter leading-none">
+            <div className="space-y-6">
+              <h1 className="premium-title">
                 Luyện Kỹ năng <span className="gradient-text">Đọc</span>
               </h1>
-              <p className="text-slate-400 font-medium text-xl leading-relaxed">
+              <p className="premium-subtitle">
                 Trải nghiệm môi trường thi IELTS thực tế với các bài đọc học thuật đa dạng chủ đề được biên soạn bởi AI.
               </p>
             </div>

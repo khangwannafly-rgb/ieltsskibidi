@@ -111,13 +111,13 @@ export default function Navbar() {
               exit={{ opacity: 0, y: -20 }}
               className="absolute top-full left-0 right-0 mt-2 mx-auto max-w-6xl pointer-events-auto"
             >
-              <div className="glass bg-slate-900/95 border-slate-800/50 rounded-2xl p-4 shadow-2xl flex flex-col gap-2">
+              <div className="glass-premium bg-slate-950/90 border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 backdrop-blur-2xl">
                 {navLinks.map((link) => (
                   <Link 
                     key={link.href} 
                     href={link.href} 
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 hover:text-white font-bold transition-all"
+                    className="px-6 py-4 rounded-2xl hover:bg-white/5 text-slate-300 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all border border-transparent hover:border-white/5"
                   >
                     {link.label}
                   </Link>
@@ -128,7 +128,7 @@ export default function Navbar() {
                       logout();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="flex items-center gap-2 px-4 py-3 text-rose-400 font-bold hover:bg-rose-500/5 rounded-xl transition-all"
+                    className="flex items-center gap-3 px-6 py-4 text-rose-400 font-black uppercase tracking-widest text-[10px] hover:bg-rose-500/10 rounded-2xl transition-all border border-transparent hover:border-rose-500/20"
                   >
                     <LogOut className="w-4 h-4" /> Đăng xuất
                   </button>

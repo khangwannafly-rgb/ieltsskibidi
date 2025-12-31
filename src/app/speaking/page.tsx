@@ -68,6 +68,12 @@ export default function SpeakingPage() {
           transcript: "Bản ghi âm mô phỏng của người dùng. (Trong thực tế, tính năng chuyển giọng nói thành văn bản sẽ được tích hợp ở đây)."
         })
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to score speaking task");
+      }
+
       const scoreData = await res.json();
       setScore(scoreData);
 
@@ -173,12 +179,12 @@ export default function SpeakingPage() {
       <div className="max-w-5xl mx-auto px-6 relative">
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-12">
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-widest">
               AI Speaking Lab
             </div>
-            <h1 className="text-5xl font-black text-white tracking-tight">Speaking Simulator</h1>
-            <p className="text-slate-400 font-medium text-lg">Môi trường phỏng vấn IELTS chuyên nghiệp với AI.</p>
+            <h1 className="premium-title">Speaking Simulator</h1>
+            <p className="premium-subtitle">Môi trường phỏng vấn IELTS chuyên nghiệp với AI.</p>
           </div>
           
           <div className="flex glass-premium p-1.5 rounded-2xl border-white/5">
