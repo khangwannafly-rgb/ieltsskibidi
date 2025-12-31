@@ -21,6 +21,10 @@ export const getGeminiModel = (): GenerativeModel => {
   }
 
   if (!genAI || !model) {
+    // Log masked key for debugging on Vercel
+    const maskedKey = apiKey.substring(0, 6) + "..." + apiKey.substring(apiKey.length - 4);
+    console.log(`Initializing Gemini with key: ${maskedKey}`);
+    
     genAI = new GoogleGenerativeAI(apiKey);
     model = genAI.getGenerativeModel({ 
       model: "gemini-flash-latest",
