@@ -33,6 +33,7 @@ export default function Navbar() {
     { href: "/reading", label: "Đọc" },
     { href: "/listening", label: "Nghe" },
     { href: "/speaking", label: "Nói" },
+    { href: "/reviews", label: "Đánh giá" },
   ];
 
   return (
