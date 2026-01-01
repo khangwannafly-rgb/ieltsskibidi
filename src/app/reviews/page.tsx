@@ -27,7 +27,7 @@ const reviews = [
     name: "anh ALO",
     score: "Band 7.0",
     comment: "Sau khi chinh phục được 7.0 ielts với ielts skibidi, thứ tiếp theo tôi hướng đến sẽ là major!!!",
-    image: "https://yt3.googleusercontent.com/ytc/AIdro_nFv5I5_f_n9v_z5V0_f_n9v_z5V0_f_n9v_z5V0=s900-c-k-c0x00ffffff-no-rj",
+    image: "https://pbs.twimg.com/media/GwtTJinWoAASY8h.jpg?format=jpg&name=medium",
     date: "05/12/2025"
   },
   {
