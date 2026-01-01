@@ -8,34 +8,34 @@ import Image from "next/image";
 const reviews = [
   {
     id: 1,
-    name: "Nguyễn Văn A",
+    name: "Ộ I i",
     score: "Band 8.0",
-    comment: "Nhờ IELTS SKIBIDI mà mình đã đạt được mục tiêu chỉ sau 2 tháng luyện tập. Công cụ AI chấm điểm rất sát thực tế!",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80", // Thay bằng link ảnh thật của bạn
+    comment: "alo vũ à vũ, cảm ơn vũ vì giới thiệu anh tới ielts skibidi.",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbwOaIfBgo681SnQ9tXxsYxs7XP6IRLfDmUw&s",
     date: "15/12/2025"
   },
   {
     id: 2,
-    name: "Trần Thị B",
+    name: "Faker",
     score: "Band 7.5",
-    comment: "Giao diện đẹp, dễ dùng. Phần Writing được sửa lỗi rất chi tiết, giúp mình nhận ra những lỗi sai ngữ pháp ngớ ngẩn.",
-    image: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&q=80",
+    comment: "Chiếc cúp thứ 7 là dành cho Ielts Skibidi.",
+    image: "https://cdn2.tuoitre.vn/thumb_w/480/471584752817336320/2025/11/20/0b89fcc0-92c9-4458-addd-1f4b13bbf00b-17636300163231290204390.jpg",
     date: "10/12/2025"
   },
   {
     id: 3,
-    name: "Lê Văn C",
+    name: "anh ALO",
     score: "Band 7.0",
-    comment: "Phần Speaking giả lập giúp mình bớt run hơn khi đi thi thật. Cảm ơn đội ngũ phát triển!",
-    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&q=80",
+    comment: "Sau khi chinh phục được 7.0 ielts với ielts skibidi, thứ tiếp theo tôi hướng đến sẽ là major!!!",
+    image: "https://yt3.googleusercontent.com/ytc/AIdro_nFv5I5_f_n9v_z5V0_f_n9v_z5V0_f_n9v_z5V0=s900-c-k-c0x00ffffff-no-rj",
     date: "05/12/2025"
   },
   {
     id: 4,
-    name: "Hoàng Thị D",
+    name: "Sơn Tùng MTP",
     score: "Band 8.5",
-    comment: "Tuyệt vời! Không nghĩ là có một nền tảng hỗ trợ học IELTS tốt như thế này tại Việt Nam.",
-    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80",
+    comment: "FLOP QUÁ THÌ GHI TÊN ANH VÀO!!!",
+    image: "https://yt3.googleusercontent.com/c-Z7mIlntSpG6VyQ5ZqaPggqkZRhaySr-H5ZEazFN2iR1pP4eD1UGekwu0y--c4CSVhJJ1A4QT8=s900-c-k-c0x00ffffff-no-rj",
     date: "01/12/2025"
   }
 ];
