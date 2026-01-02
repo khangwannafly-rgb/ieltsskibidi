@@ -10,7 +10,7 @@ const reviews = [
     name: "Ộ I i",
     score: "Band 8.0",
     skill: "Writing",
-    comment: "alo vũ à vũ, cảm ơn vũ vì giới thiệu anh tới ielts skibidi.",
+    comment: "alo vũ à vũ, cảm ơn vũ vì giới thiệu anh tới ielts skibidi. Một nền tảng học tập cực kỳ thông minh, giúp mình tiết kiệm được rất nhiều thời gian ôn luyện mà vẫn đạt được kết quả mong muốn.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbwOaIfBgo681SnQ9tXxsYxs7XP6IRLfDmUw&s",
     date: "15/12/2025",
     size: "large",
@@ -21,10 +21,10 @@ const reviews = [
     name: "Faker",
     score: "Band 7.5",
     skill: "Reading",
-    comment: "Chiếc cúp thứ 7 là dành cho Ielts Skibidi.",
+    comment: "Chiếc cúp thứ 7 là dành cho Ielts Skibidi. Một trải nghiệm học tập tuyệt vời, giúp tôi cải thiện tư duy đọc hiểu đáng kể.",
     image: "https://cdn2.tuoitre.vn/thumb_w/480/471584752817336320/2025/11/20/0b89fcc0-92c9-4458-addd-1f4b13bbf00b-17636300163231290204390.jpg",
     date: "10/12/2025",
-    size: "medium",
+    size: "wide",
     accent: "from-rose-500/20"
   },
   {
@@ -32,7 +32,7 @@ const reviews = [
     name: "anh ALO",
     score: "Band 7.0",
     skill: "Speaking",
-    comment: "Sau khi chinh phục được 7.0 ielts với ielts skibidi, thứ tiếp theo tôi hướng đến sẽ là major!!!",
+    comment: "7.0 ielts easy!",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREK5zSrwzVYwXVoazwMynFv4szRnlLA1MAFQ&s",
     date: "05/12/2025",
     size: "small",
@@ -43,10 +43,10 @@ const reviews = [
     name: "Sơn Tùng MTP",
     score: "Band 8.5",
     skill: "Listening",
-    comment: "FLOP QUÁ THÌ GHI TÊN ANH VÀO!!!",
+    comment: "FLOP QUÁ THÌ GHI TÊN ANH VÀO!!! Ielts Skibidi thực sự là một cú hích lớn cho kỹ năng Listening của mình.",
     image: "https://yt3.googleusercontent.com/c-Z7mIlntSpG6VyQ5ZqaPggqkZRhaySr-H5ZEazFN2iR1pP4eD1UGekwu0y--c4CSVhJJ1A4QT8=s900-c-k-c0x00ffffff-no-rj",
     date: "01/12/2025",
-    size: "medium",
+    size: "wide",
     accent: "from-violet-500/20"
   },
   {
@@ -54,7 +54,7 @@ const reviews = [
     name: "Học viên Ẩn danh",
     score: "Band 7.5",
     skill: "Writing",
-    comment: "AI phản hồi cực nhanh và chính xác, giúp mình sửa lỗi sai ngay lập tức.",
+    comment: "AI sửa lỗi cực kỳ chi tiết.",
     image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop",
     date: "20/12/2025",
     size: "small",
@@ -65,10 +65,10 @@ const reviews = [
     name: "Vinh Râu",
     score: "Band 6.5",
     skill: "Speaking",
-    comment: "Tự học ở nhà mà cảm giác như có giáo viên kèm 1-1 vậy, đỉnh thực sự!",
+    comment: "Tự học ở nhà mà cảm giác như có giáo viên kèm 1-1 vậy, đỉnh thực sự! Mình đã tự tin hơn rất nhiều khi giao tiếp.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSq7tW8t6O7Y2_J5n9_v8Z7y-U5Z6L-n5p8_Q&s",
     date: "25/12/2025",
-    size: "medium",
+    size: "wide",
     accent: "from-amber-500/20"
   },
   {
@@ -76,10 +76,10 @@ const reviews = [
     name: "Hieuthuhai",
     score: "Band 8.0",
     skill: "Listening",
-    comment: "Nghe Skibidi xong đi thi nghe như nghe nhạc rap, dễ hiểu vô cùng.",
+    comment: "Nghe Skibidi xong đi thi nghe như nghe nhạc rap, dễ hiểu vô cùng. Các bài nghe được thiết kế rất sát với thực tế.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0Y6M8p8vW9Z8Y_mYp8_z_z_z_z_z_z_z_z_z&s",
     date: "28/12/2025",
-    size: "small",
+    size: "tall",
     accent: "from-teal-500/20"
   },
   {
@@ -87,11 +87,44 @@ const reviews = [
     name: "Linh Ngọc Đàm",
     score: "Band 7.5",
     skill: "Reading",
-    comment: "Giao diện đẹp xỉu, học mà cứ ngỡ đang lướt Pinterest luôn á!",
+    comment: "Giao diện đẹp xỉu, học mà cứ ngỡ đang lướt Pinterest luôn á! Rất cảm hứng để học mỗi ngày.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSW8y1p_79fN2_Xm9r8Tz_Z_z_z_z_z_z_z_z_z&s",
     date: "30/12/2025",
-    size: "medium",
+    size: "wide",
     accent: "from-pink-500/20"
+  },
+  {
+    id: 9,
+    name: "Độ Mixi",
+    score: "Band 7.0",
+    skill: "Speaking",
+    comment: "Hợp lý! Học Ielts ở đây thấy giải trí mà vẫn hiệu quả. Anh em nên thử nhé, không hề áp lực tí nào.",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr3n_W7rL_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    date: "02/01/2026",
+    size: "wide",
+    accent: "from-orange-500/20"
+  },
+  {
+    id: 10,
+    name: "PewPew",
+    score: "Band 8.0",
+    skill: "Writing",
+    comment: "Bạn có thể không giỏi, nhưng bạn phải cố gắng. Ielts Skibidi cung cấp cho bạn mọi công cụ để cố gắng đó.",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7y_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    date: "03/01/2026",
+    size: "tall",
+    accent: "from-cyan-500/20"
+  },
+  {
+    id: 11,
+    name: "Misthy",
+    score: "Band 7.5",
+    skill: "Reading",
+    comment: "Thích nhất phần Reading, bài đọc phong phú và giải thích cực kỳ dễ hiểu. Cảm ơn team Skibidi nhiều!",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    date: "04/01/2026",
+    size: "wide",
+    accent: "from-fuchsia-500/20"
   }
 ];
 
@@ -113,7 +146,8 @@ const categories = [
 function ReviewCard({ review, index }: { review: any; index: number }) {
   const sizeClasses = {
     small: "col-span-1 row-span-1",
-    medium: "col-span-1 md:col-span-2 row-span-1",
+    wide: "col-span-1 md:col-span-2 row-span-1",
+    tall: "col-span-1 row-span-2",
     large: "col-span-1 md:col-span-2 row-span-2",
   };
 
@@ -137,47 +171,64 @@ function ReviewCard({ review, index }: { review: any; index: number }) {
         delay: index * 0.02,
         layout: { duration: 0.3 }
       }}
-      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group relative overflow-hidden rounded-[2.5rem] glass-premium border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500 flex flex-col`}
+      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group relative overflow-hidden rounded-[2.5rem] glass-premium border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500 flex flex-col h-full min-h-[340px]`}
     >
       {/* Background Glow */}
       <div className={`absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br ${review.accent} to-transparent rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
 
-      <div className="p-8 flex-1 flex flex-col justify-between relative z-10 min-h-0">
-        <div className="space-y-6">
-          <div className="flex justify-between items-start gap-4">
-            <div className="flex gap-4 min-w-0">
-              <div className="flex-shrink-0 w-14 h-14 rounded-2xl overflow-hidden border-2 border-white/10 shadow-xl group-hover:scale-110 transition-transform duration-500">
-                <img src={review.image} alt={review.name} className="w-full h-full object-cover" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-xl font-black text-white tracking-tight truncate">{review.name}</h3>
-                <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">
-                  <Icon className="w-3 h-3 text-indigo-400 flex-shrink-0" />
-                  <span className="truncate">{review.skill} • {review.date}</span>
-                </div>
-              </div>
+      <div className="p-6 md:p-8 flex-1 flex flex-col relative z-10 min-h-0">
+        {/* Header Section - Fixed Layout */}
+        <div className="flex justify-between items-center gap-4 mb-8 flex-shrink-0">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl overflow-hidden border-2 border-white/10 shadow-xl group-hover:scale-110 transition-transform duration-500">
+              <img src={review.image} alt={review.name} className="w-full h-full object-cover" />
             </div>
-            <div className="flex-shrink-0 px-4 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black shadow-lg">
-              {review.score}
+            <div className="min-w-0">
+              <h3 className="text-lg md:text-xl font-black text-white tracking-tight truncate mb-1">{review.name}</h3>
+              <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest truncate">
+                {review.date}
+              </p>
             </div>
           </div>
-
-          <div className="relative">
-            <Quote className="absolute -top-4 -left-4 w-12 h-12 text-white/5 -z-10" />
-            <p className={`text-white font-medium leading-relaxed italic line-clamp-6 ${review.size === 'large' ? 'text-2xl line-clamp-none' : 'text-lg'}`}>
-              "{review.comment}"
-            </p>
+          
+          <div className="flex flex-col items-end gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shadow-lg transition-colors group-hover:bg-indigo-500/20">
+              <Icon className="w-3 h-3 md:w-4 h-4" />
+              <span className="text-[10px] md:text-xs font-black">{review.score}</span>
+            </div>
+            <span className="text-[8px] font-bold text-slate-600 uppercase tracking-[0.2em]">
+              {review.skill}
+            </span>
           </div>
         </div>
 
-        <div className="pt-6 flex items-center justify-between border-t border-white/5 mt-6">
+        {/* Content Section */}
+        <div className="relative flex-1 min-h-0 flex flex-col justify-center">
+          <Quote className="absolute -top-6 -left-2 w-10 h-10 md:w-14 md:h-14 text-white/5 -z-10" />
+          <p className={`text-white font-medium leading-relaxed italic overflow-hidden
+            ${review.size === 'large' ? 'text-xl md:text-2xl line-clamp-8' : 
+              review.size === 'small' ? 'text-sm line-clamp-4' : 
+              'text-base md:text-lg line-clamp-6'}`}>
+            "{review.comment}"
+          </p>
+          
+          {review.size === 'large' && (
+            <div className="mt-8 flex gap-3 opacity-50">
+              <Sparkles className="w-5 h-5 text-indigo-400" />
+              <div className="h-px flex-1 bg-gradient-to-r from-indigo-500/50 to-transparent self-center" />
+            </div>
+          )}
+        </div>
+
+        {/* Footer Section */}
+        <div className="pt-4 md:pt-6 flex items-center justify-between border-t border-white/5 mt-6 flex-shrink-0">
           <div className="flex gap-1">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <Star key={i} className="w-3 h-3 md:w-4 md:h-4 fill-amber-400 text-amber-400" />
             ))}
           </div>
-          <div className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 transition-transform">
-            Học viên Skibidi
+          <div className="text-[9px] md:text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+            Skibidians
           </div>
         </div>
       </div>
@@ -298,7 +349,7 @@ export default function ReviewsPage() {
               ))}
             </AnimatePresence>
 
-            {/* Special CTA Card - Always at the end or integrated */}
+            {/* Special CTA Card - Integrated into grid */}
             <motion.div
               layout
               initial={{ opacity: 0, scale: 0.9 }}
