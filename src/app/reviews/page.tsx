@@ -103,11 +103,15 @@ export default function ReviewsPage() {
             <motion.div
               key={review.id}
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 + i * 0.1 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 + i * 0.1 }}
               className="break-inside-avoid"
             >
-              <div className="glass-card group border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500 overflow-hidden !p-0">
+              <div className="glass-card group border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500 overflow-hidden !p-0 relative">
+                {/* Glow Effect on Hover */}
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
                 {/* Review Image */}
                 <div className="relative aspect-[4/3] overflow-hidden">
                   <img 
@@ -115,35 +119,50 @@ export default function ReviewsPage() {
                     alt={`Đánh giá từ ${review.name}`}
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
-                  <div className="absolute bottom-4 left-6 right-6 flex justify-between items-end">
-                    <div className="px-3 py-1 rounded-full bg-indigo-600 text-white text-[10px] font-black uppercase tracking-wider shadow-xl">
+                  {/* Floating Band Tag */}
+                  <div className="absolute top-4 right-4 z-20">
+                    <div className="px-4 py-1.5 rounded-full bg-slate-950/80 backdrop-blur-md text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 shadow-2xl">
                       {review.score}
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-80" />
+                  <div className="absolute bottom-4 left-6 right-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-black text-xs border border-white/10 shadow-2xl">
+                        {review.name.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="text-white font-black text-sm tracking-tight">{review.name}</div>
+                        <div className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Học viên Skibidi</div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-8 space-y-4">
-                  <div className="flex gap-1">
+                <div className="p-8 space-y-6 relative">
+                  <div className="flex gap-1.5">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
                   <div className="relative">
-                    <Quote className="absolute -top-2 -left-2 w-8 h-8 text-white/5 -z-10" />
-                    <p className="text-slate-300 font-medium leading-relaxed italic">
+                    <Quote className="absolute -top-4 -left-4 w-12 h-12 text-indigo-500/10 -z-10" />
+                    <p className="text-slate-300 font-medium leading-relaxed italic text-lg">
                       "{review.comment}"
                     </p>
                   </div>
-                  <div className="pt-4 border-t border-white/5 flex justify-between items-center">
-                    <div>
-                      <div className="text-white font-black text-sm">{review.name}</div>
-                      <div className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">{review.date}</div>
+                  <div className="pt-6 border-t border-white/5 flex justify-between items-center">
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest">{review.date}</span>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
-                      <ImageIcon className="w-4 h-4" />
-                    </div>
+                    <motion.div 
+                      whileHover={{ scale: 1.1 }}
+                      className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 cursor-pointer hover:bg-indigo-500 hover:text-white transition-all"
+                    >
+                      <ImageIcon className="w-5 h-5" />
+                    </motion.div>
                   </div>
                 </div>
               </div>
