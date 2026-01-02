@@ -187,7 +187,7 @@ export default function Dashboard() {
           { label: 'Mục tiêu', value: targetBand.toFixed(1), icon: Star, color: 'text-amber-400' },
           { label: 'Điểm mạnh nhất', value: getStrengthsText().split(' ')[1] || '---', icon: Zap, color: 'text-rose-400' },
         ].map((stat, i) => (
-          <div key={i} className="glass-card flex flex-col items-center justify-center p-6 text-center space-y-2 border-white/5 bg-slate-900/40">
+          <div key={i} className="glass-premium flex flex-col items-center justify-center p-6 text-center space-y-2 border-white/5 bg-slate-900/40">
             <stat.icon className={`w-6 h-6 ${stat.color} mb-2`} />
             <div className="text-3xl font-black text-white">{stat.value}</div>
             <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</div>
@@ -290,7 +290,7 @@ export default function Dashboard() {
           >
             <Link 
               href={skill.href} 
-              className={`group glass-card h-full flex flex-col items-start gap-6 border-transparent ${skill.borderColor} glass-shine bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500`}
+              className={`group glass-premium h-full flex flex-col items-start gap-6 border-transparent ${skill.borderColor} glass-shine bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500`}
             >
               <div className={`p-4 rounded-2xl ${skill.bgColor} ${skill.color} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
                 <skill.icon className="w-8 h-8" />
@@ -317,7 +317,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="lg:col-span-1 glass-card space-y-10 !p-10 border-white/5 bg-slate-900/40"
+          className="lg:col-span-1 glass-premium space-y-10 !p-10 border-white/5 bg-slate-900/40"
         >
           <div className="space-y-2">
             <h2 className="text-2xl font-black text-white tracking-tight">Cơ cấu Kỹ năng</h2>
@@ -355,7 +355,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="lg:col-span-2 glass-card space-y-10 !p-10 border-white/5 bg-slate-900/40"
+          className="lg:col-span-2 glass-premium space-y-10 !p-10 border-white/5 bg-slate-900/40"
         >
           <div className="flex items-center justify-between">
             <div className="space-y-2">
@@ -421,7 +421,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="glass-card !p-10 space-y-10 border-white/5 bg-slate-900/40"
+          className="glass-premium !p-10 space-y-10 border-white/5 bg-slate-900/40"
         >
           <div className="space-y-2">
             <h2 className="text-2xl font-black text-white tracking-tight">Hoạt động Gần đây</h2>
