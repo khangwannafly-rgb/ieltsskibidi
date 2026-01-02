@@ -44,13 +44,21 @@ export async function POST(req: Request) {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text().trim();
+    let text = response.text().trim();
+    
+    // Tiền xử lý text để loại bỏ markdown code blocks nếu có
+    if (text.startsWith('```json')) {
+      text = text.replace(/^```json\n?/, '').replace(/\n?```$/, '');
+    } else if (text.startsWith('```')) {
+      text = text.replace(/^```\n?/, '').replace(/\n?```$/, '');
+    }
     
     // Tìm vị trí của JSON trong phản hồi (đôi khi model trả về kèm text giải thích)
     const jsonStart = text.indexOf('{');
     const jsonEnd = text.lastIndexOf('}') + 1;
     
     if (jsonStart === -1 || jsonEnd === 0) {
+      console.error("No JSON found in response:", text);
       throw new Error("AI response does not contain valid JSON");
     }
     
@@ -60,8 +68,12 @@ export async function POST(req: Request) {
       const data = JSON.parse(jsonString);
       return NextResponse.json(data);
     } catch (parseError) {
-      console.error("JSON parse error:", text);
-      return NextResponse.json({ error: "Lỗi định dạng dữ liệu từ AI" }, { status: 500 });
+      console.error("JSON parse error for text:", jsonString);
+      return NextResponse.json({ 
+        error: "Lỗi định dạng dữ liệu từ AI",
+        details: "Không thể phân giải JSON từ phản hồi của AI",
+        raw: text.substring(0, 100) + "..."
+      }, { status: 500 });
     }
   } catch (error: any) {
     console.error("Error generating reading task:", error);
