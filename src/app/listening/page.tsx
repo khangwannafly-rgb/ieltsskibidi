@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Headphones, Play, Pause, RotateCcw, CheckCircle, Clock, Volume2, Info, AlertCircle, AlertTriangle, TrendingUp, Target, ChevronRight, Trophy } from "lucide-react";
+import { Headphones, Play, Pause, RotateCcw, CheckCircle, Clock, Volume2, Info, AlertCircle, AlertTriangle, TrendingUp, Target, ChevronRight, Trophy, BookOpen } from "lucide-react";
 import { useUser } from "@/context/UserContext";
 
 export default function ListeningPage() {
