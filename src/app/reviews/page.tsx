@@ -81,6 +81,17 @@ const reviews = [
     date: "28/12/2025",
     size: "small",
     accent: "from-teal-500/20"
+  },
+  {
+    id: 8,
+    name: "Linh Ngọc Đàm",
+    score: "Band 7.5",
+    skill: "Reading",
+    comment: "Giao diện đẹp xỉu, học mà cứ ngỡ đang lướt Pinterest luôn á!",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSW8y1p_79fN2_Xm9r8Tz_Z_z_z_z_z_z_z_z_z&s",
+    date: "30/12/2025",
+    size: "medium",
+    accent: "from-pink-500/20"
   }
 ];
 
@@ -122,38 +133,38 @@ function ReviewCard({ review, index }: { review: any; index: number }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ 
-        duration: 0.5,
-        delay: index * 0.05,
+        duration: 0.4,
+        delay: index * 0.02,
         layout: { duration: 0.3 }
       }}
-      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group relative overflow-hidden rounded-[2.5rem] glass-premium border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500`}
+      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group relative overflow-hidden rounded-[2.5rem] glass-premium border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500 flex flex-col`}
     >
       {/* Background Glow */}
       <div className={`absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br ${review.accent} to-transparent rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
 
-      <div className="p-8 h-full flex flex-col justify-between relative z-10">
+      <div className="p-8 flex-1 flex flex-col justify-between relative z-10 min-h-0">
         <div className="space-y-6">
-          <div className="flex justify-between items-start">
-            <div className="flex gap-4">
-              <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-white/10 shadow-xl group-hover:scale-110 transition-transform duration-500">
+          <div className="flex justify-between items-start gap-4">
+            <div className="flex gap-4 min-w-0">
+              <div className="flex-shrink-0 w-14 h-14 rounded-2xl overflow-hidden border-2 border-white/10 shadow-xl group-hover:scale-110 transition-transform duration-500">
                 <img src={review.image} alt={review.name} className="w-full h-full object-cover" />
               </div>
-              <div>
-                <h3 className="text-xl font-black text-white tracking-tight">{review.name}</h3>
+              <div className="min-w-0">
+                <h3 className="text-xl font-black text-white tracking-tight truncate">{review.name}</h3>
                 <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">
-                  <Icon className="w-3 h-3 text-indigo-400" />
-                  {review.skill} • {review.date}
+                  <Icon className="w-3 h-3 text-indigo-400 flex-shrink-0" />
+                  <span className="truncate">{review.skill} • {review.date}</span>
                 </div>
               </div>
             </div>
-            <div className="px-4 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black shadow-lg">
+            <div className="flex-shrink-0 px-4 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black shadow-lg">
               {review.score}
             </div>
           </div>
 
           <div className="relative">
             <Quote className="absolute -top-4 -left-4 w-12 h-12 text-white/5 -z-10" />
-            <p className={`text-white font-medium leading-relaxed italic ${review.size === 'large' ? 'text-2xl' : 'text-lg'}`}>
+            <p className={`text-white font-medium leading-relaxed italic line-clamp-6 ${review.size === 'large' ? 'text-2xl line-clamp-none' : 'text-lg'}`}>
               "{review.comment}"
             </p>
           </div>
@@ -277,7 +288,10 @@ export default function ReviewsPage() {
 
         {/* Bento Grid with Layout Transitions */}
         <LayoutGroup>
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-[320px] gap-6">
+          <motion.div 
+            layout 
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-[340px] gap-6 grid-flow-dense"
+          >
             <AnimatePresence mode="popLayout">
               {filteredReviews.map((review, index) => (
                 <ReviewCard key={review.id} review={review} index={index} />
