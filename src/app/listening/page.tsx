@@ -248,17 +248,32 @@ export default function ListeningPage() {
             <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full -translate-x-1/2 -translate-y-1/2" />
             
             <div className="flex flex-col lg:flex-row items-center gap-12 relative">
-              <button 
-                onClick={toggleAudio}
-                disabled={submitted}
-                className={`w-28 h-28 rounded-[2.5rem] flex items-center justify-center transition-all shadow-2xl ${
-                  isPlaying 
-                  ? 'bg-rose-500 hover:bg-rose-400 shadow-rose-500/20' 
-                  : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'
-                } ${submitted ? 'opacity-50 cursor-not-allowed' : 'hover:-translate-y-1 active:translate-y-0'}`}
-              >
-                {isPlaying ? <Pause className="w-12 h-12 text-white fill-current" /> : <Play className="w-12 h-12 text-white fill-current ml-1" />}
-              </button>
+              <div className="relative group">
+                <button 
+                  onClick={toggleAudio}
+                  disabled={submitted}
+                  className={`w-28 h-28 rounded-[2.5rem] flex items-center justify-center transition-all shadow-2xl relative z-10 ${
+                    isPlaying 
+                    ? 'bg-rose-500 hover:bg-rose-400 shadow-rose-500/20' 
+                    : 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20'
+                  } ${submitted ? 'opacity-50 cursor-not-allowed' : 'hover:-translate-y-1 active:translate-y-0'}`}
+                >
+                  {isPlaying ? <Pause className="w-12 h-12 text-white fill-current" /> : <Play className="w-12 h-12 text-white fill-current ml-1" />}
+                </button>
+                {/* Audio Visualizer Animation */}
+                {isPlaying && (
+                  <div className="absolute -inset-4 flex items-center justify-center gap-1 opacity-30">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <motion.div
+                        key={i}
+                        animate={{ height: [20, 40, 20] }}
+                        transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
+                        className="w-1.5 bg-emerald-500 rounded-full"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
               
               <div className="flex-1 w-full space-y-8">
                 <div className="flex items-center justify-between">
@@ -266,13 +281,27 @@ export default function ListeningPage() {
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-400">Listening Audio</span>
                     <h3 className="text-3xl font-black text-white tracking-tight">Bản ghi âm bài nghe</h3>
                   </div>
-                  <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl border border-white/5">
-                    <Volume2 className="w-5 h-5 text-emerald-400" />
-                    <span className="text-sm font-black text-white">100%</span>
+                  <div className="flex items-center gap-4">
+                    {submitted && (
+                      <button 
+                        onClick={() => {
+                          const el = document.getElementById('transcript-section');
+                          el?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500/10 text-indigo-400 text-[10px] font-black rounded-xl border border-indigo-500/20 uppercase tracking-widest hover:bg-indigo-500/20 transition-all"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        Xem Script
+                      </button>
+                    )}
+                    <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-xl border border-white/5">
+                      <Volume2 className="w-5 h-5 text-emerald-400" />
+                      <span className="text-sm font-black text-white">100%</span>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="relative h-4 bg-slate-800 rounded-full overflow-hidden p-1 shadow-inner">
+                <div className="relative h-4 bg-slate-800 rounded-full overflow-hidden p-1 shadow-inner cursor-pointer group">
                   <motion.div 
                     className="h-full bg-gradient-to-r from-emerald-600 to-teal-400 rounded-full relative"
                     style={{ width: `${audioProgress}%` }}
@@ -306,7 +335,7 @@ export default function ListeningPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {data.questions.map((q: any, idx: number) => (
-                  <div key={q.id} className="glass-card !p-8 hover:bg-slate-900/60 transition-all border-white/5 shadow-sm">
+                  <div key={q.id} id={`q-${q.id}`} className="glass-card !p-8 hover:bg-slate-900/60 transition-all border-white/5 shadow-sm relative group">
                     <div className="flex gap-6">
                       <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-black text-lg border border-white/10 shadow-lg group-hover:bg-emerald-600 transition-colors">
                         {idx + 1}
@@ -361,6 +390,28 @@ export default function ListeningPage() {
                 ))}
               </div>
             </div>
+
+            {/* Transcript Section - Shows after submission */}
+            {submitted && data.transcript && (
+              <motion.div 
+                id="transcript-section"
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-8 pt-16 border-t border-white/5"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg border border-white/10">
+                    <BookOpen className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white tracking-tight">Audio Transcript (Script)</h3>
+                </div>
+                <div className="glass-premium !p-12 border-white/5 bg-slate-900/20">
+                  <p className="text-slate-400 text-xl font-medium leading-[2] italic whitespace-pre-wrap">
+                    {data.transcript}
+                  </p>
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       )}

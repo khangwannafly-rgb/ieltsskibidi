@@ -183,7 +183,11 @@ export default function ReadingPage() {
       {!data ? (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/5 blur-[120px] rounded-full pointer-events-none" />
-          <div className="max-w-2xl space-y-10 relative">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-2xl space-y-10 relative"
+          >
             <div className="w-24 h-24 bg-indigo-500/10 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 border border-white/5 shadow-inner">
               <BookOpen className="w-12 h-12 text-indigo-400" />
             </div>
@@ -202,21 +206,53 @@ export default function ReadingPage() {
               Bắt đầu làm bài
               <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
             </button>
-          </div>
+          </motion.div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
+          {/* Question Navigator - Desktop Only */}
+          <div className="hidden xl:flex fixed left-6 top-1/2 -translate-y-1/2 flex-col gap-2 z-30">
+            {data.questions.map((q: any, idx: number) => (
+              <button
+                key={q.id}
+                onClick={() => {
+                  const el = document.getElementById(`q-${q.id}`);
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className={`w-10 h-10 rounded-xl border flex items-center justify-center font-black text-xs transition-all ${
+                  submitted 
+                    ? (userAnswers[q.id]?.toLowerCase().trim() === data.answers.find((a: any) => a.id === q.id).correct_answer.toLowerCase().trim() ? 'bg-emerald-500 border-emerald-400 text-white' : 'bg-rose-500 border-rose-400 text-white')
+                    : (userAnswers[q.id] ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-900 border-white/5 text-slate-500 hover:border-indigo-500/50')
+                }`}
+              >
+                {idx + 1}
+              </button>
+            ))}
+          </div>
+
           {/* Passage Section */}
-          <div className="w-full lg:w-1/2 overflow-y-auto p-12 bg-slate-900/30 border-r border-white/5">
-            <div className="max-w-3xl mx-auto prose prose-invert prose-slate markdown-passage">
-              <ReactMarkdown>
-                {data.passage}
-              </ReactMarkdown>
+          <div className="w-full lg:w-1/2 overflow-y-auto p-12 bg-slate-900/30 border-r border-white/5 custom-scrollbar">
+            <div className="max-w-3xl mx-auto">
+              <div className="mb-8 flex items-center justify-between">
+                <span className="px-4 py-1.5 bg-indigo-500/10 text-indigo-400 text-[10px] font-black rounded-full border border-indigo-500/20 uppercase tracking-[0.2em]">
+                  Reading Passage
+                </span>
+                <div className="flex gap-2">
+                  <button className="p-2 hover:bg-white/5 rounded-lg text-slate-500 hover:text-white transition-colors" title="Highlight text (coming soon)">
+                    <Target className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+              <div className="prose prose-invert prose-slate markdown-passage">
+                <ReactMarkdown>
+                  {data.passage}
+                </ReactMarkdown>
+              </div>
             </div>
           </div>
 
           {/* Questions Section */}
-          <div className="w-full lg:w-1/2 overflow-y-auto p-12 bg-slate-950">
+          <div className="w-full lg:w-1/2 overflow-y-auto p-12 bg-slate-950 custom-scrollbar">
             <div className="max-w-2xl mx-auto space-y-12 pb-24">
               <div className="flex items-center justify-between border-b border-white/5 pb-8">
                 <div className="space-y-1">
@@ -229,7 +265,11 @@ export default function ReadingPage() {
               </div>
 
               {data.questions.map((q: any, idx: number) => (
-                <div key={q.id} className={`glass-card !p-8 border-white/5 bg-slate-900/40 transition-all ${submitted ? 'opacity-80' : 'hover:bg-slate-900/60'}`}>
+                <div 
+                  key={q.id} 
+                  id={`q-${q.id}`}
+                  className={`glass-card !p-8 border-white/5 bg-slate-900/40 transition-all ${submitted ? 'opacity-90' : 'hover:bg-slate-900/60'}`}
+                >
                   <div className="flex gap-6">
                     <span className="flex-shrink-0 w-10 h-10 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-black text-sm border border-white/10 shadow-lg">
                       {idx + 1}
