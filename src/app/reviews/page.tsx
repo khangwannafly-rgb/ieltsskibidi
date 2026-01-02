@@ -1,8 +1,7 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { Star, Quote, ChevronRight, MessageSquare, Award } from "lucide-react";
-import { useRef } from "react";
+import { motion } from "framer-motion";
+import { Star, Quote, ChevronRight, MessageSquare, Award, Users, Target, TrendingUp, Sparkles } from "lucide-react";
 
 const reviews = [
   {
@@ -12,6 +11,7 @@ const reviews = [
     comment: "alo vũ à vũ, cảm ơn vũ vì giới thiệu anh tới ielts skibidi.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbwOaIfBgo681SnQ9tXxsYxs7XP6IRLfDmUw&s",
     date: "15/12/2025",
+    size: "large", // Occupies 2x2
     accent: "from-indigo-500/20"
   },
   {
@@ -21,6 +21,7 @@ const reviews = [
     comment: "Chiếc cúp thứ 7 là dành cho Ielts Skibidi.",
     image: "https://cdn2.tuoitre.vn/thumb_w/480/471584752817336320/2025/11/20/0b89fcc0-92c9-4458-addd-1f4b13bbf00b-17636300163231290204390.jpg",
     date: "10/12/2025",
+    size: "medium", // Occupies 2x1
     accent: "from-rose-500/20"
   },
   {
@@ -30,6 +31,7 @@ const reviews = [
     comment: "Sau khi chinh phục được 7.0 ielts với ielts skibidi, thứ tiếp theo tôi hướng đến sẽ là major!!!",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREK5zSrwzVYwXVoazwMynFv4szRnlLA1MAFQ&s",
     date: "05/12/2025",
+    size: "small", // Occupies 1x1
     accent: "from-emerald-500/20"
   },
   {
@@ -39,171 +41,193 @@ const reviews = [
     comment: "FLOP QUÁ THÌ GHI TÊN ANH VÀO!!!",
     image: "https://yt3.googleusercontent.com/c-Z7mIlntSpG6VyQ5ZqaPggqkZRhaySr-H5ZEazFN2iR1pP4eD1UGekwu0y--c4CSVhJJ1A4QT8=s900-c-k-c0x00ffffff-no-rj",
     date: "01/12/2025",
+    size: "medium", // Occupies 2x1
     accent: "from-violet-500/20"
+  },
+  {
+    id: 5,
+    name: "Học viên Ẩn danh",
+    score: "Band 7.5",
+    comment: "AI phản hồi cực nhanh và chính xác, giúp mình sửa lỗi sai ngay lập tức.",
+    image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop",
+    date: "20/12/2025",
+    size: "small",
+    accent: "from-blue-500/20"
   }
 ];
 
-function ReviewSection({ review, index }: { review: any, index: number }) {
-  const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"]
-  });
+const stats = [
+  { label: "Học viên", value: "5,000+", icon: Users, color: "text-indigo-400" },
+  { label: "Band cao nhất", value: "8.5", icon: Award, color: "text-rose-400" },
+  { label: "Mục tiêu đạt được", value: "92%", icon: Target, color: "text-emerald-400" },
+  { label: "Bài làm mỗi ngày", value: "1,200+", icon: TrendingUp, color: "text-amber-400" },
+];
 
-  const y = useTransform(scrollYProgress, [0, 1], [0, -100]);
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
-  const isEven = index % 2 === 0;
+function ReviewCard({ review, index }: { review: any; index: number }) {
+  const sizeClasses = {
+    small: "col-span-1 row-span-1",
+    medium: "col-span-2 row-span-1",
+    large: "col-span-2 row-span-2",
+  };
 
   return (
-    <motion.section 
-      ref={containerRef}
-      style={{ opacity }}
-      className={`min-h-[80vh] flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-12 lg:gap-24 py-24 relative overflow-hidden`}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1 }}
+      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group relative overflow-hidden rounded-[2.5rem] glass-premium border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500`}
     >
       {/* Background Glow */}
-      <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r ${review.accent} to-transparent rounded-full blur-[120px] -z-10 opacity-30`} />
+      <div className={`absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br ${review.accent} to-transparent rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
 
-      {/* Image Side */}
-      <div className="w-full lg:w-1/2 relative group">
-        <motion.div 
-          style={{ y }}
-          className="relative aspect-[4/5] lg:aspect-square overflow-hidden rounded-[3rem] border border-white/10 shadow-2xl"
-        >
-          <img 
-            src={review.image} 
-            alt={review.name}
-            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
-        </motion.div>
-        
-        {/* Floating Stats */}
-        <motion.div 
-          initial={{ x: isEven ? 50 : -50, opacity: 0 }}
-          whileInView={{ x: 0, opacity: 1 }}
-          className={`absolute ${isEven ? '-right-6' : '-left-6'} top-12 glass-premium !p-6 !rounded-3xl border-white/10 shadow-2xl z-20`}
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <Award className="w-6 h-6 text-white" />
+      <div className="p-8 h-full flex flex-col justify-between relative z-10">
+        <div className="space-y-6">
+          <div className="flex justify-between items-start">
+            <div className="flex gap-4">
+              <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-white/10 shadow-xl group-hover:scale-110 transition-transform duration-500">
+                <img src={review.image} alt={review.name} className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-white tracking-tight">{review.name}</h3>
+                <div className="flex items-center gap-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">
+                  <Sparkles className="w-3 h-3 text-indigo-400" />
+                  {review.date}
+                </div>
+              </div>
             </div>
-            <div>
-              <div className="text-2xl font-black text-white">{review.score}</div>
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">IELTS Result</div>
+            <div className="px-4 py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black shadow-lg">
+              {review.score}
             </div>
           </div>
-        </motion.div>
-      </div>
 
-      {/* Content Side */}
-      <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
-        <motion.div
-          initial={{ opacity: 0, x: isEven ? -50 : 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="flex justify-center lg:justify-start gap-1 mb-6">
+          <div className="relative">
+            <Quote className="absolute -top-4 -left-4 w-12 h-12 text-white/5 -z-10" />
+            <p className={`text-white font-medium leading-relaxed italic ${review.size === 'large' ? 'text-2xl' : 'text-lg'}`}>
+              "{review.comment}"
+            </p>
+          </div>
+        </div>
+
+        <div className="pt-6 flex items-center justify-between border-t border-white/5 mt-6">
+          <div className="flex gap-1">
             {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+              <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
             ))}
           </div>
-          
-          <div className="relative">
-            <Quote className="absolute -top-12 -left-8 w-24 h-24 text-white/5 -z-10" />
-            <h2 className="text-3xl md:text-5xl font-black text-white leading-tight tracking-tight italic">
-              "{review.comment}"
-            </h2>
+          <div className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 transition-transform">
+            Học viên Skibidi
           </div>
-        </motion.div>
-
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="pt-8 flex flex-col lg:flex-row items-center gap-6"
-        >
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-2xl font-black text-white shadow-xl">
-            {review.name.charAt(0)}
-          </div>
-          <div>
-            <div className="text-2xl font-black text-white tracking-tight">{review.name}</div>
-            <div className="flex items-center gap-3 text-slate-500 mt-1">
-              <span className="text-xs font-bold uppercase tracking-[0.2em]">Học viên Skibidi</span>
-              <span className="w-1 h-1 rounded-full bg-slate-700" />
-              <span className="text-xs font-bold uppercase tracking-widest">{review.date}</span>
-            </div>
-          </div>
-        </motion.div>
+        </div>
       </div>
-    </motion.section>
+    </motion.div>
   );
 }
 
 export default function ReviewsPage() {
   return (
-    <div className="min-h-screen bg-slate-950 overflow-x-hidden">
-      {/* Hero Header */}
-      <div className="relative pt-32 pb-20 px-6">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(99,102,241,0.15),transparent_50%)]" />
-        
-        <div className="max-w-7xl mx-auto text-center space-y-8 relative">
-          <motion.div 
+    <div className="min-h-screen bg-slate-950 overflow-x-hidden pt-32 pb-24">
+      {/* Animated Background */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-rose-600/5 rounded-full blur-[120px] animate-pulse-slow" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 space-y-20 relative">
+        {/* Hero Section */}
+        <div className="text-center space-y-8">
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md text-indigo-400 text-[10px] font-black uppercase tracking-[0.3em]"
           >
             <MessageSquare className="w-4 h-4" />
-            Wall of Love
+            Community Wall of Fame
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-7xl md:text-9xl font-black text-white tracking-tighter leading-none"
+            className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-none"
           >
-            THE <span className="gradient-text">VOICE</span> OF<br />SKIBIDIANS
+            NHỮNG <span className="gradient-text">GƯƠNG MẶT</span><br />CHINH PHỤC IELTS
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.3 }}
             className="text-slate-400 text-xl max-w-2xl mx-auto font-medium leading-relaxed"
           >
-            Không chỉ là những con số, đây là những câu chuyện thực tế về hành trình chinh phục IELTS.
+            Nơi lưu giữ những cột mốc đáng nhớ của cộng đồng Skibidians trên hành trình vươn tới mục tiêu Band điểm mơ ước.
           </motion.p>
         </div>
-      </div>
 
-      {/* Main Content - No Cards, Just Immersive Sections */}
-      <div className="max-w-7xl mx-auto px-6">
-        {reviews.map((review, index) => (
-          <ReviewSection key={review.id} review={review} index={index} />
-        ))}
-      </div>
+        {/* Stats Bar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          {stats.map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + i * 0.1 }}
+              className="glass-premium !p-8 text-center space-y-4 border-white/5 bg-slate-900/40"
+            >
+              <div className={`w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mx-auto ${stat.color} shadow-inner`}>
+                <stat.icon className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="text-3xl font-black text-white">{stat.value}</div>
+                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
 
-      {/* Footer CTA */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        className="py-32 px-6 relative"
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-indigo-500/5 to-transparent" />
-        <div className="max-w-4xl mx-auto text-center relative space-y-12">
-          <h2 className="text-5xl md:text-7xl font-black text-white tracking-tight">
-            CÂU CHUYỆN TIẾP THEO SẼ LÀ CỦA <span className="text-indigo-500">BẠN?</span>
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-[320px] gap-6">
+          {reviews.map((review, index) => (
+            <ReviewCard key={review.id} review={review} index={index} />
+          ))}
+
+          {/* Special CTA Card */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            className="col-span-1 md:col-span-2 row-span-1 glass-premium bg-gradient-to-br from-indigo-600 to-violet-700 p-10 flex flex-col justify-between group cursor-pointer border-none shadow-2xl shadow-indigo-500/20"
+          >
+            <div className="space-y-4">
+              <h2 className="text-3xl font-black text-white tracking-tight">CÂU CHUYỆN CỦA BẠN?</h2>
+              <p className="text-indigo-100 font-medium leading-relaxed">
+                Hãy bắt đầu hành trình ngay hôm nay để ghi tên mình lên bảng vàng Skibidi.
+              </p>
+            </div>
+            <div className="flex items-center gap-4 text-white font-black uppercase tracking-widest text-xs">
+              Bắt đầu luyện tập <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Footer CTA */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          className="py-20 text-center space-y-12 border-t border-white/5"
+        >
+          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tight">
+            BẠN ĐÃ SẴN SÀNG CHƯA?
           </h2>
           <div className="flex flex-wrap justify-center gap-6">
-            <button className="group px-10 py-5 bg-white text-slate-950 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-indigo-500 hover:text-white transition-all duration-500 flex items-center gap-3">
-              Bắt đầu ngay
+            <button className="group px-10 py-5 bg-white text-slate-950 rounded-2xl font-black uppercase tracking-widest text-sm hover:bg-indigo-500 hover:text-white transition-all duration-500 flex items-center gap-3 shadow-2xl shadow-white/5">
+              Bắt đầu học ngay
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="px-10 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm border border-white/5 hover:bg-slate-800 transition-all">
-              Xem lộ trình
+            <button className="px-10 py-5 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm border border-white/10 hover:bg-slate-800 transition-all backdrop-blur-xl">
+              Tư vấn lộ trình
             </button>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
