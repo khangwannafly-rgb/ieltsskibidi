@@ -10,10 +10,10 @@ const reviews = [
     name: "Ộ I i",
     score: "Band 8.0",
     skill: "Writing",
-    comment: "alo vũ à vũ, cảm ơn vũ vì giới thiệu anh tới ielts skibidi. Một nền tảng học tập cực kỳ thông minh, giúp mình tiết kiệm được rất nhiều thời gian ôn luyện mà vẫn đạt được kết quả mong muốn.",
+    comment: "Cảm ơn vũ vì giới thiệu anh tới ielts skibidi. Một nền tảng học tập cực kỳ thông minh, giúp mình tiết kiệm được rất nhiều thời gian ôn luyện.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbwOaIfBgo681SnQ9tXxsYxs7XP6IRLfDmUw&s",
     date: "15/12/2025",
-    size: "large",
+    size: "wide",
     accent: "from-indigo-500/20"
   },
   {
@@ -21,10 +21,10 @@ const reviews = [
     name: "Faker",
     score: "Band 7.5",
     skill: "Reading",
-    comment: "Chiếc cúp thứ 7 là dành cho Ielts Skibidi. Một trải nghiệm học tập tuyệt vời, giúp tôi cải thiện tư duy đọc hiểu đáng kể.",
+    comment: "Chiếc cúp thứ 7 là dành cho Ielts Skibidi. Trải nghiệm học tập tuyệt vời.",
     image: "https://cdn2.tuoitre.vn/thumb_w/480/471584752817336320/2025/11/20/0b89fcc0-92c9-4458-addd-1f4b13bbf00b-17636300163231290204390.jpg",
     date: "10/12/2025",
-    size: "wide",
+    size: "small",
     accent: "from-rose-500/20"
   },
   {
@@ -32,7 +32,7 @@ const reviews = [
     name: "anh ALO",
     score: "Band 7.0",
     skill: "Speaking",
-    comment: "7.0 ielts easy!",
+    comment: "7.0 ielts easy! Skibidi giúp mình tự tin hơn khi giao tiếp tiếng Anh.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREK5zSrwzVYwXVoazwMynFv4szRnlLA1MAFQ&s",
     date: "05/12/2025",
     size: "small",
@@ -43,7 +43,7 @@ const reviews = [
     name: "Sơn Tùng MTP",
     score: "Band 8.5",
     skill: "Listening",
-    comment: "FLOP QUÁ THÌ GHI TÊN ANH VÀO!!! Ielts Skibidi thực sự là một cú hích lớn cho kỹ năng Listening của mình.",
+    comment: "FLOP QUÁ THÌ GHI TÊN ANH VÀO!!! Ielts Skibidi thực sự là một cú hích lớn cho kỹ năng Listening của mình, giúp mình nghe rõ từng từ.",
     image: "https://yt3.googleusercontent.com/c-Z7mIlntSpG6VyQ5ZqaPggqkZRhaySr-H5ZEazFN2iR1pP4eD1UGekwu0y--c4CSVhJJ1A4QT8=s900-c-k-c0x00ffffff-no-rj",
     date: "01/12/2025",
     size: "wide",
@@ -54,7 +54,7 @@ const reviews = [
     name: "Học viên Ẩn danh",
     score: "Band 7.5",
     skill: "Writing",
-    comment: "AI sửa lỗi cực kỳ chi tiết.",
+    comment: "AI sửa lỗi cực kỳ chi tiết, giúp mình tiến bộ từng ngày.",
     image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop",
     date: "20/12/2025",
     size: "small",
@@ -65,7 +65,7 @@ const reviews = [
     name: "Vinh Râu",
     score: "Band 6.5",
     skill: "Speaking",
-    comment: "Tự học ở nhà mà cảm giác như có giáo viên kèm 1-1 vậy, đỉnh thực sự! Mình đã tự tin hơn rất nhiều khi giao tiếp.",
+    comment: "Tự học ở nhà mà cảm giác như có giáo viên kèm 1-1 vậy, đỉnh thực sự! Mình đã tự tin hơn rất nhiều khi đối diện với giám khảo.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSq7tW8t6O7Y2_J5n9_v8Z7y-U5Z6L-n5p8_Q&s",
     date: "25/12/2025",
     size: "wide",
@@ -76,10 +76,10 @@ const reviews = [
     name: "Hieuthuhai",
     score: "Band 8.0",
     skill: "Listening",
-    comment: "Nghe Skibidi xong đi thi nghe như nghe nhạc rap, dễ hiểu vô cùng. Các bài nghe được thiết kế rất sát với thực tế.",
+    comment: "Nghe Skibidi xong đi thi nghe như nghe nhạc rap, dễ hiểu vô cùng.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0Y6M8p8vW9Z8Y_mYp8_z_z_z_z_z_z_z_z_z&s",
     date: "28/12/2025",
-    size: "tall",
+    size: "small",
     accent: "from-teal-500/20"
   },
   {
@@ -87,7 +87,7 @@ const reviews = [
     name: "Linh Ngọc Đàm",
     score: "Band 7.5",
     skill: "Reading",
-    comment: "Giao diện đẹp xỉu, học mà cứ ngỡ đang lướt Pinterest luôn á! Rất cảm hứng để học mỗi ngày.",
+    comment: "Giao diện đẹp xỉu, học mà cứ ngỡ đang lướt Pinterest luôn á! Rất cảm hứng để học mỗi ngày mà không thấy chán.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSW8y1p_79fN2_Xm9r8Tz_Z_z_z_z_z_z_z_z_z&s",
     date: "30/12/2025",
     size: "wide",
@@ -98,10 +98,10 @@ const reviews = [
     name: "Độ Mixi",
     score: "Band 7.0",
     skill: "Speaking",
-    comment: "Hợp lý! Học Ielts ở đây thấy giải trí mà vẫn hiệu quả. Anh em nên thử nhé, không hề áp lực tí nào.",
+    comment: "Hợp lý! Học Ielts ở đây thấy giải trí mà vẫn hiệu quả. Anh em nên thử nhé.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr3n_W7rL_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "02/01/2026",
-    size: "wide",
+    size: "small",
     accent: "from-orange-500/20"
   },
   {
@@ -109,10 +109,10 @@ const reviews = [
     name: "PewPew",
     score: "Band 8.0",
     skill: "Writing",
-    comment: "Bạn có thể không giỏi, nhưng bạn phải cố gắng. Ielts Skibidi cung cấp cho bạn mọi công cụ để cố gắng đó.",
+    comment: "Bạn có thể không giỏi, nhưng bạn phải cố gắng. Ielts Skibidi là công cụ tuyệt vời để bạn hiện thực hóa điều đó.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7y_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "03/01/2026",
-    size: "tall",
+    size: "wide",
     accent: "from-cyan-500/20"
   },
   {
@@ -120,11 +120,66 @@ const reviews = [
     name: "Misthy",
     score: "Band 7.5",
     skill: "Reading",
-    comment: "Thích nhất phần Reading, bài đọc phong phú và giải thích cực kỳ dễ hiểu. Cảm ơn team Skibidi nhiều!",
+    comment: "Thích nhất phần Reading, bài đọc phong phú và giải thích cực kỳ dễ hiểu.",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "04/01/2026",
-    size: "wide",
+    size: "small",
     accent: "from-fuchsia-500/20"
+  },
+  {
+    id: 12,
+    name: "Xemesis",
+    score: "Band 7.0",
+    skill: "Listening",
+    comment: "Đúng chất Skibidi! Học hiệu quả mà không bị gò bó. 10 điểm cho chất lượng!",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    date: "05/01/2026",
+    size: "small",
+    accent: "from-yellow-500/20"
+  },
+  {
+    id: 13,
+    name: "Hậu Hoàng",
+    score: "Band 7.5",
+    skill: "Speaking",
+    comment: "Vừa học vừa nhảy cũng ra được 7.5 Speaking nè. Skibidi đỉnh thật sự!",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    date: "06/01/2026",
+    size: "small",
+    accent: "from-orange-400/20"
+  },
+  {
+    id: 14,
+    name: "Quang Hải",
+    score: "Band 6.5",
+    skill: "Reading",
+    comment: "Đọc hiểu chiến thuật trên sân cỏ hay trong bài thi Ielts đều cần sự tập trung. Skibidi đã giúp tôi điều đó.",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    date: "07/01/2026",
+    size: "wide",
+    accent: "from-red-500/20"
+  },
+  {
+    id: 15,
+    name: "Lê Bống",
+    score: "Band 7.0",
+    skill: "Writing",
+    comment: "Viết lách không còn là nỗi sợ nhờ AI của Skibidi. Cảm ơn team rất nhiều!",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    date: "08/01/2026",
+    size: "small",
+    accent: "from-purple-500/20"
+  },
+  {
+    id: 16,
+    name: "Trấn Thành",
+    score: "Band 8.0",
+    skill: "Speaking",
+    comment: "Ielts Skibidi là một bước ngoặt lớn. Ngôn ngữ không chỉ là công cụ, nó là nghệ thuật.",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    date: "10/01/2026",
+    size: "small",
+    accent: "from-blue-600/20"
   }
 ];
 
@@ -147,8 +202,6 @@ function ReviewCard({ review, index }: { review: any; index: number }) {
   const sizeClasses = {
     small: "col-span-1 row-span-1",
     wide: "col-span-1 md:col-span-2 row-span-1",
-    tall: "col-span-1 row-span-2",
-    large: "col-span-1 md:col-span-2 row-span-2",
   };
 
   const skillIcons = {
@@ -171,13 +224,13 @@ function ReviewCard({ review, index }: { review: any; index: number }) {
         delay: index * 0.02,
         layout: { duration: 0.3 }
       }}
-      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group relative overflow-hidden rounded-[2.5rem] glass-premium border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500 flex flex-col h-full min-h-[340px]`}
+      className={`${sizeClasses[review.size as keyof 'small' | 'wide']} group relative overflow-hidden rounded-[2.5rem] glass-premium border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500 flex flex-col h-full min-h-[340px]`}
     >
       {/* Background Glow */}
       <div className={`absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br ${review.accent} to-transparent rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
 
       <div className="p-6 md:p-8 flex-1 flex flex-col relative z-10 min-h-0">
-        {/* Header Section - Fixed Layout */}
+        {/* Header Section - Uniform Layout */}
         <div className="flex justify-between items-center gap-4 mb-8 flex-shrink-0">
           <div className="flex items-center gap-4 min-w-0">
             <div className="flex-shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-2xl overflow-hidden border-2 border-white/10 shadow-xl group-hover:scale-110 transition-transform duration-500">
@@ -191,36 +244,27 @@ function ReviewCard({ review, index }: { review: any; index: number }) {
             </div>
           </div>
           
-          <div className="flex flex-col items-end gap-2 flex-shrink-0">
+          <div className="flex flex-col items-end gap-1 flex-shrink-0">
             <div className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shadow-lg transition-colors group-hover:bg-indigo-500/20">
               <Icon className="w-3 h-3 md:w-4 h-4" />
               <span className="text-[10px] md:text-xs font-black">{review.score}</span>
             </div>
-            <span className="text-[8px] font-bold text-slate-600 uppercase tracking-[0.2em]">
+            <span className="text-[8px] font-black text-slate-600 uppercase tracking-[0.2em]">
               {review.skill}
             </span>
           </div>
         </div>
 
-        {/* Content Section */}
+        {/* Content Section - Balanced Typography */}
         <div className="relative flex-1 min-h-0 flex flex-col justify-center">
           <Quote className="absolute -top-6 -left-2 w-10 h-10 md:w-14 md:h-14 text-white/5 -z-10" />
           <p className={`text-white font-medium leading-relaxed italic overflow-hidden
-            ${review.size === 'large' ? 'text-xl md:text-2xl line-clamp-8' : 
-              review.size === 'small' ? 'text-sm line-clamp-4' : 
-              'text-base md:text-lg line-clamp-6'}`}>
+            ${review.size === 'wide' ? 'text-base md:text-lg line-clamp-4' : 'text-sm md:text-base line-clamp-5'}`}>
             "{review.comment}"
           </p>
-          
-          {review.size === 'large' && (
-            <div className="mt-8 flex gap-3 opacity-50">
-              <Sparkles className="w-5 h-5 text-indigo-400" />
-              <div className="h-px flex-1 bg-gradient-to-r from-indigo-500/50 to-transparent self-center" />
-            </div>
-          )}
         </div>
 
-        {/* Footer Section */}
+        {/* Footer Section - Perfectly Aligned */}
         <div className="pt-4 md:pt-6 flex items-center justify-between border-t border-white/5 mt-6 flex-shrink-0">
           <div className="flex gap-1">
             {[...Array(5)].map((_, i) => (
@@ -354,15 +398,20 @@ export default function ReviewsPage() {
               layout
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              className="col-span-1 md:col-span-2 row-span-1 glass-premium bg-gradient-to-br from-indigo-600 to-violet-700 p-10 flex flex-col justify-between group cursor-pointer border-none shadow-2xl shadow-indigo-500/20"
+              className="col-span-1 md:col-span-2 row-span-1 glass-premium bg-gradient-to-br from-indigo-600 to-violet-700 p-8 md:p-10 flex flex-col justify-between group cursor-pointer border-none shadow-2xl shadow-indigo-500/20 rounded-[2.5rem] min-h-[340px]"
             >
-              <div className="space-y-4">
-                <h2 className="text-3xl font-black text-white tracking-tight">CÂU CHUYỆN CỦA BẠN?</h2>
-                <p className="text-indigo-100 font-medium leading-relaxed">
-                  Hãy bắt đầu hành trình ngay hôm nay để ghi tên mình lên bảng vàng Skibidi.
-                </p>
+              <div className="space-y-6">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md">
+                  <Sparkles className="w-8 h-8 text-white" />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-3xl font-black text-white tracking-tight">CÂU CHUYỆN CỦA BẠN?</h2>
+                  <p className="text-indigo-100 font-medium leading-relaxed">
+                    Hãy bắt đầu hành trình ngay hôm nay để ghi tên mình lên bảng vàng Skibidi.
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-4 text-white font-black uppercase tracking-widest text-xs">
+              <div className="flex items-center gap-4 text-white font-black uppercase tracking-widest text-xs pt-6 border-t border-white/10">
                 Bắt đầu luyện tập <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
               </div>
             </motion.div>

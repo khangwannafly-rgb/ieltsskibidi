@@ -123,16 +123,6 @@ export default function WritingPage() {
             <p className="text-slate-400 font-medium leading-relaxed">
               {question.error || "Không thể kết nối với AI để tạo đề bài. Vui lòng thử lại sau giây lát."}
             </p>
-            {question.code === "MISSING_API_KEY" && (
-              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold mt-4">
-                Mẹo: Hãy kiểm tra xem bạn đã thêm GEMINI_API_KEY vào Environment Variables trên Vercel chưa.
-              </div>
-            )}
-            {question.code === "LEAKED_API_KEY" && (
-              <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold mt-4">
-                Mẹo: Hãy tạo API Key mới tại Google AI Studio, sau đó cập nhật lại biến GEMINI_API_KEY trên Vercel.
-              </div>
-            )}
           </div>
           <button 
             onClick={() => generateTask(taskType)}
@@ -147,7 +137,7 @@ export default function WritingPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 pt-8 pb-24">
-      <div className="max-w-[1400px] mx-auto px-6 space-y-16">
+      <div className="max-w-[1600px] mx-auto px-6 space-y-12">
         {/* Header Section */}
         {!question && (
           <div className="flex flex-col lg:flex-row justify-between items-end gap-12 border-b border-white/5 pb-12">
@@ -255,57 +245,51 @@ export default function WritingPage() {
             </motion.button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-12 items-start">
-            {/* Left Side: Question */}
+          <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr_0.8fr] gap-8 items-start">
+            {/* Left Side: Question & Data */}
             <div className="space-y-8">
               <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="glass-card !p-12 space-y-10 relative overflow-hidden border-white/5 bg-slate-900/40"
+                className="glass-card !p-10 space-y-8 relative overflow-hidden border-white/5 bg-slate-900/40"
               >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32" />
                 
                 <div className="flex justify-between items-start relative">
                   <div className="space-y-2">
                     <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Practice Content</span>
-                    <h2 className="text-4xl font-black text-white tracking-tight">Đề bài chi tiết</h2>
+                    <h2 className="text-3xl font-black text-white tracking-tight">Đề bài chi tiết</h2>
                   </div>
                   <div className="px-5 py-2.5 bg-indigo-500/10 text-indigo-400 text-[10px] font-black rounded-2xl border border-indigo-500/20 uppercase tracking-[0.2em] shadow-2xl">
                     Mục tiêu Band {question.difficulty_estimate_band}
                   </div>
                 </div>
 
-                <div className="p-10 bg-slate-950/50 rounded-[2.5rem] border border-white/5 shadow-inner relative group">
-                  <div className="absolute top-6 left-6 flex items-center gap-3 opacity-50 group-hover:opacity-100 transition-opacity">
-                    <div className="w-1 h-4 bg-indigo-500 rounded-full" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Nội dung đề bài</span>
-                  </div>
-                  <p className="text-white font-bold text-2xl leading-relaxed italic pt-6">
+                <div className="p-8 bg-slate-950/50 rounded-[2rem] border border-white/5 shadow-inner relative group">
+                  <p className="text-white font-bold text-xl leading-relaxed italic">
                     "{question.question}"
                   </p>
                 </div>
 
                 {taskType === 'task1' && question.chart_data && (
-                  <div className="glass-card !p-8 bg-slate-950/30 border-white/5">
-                    <div className="h-[550px] w-full">
-                      <WritingTask1Chart data={question.chart_data} />
-                    </div>
+                  <div className="glass-card !p-8 bg-slate-950/30 border-white/5 min-h-[450px]">
+                    <WritingTask1Chart data={question.chart_data} />
                   </div>
                 )}
 
-                <div className="flex flex-wrap gap-10 pt-10 border-t border-white/5">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center border border-white/5">
-                      <Clock className="w-6 h-6 text-indigo-400" />
+                <div className="flex flex-wrap gap-8 pt-8 border-t border-white/5">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center border border-white/5">
+                      <Clock className="w-5 h-5 text-indigo-400" />
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Thời gian</span>
                       <span className="text-sm font-black text-white uppercase tracking-tight">{taskType === 'task1' ? '20' : '40'} Phút</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center border border-white/5">
-                      <BookOpen className="w-6 h-6 text-indigo-400" />
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center border border-white/5">
+                      <BookOpen className="w-5 h-5 text-indigo-400" />
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Yêu cầu</span>
@@ -316,47 +300,129 @@ export default function WritingPage() {
               </motion.div>
             </div>
 
-            {/* Right Side: Editor */}
+            {/* Middle: Editor */}
             <div className="space-y-8 lg:sticky lg:top-32">
               <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 className="glass-card !p-0 overflow-hidden shadow-2xl border-white/5 bg-slate-900/40 backdrop-blur-2xl"
               >
-                <div className="bg-slate-900/60 px-10 py-8 flex justify-between items-center border-b border-white/5">
+                <div className="bg-slate-900/60 px-8 py-6 flex justify-between items-center border-b border-white/5">
                   <div className="flex items-center gap-4">
                     <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_20px_rgba(16,185,129,0.6)]" />
-                    <span className="text-white text-xs font-black uppercase tracking-[0.3em]">Editor Mode</span>
+                    <span className="text-white text-[10px] font-black uppercase tracking-[0.3em]">Editor Mode</span>
                   </div>
-                  <div className={`text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2.5 rounded-2xl border transition-colors duration-500 ${wordCount < (question.min_words || 150) ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+                  <div className={`text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl border transition-colors duration-500 ${wordCount < (question.min_words || 150) ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
                     {wordCount} Words
                   </div>
                 </div>
                 <textarea 
-                  className="w-full h-[700px] p-12 outline-none bg-transparent text-slate-200 font-medium text-xl leading-relaxed resize-none transition-colors placeholder:text-slate-600 selection:bg-indigo-500/30"
+                  className="w-full h-[600px] p-10 outline-none bg-transparent text-slate-200 font-medium text-lg leading-relaxed resize-none transition-colors placeholder:text-slate-600 selection:bg-indigo-500/30"
                   placeholder="Bắt đầu viết bài luận của bạn tại đây..."
                   value={essay}
                   onChange={(e) => setEssay(e.target.value)}
                   disabled={loading || !!result}
                 />
-                <div className="p-10 bg-slate-950/40 border-t border-white/5 flex justify-end gap-6">
+                <div className="p-8 bg-slate-950/40 border-t border-white/5 flex justify-end gap-6">
                   {!result ? (
                     <button 
                       onClick={submitEssay}
                       disabled={loading || wordCount < 50}
-                      className="btn-primary flex items-center gap-4 py-6 px-12 disabled:opacity-30 disabled:grayscale group"
+                      className="btn-primary flex items-center gap-4 py-4 px-8 disabled:opacity-30 disabled:grayscale group"
                     >
-                      {loading ? <RefreshCw className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
-                      <span className="text-xl">Chấm điểm bài viết</span>
+                      {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
+                      <span className="text-lg">Chấm điểm bài viết</span>
                     </button>
                   ) : (
                     <button 
                       onClick={() => generateTask(taskType)}
-                      className="btn-secondary flex items-center gap-4 py-6 px-12"
+                      className="btn-secondary flex items-center gap-4 py-4 px-8"
                     >
-                      <RefreshCw className="w-6 h-6" />
-                      <span className="text-xl">Luyện đề mới</span>
+                      <RefreshCw className="w-5 h-5" />
+                      <span className="text-lg">Luyện đề mới</span>
                     </button>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Right Side: Structural Guide & Vocabulary */}
+            <div className="space-y-8 lg:sticky lg:top-32">
+              {/* Structural Guide */}
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="glass-card !p-8 space-y-6 border-white/5 bg-slate-900/40"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                    <Trophy className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">Cấu trúc chuẩn</h3>
+                </div>
+
+                {question.structure_tips && (
+                  <div className="space-y-6">
+                    {Object.entries(question.structure_tips).map(([key, tip]: [string, any]) => {
+                      const labelMap: Record<string, { title: string, icon: any }> = {
+                        'introduction': { title: 'Mở bài', icon: <PenTool className="w-3 h-3" /> },
+                        'overview': { title: 'Tổng quan', icon: <TrendingUp className="w-3 h-3" /> },
+                        'body_paragraph_1': { title: 'Thân bài 1', icon: <ChevronRight className="w-3 h-3" /> },
+                        'body_paragraph_2': { title: 'Thân bài 2', icon: <ChevronRight className="w-3 h-3" /> },
+                        'body_1': { title: 'Thân bài 1', icon: <ChevronRight className="w-3 h-3" /> },
+                        'body_2': { title: 'Thân bài 2', icon: <ChevronRight className="w-3 h-3" /> },
+                        'conclusion': { title: 'Kết bài', icon: <CheckCircle className="w-3 h-3" /> }
+                      };
+                      const config = labelMap[key] || { title: key.replace('_', ' '), icon: <ChevronRight className="w-3 h-3" /> };
+                      
+                      return (
+                        <div key={key} className="space-y-3 group">
+                          <div className="flex items-center gap-3">
+                            <div className="w-6 h-6 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-white transition-all duration-300">
+                              {config.icon}
+                            </div>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] group-hover:text-indigo-400 transition-colors">{config.title}</span>
+                          </div>
+                          <div className="pl-9 relative">
+                            <div className="absolute left-3 top-0 bottom-0 w-px bg-white/5 group-hover:bg-indigo-500/30 transition-colors" />
+                            <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                              {tip}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Vocabulary Hints */}
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
+                className="glass-card !p-8 space-y-6 border-white/5 bg-slate-900/40"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">Từ vựng gợi ý</h3>
+                </div>
+
+                <div className="space-y-4">
+                  {question.vocabulary_hints?.map((hint: any, idx: number) => (
+                    <div key={idx} className="p-4 rounded-2xl bg-slate-950/50 border border-white/5 hover:border-emerald-500/30 transition-all group">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-sm font-black text-emerald-400">{hint.word}</span>
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">{hint.meaning}</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 italic leading-relaxed">
+                        "{hint.usage}"
+                      </p>
+                    </div>
+                  ))}
+                  {!question.vocabulary_hints && (
+                    <p className="text-xs text-slate-500 italic">Đang phân tích từ vựng phù hợp...</p>
                   )}
                 </div>
               </motion.div>
