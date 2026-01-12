@@ -152,7 +152,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="relative max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-4 pb-24 overflow-hidden">
+    <div className="landing-body relative max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-32 pb-24 overflow-hidden">
       {/* Welcome Header */}
       {user && (
         <motion.div 
@@ -160,20 +160,16 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4 mb-12"
         >
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-500/20">
+          <div className="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-500/20">
             {user.name.charAt(0)}
           </div>
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tight">Chào mừng trở lại, {user.name}! 👋</h2>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Chào mừng trở lại, {user.name}! 👋</h2>
             <p className="text-slate-500 text-sm font-medium">Hôm nay bạn muốn luyện tập kỹ năng nào?</p>
           </div>
         </motion.div>
       )}
 
-      {/* Background Decorative Elements */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-[128px] -z-10 animate-float" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-fuchsia-600/10 rounded-full blur-[128px] -z-10 animate-float" style={{ animationDelay: '-3s' }} />
-      
       {/* Stats Section */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -182,15 +178,15 @@ export default function Dashboard() {
         className="grid grid-cols-2 md:grid-cols-4 gap-4"
       >
         {[
-          { label: 'Bài tập hoàn thành', value: submissions.length, icon: Target, color: 'text-indigo-400' },
-          { label: 'Band trung bình', value: currentBand.toFixed(1), icon: TrendingUp, color: 'text-emerald-400' },
-          { label: 'Mục tiêu', value: targetBand.toFixed(1), icon: Star, color: 'text-amber-400' },
-          { label: 'Điểm mạnh nhất', value: getStrengthsText().split(' ')[1] || '---', icon: Zap, color: 'text-rose-400' },
+          { label: 'Bài tập hoàn thành', value: submissions.length, icon: Target, color: 'text-indigo-600' },
+          { label: 'Band trung bình', value: currentBand.toFixed(1), icon: TrendingUp, color: 'text-emerald-600' },
+          { label: 'Mục tiêu', value: targetBand.toFixed(1), icon: Star, color: 'text-amber-600' },
+          { label: 'Điểm mạnh nhất', value: getStrengthsText().split(' ')[1] || '---', icon: Zap, color: 'text-rose-600' },
         ].map((stat, i) => (
-          <div key={i} className="glass-premium flex flex-col items-center justify-center p-6 text-center space-y-2 border-white/5 bg-slate-900/40">
+          <div key={i} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center p-6 text-center space-y-2 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500">
             <stat.icon className={`w-6 h-6 ${stat.color} mb-2`} />
-            <div className="text-3xl font-black text-white">{stat.value}</div>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</div>
+            <div className="text-3xl font-black text-slate-900">{stat.value}</div>
+            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{stat.label}</div>
           </div>
         ))}
       </motion.div>
@@ -201,29 +197,29 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-[0.3em] mb-4"
+            className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-black uppercase tracking-[0.3em] mb-4"
           >
-            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
             AI Learning Dashboard v2.0
           </motion.div>
           
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="premium-title"
+            className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-[0.9]"
           >
             Chinh phục <br />
-            <span className="gradient-text">IELTS</span> cùng IELTS SKIBIDI
+            <span className="text-indigo-600">IELTS</span> cùng IELTS SKIBIDI
           </motion.h1>
 
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="premium-subtitle"
+            className="text-slate-600 font-medium text-lg md:text-xl leading-relaxed max-w-2xl"
           >
             Nền tảng luyện thi IELTS ứng dụng trí tuệ nhân tạo thế hệ mới. <br />
-            Mục tiêu của bạn là Band <span className="text-indigo-400 font-black tracking-wider underline decoration-indigo-500/30 underline-offset-8">{targetBand.toFixed(1)}</span>. 
+            Mục tiêu của bạn là Band <span className="text-indigo-600 font-black tracking-wider underline decoration-indigo-500/30 underline-offset-8">{targetBand.toFixed(1)}</span>. 
           </motion.p>
 
           <motion.div
@@ -238,7 +234,7 @@ export default function Dashboard() {
             </Link>
             <button className="btn-secondary group relative overflow-hidden">
               <span className="relative z-10">Xem lộ trình học</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
+              <div className="absolute inset-0 bg-indigo-50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
             </button>
           </motion.div>
         </div>
@@ -249,24 +245,24 @@ export default function Dashboard() {
           transition={{ delay: 0.2, type: "spring", damping: 20 }}
           className="relative group w-full lg:w-auto"
         >
-          <div className="absolute inset-0 bg-indigo-500/20 blur-[120px] rounded-full group-hover:bg-indigo-500/30 transition-all duration-700" />
-          <div className="relative glass-premium border-white/10 text-center space-y-8 min-w-[340px] shadow-2xl animate-float">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2.5rem] bg-indigo-600 shadow-2xl shadow-indigo-500/40 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+          <div className="absolute inset-0 bg-indigo-500/5 blur-[120px] rounded-full group-hover:bg-indigo-500/10 transition-all duration-700" />
+          <div className="relative bg-white border border-slate-100 rounded-[2.5rem] p-10 text-center space-y-8 min-w-[340px] shadow-2xl shadow-indigo-500/5 animate-float">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2.5rem] bg-indigo-600 shadow-2xl shadow-indigo-500/20 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
               <Target className="w-12 h-12 text-white" />
             </div>
             <div className="space-y-2">
-              <span className="text-xs font-black text-indigo-400 uppercase tracking-[0.3em]">Trình độ hiện tại</span>
-              <div className="text-8xl font-black text-white tracking-tighter tabular-nums drop-shadow-2xl">
+              <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.3em]">Trình độ hiện tại</span>
+              <div className="text-8xl font-black text-slate-900 tracking-tighter tabular-nums">
                 {currentBand.toFixed(1)}
               </div>
             </div>
             <div className="space-y-4">
-              <div className="w-full h-3 bg-slate-800/50 rounded-full overflow-hidden p-0.5 border border-white/5">
+              <div className="w-full h-3 bg-slate-50 rounded-full overflow-hidden p-0.5 border border-slate-100">
                 <motion.div 
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
                   transition={{ duration: 1.5, ease: "easeOut" }}
-                  className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 rounded-full"
+                  className="h-full bg-indigo-600 rounded-full"
                 />
               </div>
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex justify-between">
@@ -290,16 +286,16 @@ export default function Dashboard() {
           >
             <Link 
               href={skill.href} 
-              className={`group glass-premium h-full flex flex-col items-start gap-6 border-transparent ${skill.borderColor} glass-shine bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500`}
+              className={`group bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm flex flex-col items-start gap-6 hover:border-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500`}
             >
               <div className={`p-4 rounded-2xl ${skill.bgColor} ${skill.color} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
                 <skill.icon className="w-8 h-8" />
               </div>
               <div className="space-y-3">
-                <h3 className="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">
+                <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                   {skill.name}
                 </h3>
-                <p className="text-slate-400 text-sm leading-relaxed line-clamp-3">
+                <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">
                   {skill.desc}
                 </p>
               </div>
@@ -317,18 +313,18 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="lg:col-span-1 glass-premium space-y-10 !p-10 border-white/5 bg-slate-900/40"
+          className="lg:col-span-1 bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-10 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500"
         >
           <div className="space-y-2">
-            <h2 className="text-2xl font-black text-white tracking-tight">Cơ cấu Kỹ năng</h2>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Phân tích chi tiết theo tiêu chí</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Cơ cấu Kỹ năng</h2>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Phân tích chi tiết theo tiêu chí</p>
           </div>
           <div className="h-[320px] -mx-4 min-h-[320px]">
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={descriptorData}>
-                  <PolarGrid stroke="#334155" strokeDasharray="3 3" opacity={0.5} />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} />
+                  <PolarGrid stroke="#e2e8f0" strokeDasharray="3 3" opacity={0.5} />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 900 }} />
                   <PolarRadiusAxis angle={30} domain={[0, 9]} tick={false} axisLine={false} />
                   <Radar 
                     name="Thí sinh" 
@@ -336,15 +332,15 @@ export default function Dashboard() {
                     stroke="#6366f1" 
                     strokeWidth={3}
                     fill="#6366f1" 
-                    fillOpacity={0.2} 
+                    fillOpacity={0.1} 
                   />
                 </RadarChart>
               </ResponsiveContainer>
             )}
           </div>
-          <div className="pt-8 border-t border-white/5 flex items-start gap-4 text-slate-400 text-sm font-medium leading-relaxed bg-indigo-500/5 -mx-10 -mb-10 p-10 rounded-b-[2rem]">
-            <div className="mt-1 p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
+          <div className="pt-8 border-t border-slate-50 flex items-start gap-4 text-slate-500 text-sm font-medium leading-relaxed bg-indigo-50/30 -mx-10 -mb-10 p-10 rounded-b-[2rem]">
+            <div className="mt-1 p-2 bg-indigo-100 rounded-xl border border-indigo-200">
+              <TrendingUp className="w-4 h-4 text-indigo-600" />
             </div>
             {getStrengthsText()}
           </div>
@@ -355,15 +351,15 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="lg:col-span-2 glass-premium space-y-10 !p-10 border-white/5 bg-slate-900/40"
+          className="lg:col-span-2 bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-10 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500"
         >
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <h2 className="text-2xl font-black text-white tracking-tight">Tiến độ Phát triển</h2>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Lịch sử rèn luyện gần nhất</p>
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Tiến độ Phát triển</h2>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Lịch sử rèn luyện gần nhất</p>
             </div>
             {submissions.length > 1 && (
-              <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+              <div className="px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                 <TrendingUp className="w-3 h-3" />
                 +{ (submissions[0].band - submissions[submissions.length-1].band).toFixed(1) } Band
               </div>
@@ -373,39 +369,39 @@ export default function Dashboard() {
             {isMounted && (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={progressData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.3} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} opacity={0.3} />
                   <XAxis 
                     dataKey="name" 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
+                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
                     dy={15}
                   />
                   <YAxis 
                     domain={[0, 9]} 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
+                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
                     dx={-10}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#0f172a', 
+                      backgroundColor: '#ffffff', 
                       borderRadius: '1.25rem', 
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+                      border: '1px solid #f1f5f9',
+                      boxShadow: '0 25px 50px -12px rgba(0,0,0,0.05)',
                       padding: '1rem'
                     }}
-                    itemStyle={{ color: '#fff', fontWeight: 900 }}
-                    labelStyle={{ color: '#64748b', marginBottom: '0.5rem', fontWeight: 900, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                    itemStyle={{ color: '#0f172a', fontWeight: 900 }}
+                    labelStyle={{ color: '#94a3b8', marginBottom: '0.5rem', fontWeight: 900, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
                   />
                   <Line 
                     type="monotone" 
                     dataKey="band" 
                     stroke="#6366f1" 
                     strokeWidth={5} 
-                    dot={{ r: 6, fill: '#6366f1', strokeWidth: 3, stroke: '#1e293b' }}
-                    activeDot={{ r: 8, fill: '#fff', strokeWidth: 4, stroke: '#6366f1' }}
+                    dot={{ r: 6, fill: '#6366f1', strokeWidth: 3, stroke: '#ffffff' }}
+                    activeDot={{ r: 8, fill: '#6366f1', strokeWidth: 4, stroke: '#ffffff' }}
                     animationDuration={2000}
                   />
                 </LineChart>
@@ -421,25 +417,25 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="glass-premium !p-10 space-y-10 border-white/5 bg-slate-900/40"
+          className="bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-10 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500"
         >
           <div className="space-y-2">
-            <h2 className="text-2xl font-black text-white tracking-tight">Hoạt động Gần đây</h2>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">5 bài nộp mới nhất của bạn</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Hoạt động Gần đây</h2>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">5 bài nộp mới nhất của bạn</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="border-b border-white/5">
-                  <th className="pb-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Kỹ năng</th>
-                  <th className="pb-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Điểm số</th>
-                  <th className="pb-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Ngày hoàn thành</th>
+                <tr className="border-b border-slate-50">
+                  <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Kỹ năng</th>
+                  <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Điểm số</th>
+                  <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Ngày hoàn thành</th>
                   <th className="pb-6"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-50">
                 {submissions.slice(0, 5).map((sub) => (
-                  <tr key={sub.id} className="group hover:bg-white/5 transition-colors">
+                  <tr key={sub.id} className="group hover:bg-indigo-50/30 transition-colors">
                     <td className="py-6 pr-4">
                       <div className="flex items-center gap-4">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-white/5 shadow-inner ${

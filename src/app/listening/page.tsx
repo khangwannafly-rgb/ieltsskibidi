@@ -117,19 +117,19 @@ export default function ListeningPage() {
 
   if (loading && !data) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950 p-6">
-        <div className="w-full max-w-md p-12 glass-premium border-white/10 text-center space-y-8 relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-6">
+        <div className="w-full max-w-md p-12 bg-white rounded-[2.5rem] border border-slate-100 text-center space-y-8 relative overflow-hidden shadow-xl shadow-slate-200/50">
           <div className="absolute inset-0 bg-emerald-500/5 blur-3xl rounded-full" />
           <div className="relative w-28 h-28 mx-auto">
             <div className="absolute inset-0 border-b-2 border-emerald-500 rounded-full animate-spin" />
-            <div className="absolute inset-2 border-t-2 border-teal-500/30 rounded-full animate-spin-slow" />
-            <Headphones className="absolute inset-0 m-auto w-12 h-12 text-emerald-400" />
+            <div className="absolute inset-2 border-t-2 border-emerald-500/30 rounded-full animate-spin-slow" />
+            <Headphones className="absolute inset-0 m-auto w-12 h-12 text-emerald-600" />
           </div>
           <div className="space-y-4 relative">
-            <h2 className="text-3xl font-black text-white tracking-tight">Đang chuẩn bị bài nghe...</h2>
-            <p className="text-slate-400 font-medium leading-relaxed">AI đang biên soạn kịch bản hội thoại và câu hỏi Listening cho bạn.</p>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Đang chuẩn bị bài nghe...</h2>
+            <p className="text-slate-500 font-medium leading-relaxed">AI đang biên soạn kịch bản hội thoại và câu hỏi Listening cho bạn.</p>
           </div>
-          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden relative">
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500 to-transparent w-1/2 animate-shimmer" />
           </div>
         </div>
@@ -139,23 +139,23 @@ export default function ListeningPage() {
 
   if (data?.error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950">
-        <div className="max-w-md w-full p-12 glass-premium border-rose-500/20 text-center space-y-10">
-          <div className="w-24 h-24 bg-rose-500/10 rounded-[2.5rem] flex items-center justify-center mx-auto text-rose-400 border border-rose-500/20 shadow-2xl shadow-rose-500/10">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+        <div className="max-w-md w-full p-12 bg-white rounded-[2.5rem] border border-rose-100 text-center space-y-10 shadow-xl shadow-slate-200/50">
+          <div className="w-24 h-24 bg-rose-50 rounded-[2.5rem] flex items-center justify-center mx-auto text-rose-500 border border-rose-100 shadow-2xl shadow-rose-500/10">
             <AlertTriangle className="w-12 h-12" />
           </div>
           <div className="space-y-4">
-            <h2 className="text-4xl font-black text-white tracking-tight">Lỗi hệ thống</h2>
-            <p className="text-slate-400 font-medium leading-relaxed">
+            <h2 className="text-4xl font-black text-slate-900 tracking-tight">Lỗi hệ thống</h2>
+            <p className="text-slate-500 font-medium leading-relaxed">
               {data.error || "Không thể kết nối với AI để tạo đề bài. Vui lòng thử lại sau giây lát."}
             </p>
             {data.code === "MISSING_API_KEY" && (
-               <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold mt-4 text-left">
+               <div className="p-4 rounded-2xl bg-amber-5 border border-amber-100 text-amber-600 text-xs font-bold mt-4 text-left">
                  Mẹo: Hãy kiểm tra xem bạn đã thêm GEMINI_API_KEY vào Environment Variables trên Vercel chưa.
                </div>
              )}
              {data.code === "LEAKED_API_KEY" && (
-               <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold mt-4 text-left">
+               <div className="p-4 rounded-2xl bg-rose-5 border border-rose-100 text-rose-600 text-xs font-bold mt-4 text-left">
                  Mẹo: Hãy tạo API Key mới tại Google AI Studio, sau đó cập nhật lại biến GEMINI_API_KEY trên Vercel.
                </div>
              )}
@@ -172,31 +172,31 @@ export default function ListeningPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-0 flex flex-col">
+    <div className="min-h-screen bg-slate-50 pt-0 flex flex-col">
       {/* Top Header */}
-      <div className="h-20 bg-slate-900/80 backdrop-blur-xl text-white flex items-center justify-between px-10 sticky top-[80px] z-40 border-b border-white/5 shadow-2xl">
+      <div className="h-20 bg-white/80 backdrop-blur-xl text-slate-900 flex items-center justify-between px-10 sticky top-[80px] z-40 border-b border-slate-100 shadow-sm">
         <div className="flex items-center gap-6">
-          <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 border border-white/10">
+          <div className="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 border border-emerald-500/10">
             <Headphones className="w-6 h-6 text-white" />
           </div>
           <div className="hidden sm:block">
-            <span className="font-black tracking-[0.3em] uppercase text-[10px] block text-emerald-400">Listening Session</span>
-            <span className="font-black text-lg text-white tracking-tighter">IELTS Practice</span>
+            <span className="font-black tracking-[0.3em] uppercase text-[10px] block text-emerald-600">Listening Session</span>
+            <span className="font-black text-lg text-slate-900 tracking-tighter">IELTS Practice</span>
           </div>
         </div>
 
         {data && (
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-6">
-              <span className="text-[10px] uppercase font-black text-slate-500 tracking-[0.2em] hidden md:block">Time Remaining</span>
-              <div className="px-6 py-3 bg-slate-800/50 text-emerald-400 rounded-2xl border border-white/5 font-mono font-black text-2xl tabular-nums">
+              <span className="text-[10px] uppercase font-black text-slate-400 tracking-[0.2em] hidden md:block">Time Remaining</span>
+              <div className="px-6 py-3 bg-slate-50 text-emerald-600 rounded-2xl border border-slate-100 font-mono font-black text-2xl tabular-nums">
                 {formatTime(timeLeft)}
               </div>
             </div>
             {!submitted && (
               <button 
                 onClick={submitTest}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-3.5 rounded-2xl font-black text-sm transition-all shadow-2xl shadow-emerald-500/20 hover:-translate-y-1 active:translate-y-0 border border-white/10"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-3.5 rounded-2xl font-black text-sm transition-all shadow-lg shadow-emerald-500/20 hover:-translate-y-1 active:translate-y-0 border border-emerald-500/10"
               >
                 NỘP BÀI THI
               </button>
@@ -214,26 +214,26 @@ export default function ListeningPage() {
             className="max-w-2xl space-y-10 relative"
           >
             <div className="relative inline-block">
-              <div className="w-32 h-32 bg-emerald-500/10 rounded-[2.5rem] flex items-center justify-center border border-white/5 shadow-inner rotate-6 transition-transform hover:rotate-0 duration-500">
-                <Headphones className="w-16 h-16 text-emerald-400 -rotate-6" />
+              <div className="w-32 h-32 bg-emerald-50 rounded-[2.5rem] flex items-center justify-center border border-emerald-100 shadow-sm rotate-6 transition-transform hover:rotate-0 duration-500">
+                <Headphones className="w-16 h-16 text-emerald-600 -rotate-6" />
               </div>
-              <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-2xl border-2 border-slate-950">
+              <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center shadow-lg border-2 border-white">
                 <Volume2 className="w-6 h-6 text-white" />
               </div>
             </div>
             
             <div className="space-y-6">
-              <h1 className="premium-title">
-                Phòng <span className="text-emerald-500">Nghe</span>
+              <h1 className="text-6xl font-black text-slate-900 tracking-tight leading-[1.1]">
+                Phòng <span className="text-emerald-600">Nghe</span>
               </h1>
-              <p className="premium-subtitle">
+              <p className="text-slate-500 text-lg font-medium max-w-md mx-auto leading-relaxed">
                 Luyện tập kỹ năng nghe với các tình huống hội thoại và độc thoại mô phỏng kỳ thi IELTS thực tế.
               </p>
             </div>
 
             <button 
               onClick={generateTask}
-              className="btn-primary w-full py-6 text-xl shadow-2xl shadow-emerald-500/20 max-w-sm mx-auto flex items-center justify-center gap-4 group bg-emerald-600 hover:bg-emerald-500"
+              className="w-full py-6 text-xl shadow-lg shadow-emerald-500/20 max-w-sm mx-auto flex items-center justify-center gap-4 group bg-emerald-600 hover:bg-emerald-700 text-white rounded-[2rem] font-black transition-all hover:-translate-y-1 active:translate-y-0"
             >
               Bắt đầu luyện nghe
               <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
@@ -405,8 +405,8 @@ export default function ListeningPage() {
                   </div>
                   <h3 className="text-2xl font-black text-white tracking-tight">Audio Transcript (Script)</h3>
                 </div>
-                <div className="glass-premium !p-12 border-white/5 bg-slate-900/20">
-                  <p className="text-slate-400 text-xl font-medium leading-[2] italic whitespace-pre-wrap">
+                <div className="bg-white rounded-[2.5rem] p-12 border border-slate-100 shadow-sm">
+                  <p className="text-slate-600 text-xl font-medium leading-[2] italic whitespace-pre-wrap">
                     {data.transcript}
                   </p>
                 </div>
@@ -419,11 +419,11 @@ export default function ListeningPage() {
       {/* Result Modal */}
       <AnimatePresence>
         {submitted && data.score && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/80 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md">
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="glass-premium !p-0 max-w-xl w-full overflow-hidden border-white/10 shadow-[0_0_100px_rgba(16,185,129,0.15)]"
+              className="bg-white rounded-[3rem] max-w-xl w-full overflow-hidden border border-slate-100 shadow-2xl"
             >
               <div className="bg-emerald-600 p-12 text-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
@@ -438,28 +438,28 @@ export default function ListeningPage() {
               
               <div className="p-12 space-y-10">
                 <div className="grid grid-cols-2 gap-8">
-                  <div className="flex flex-col items-center justify-center p-10 bg-white/5 rounded-[2.5rem] border border-white/5 shadow-inner group">
-                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] mb-3 group-hover:text-emerald-400 transition-colors">Độ chính xác</p>
-                    <div className="text-6xl font-black text-white tracking-tighter tabular-nums">
-                      {data.score.rawScore}<span className="text-slate-700 mx-2 text-4xl">/</span>{data.score.totalQuestions}
+                  <div className="flex flex-col items-center justify-center p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-inner group">
+                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3 group-hover:text-emerald-600 transition-colors">Độ chính xác</p>
+                    <div className="text-6xl font-black text-slate-900 tracking-tighter tabular-nums">
+                      {data.score.rawScore}<span className="text-slate-200 mx-2 text-4xl">/</span>{data.score.totalQuestions}
                     </div>
                   </div>
-                  <div className="flex flex-col items-center justify-center p-10 bg-emerald-500/10 rounded-[2.5rem] border border-emerald-500/20 shadow-2xl group">
-                    <p className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3">Estimated Band</p>
-                    <div className="text-7xl font-black text-white tracking-tighter tabular-nums drop-shadow-2xl">{data.score.band}</div>
+                  <div className="flex flex-col items-center justify-center p-10 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 shadow-sm group">
+                    <p className="text-emerald-600 text-[10px] font-black uppercase tracking-[0.2em] mb-3">Estimated Band</p>
+                    <div className="text-7xl font-black text-emerald-600 tracking-tighter tabular-nums">{data.score.band}</div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button 
                     onClick={() => setSubmitted(false)}
-                    className="py-5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl border border-white/5"
+                    className="py-5 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-2xl font-black uppercase tracking-widest text-xs transition-all border border-slate-200"
                   >
                     Xem lại đáp án
                   </button>
                   <button 
                     onClick={() => window.location.reload()}
-                    className="btn-primary w-full py-5 text-xs uppercase tracking-widest bg-emerald-600 hover:bg-emerald-500 shadow-emerald-500/20"
+                    className="w-full py-5 text-xs uppercase tracking-widest bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black transition-all shadow-lg shadow-emerald-500/20"
                   >
                     Làm bài thi mới
                   </button>

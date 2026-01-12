@@ -50,15 +50,15 @@ export default function Navbar() {
           ease: [0.22, 1, 0.36, 1]
         }}
       >
-        <div className="glass bg-slate-900/90 border-slate-800/50 rounded-2xl px-6 h-16 flex items-center justify-between shadow-2xl backdrop-blur-xl transition-all duration-300">
-          <Link href="/" className="text-2xl font-black tracking-tight gradient-text hover:scale-105 transition-transform">
+        <div className="bg-white/80 border border-slate-200/50 rounded-2xl px-6 h-16 flex items-center justify-between shadow-lg shadow-indigo-500/5 backdrop-blur-xl transition-all duration-300">
+          <Link href="/" className="text-2xl font-black tracking-tight text-indigo-600 hover:scale-105 transition-transform">
             IELTS SKIBIDI
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex gap-8 text-sm font-bold text-slate-400">
+          <div className="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-widest text-slate-500">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="hover:text-indigo-400 transition-colors">
+              <Link key={link.href} href={link.href} className="hover:text-indigo-600 transition-colors">
                 {link.label}
               </Link>
             ))}
@@ -68,19 +68,19 @@ export default function Navbar() {
             {user ? (
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex flex-col items-end mr-2">
-                  <span className="text-xs font-bold text-white">{user.name}</span>
-                  <span className="text-[10px] flex items-center gap-1 text-indigo-400 font-bold uppercase tracking-wider">
+                  <span className="text-xs font-bold text-slate-900">{user.name}</span>
+                  <span className="text-[10px] flex items-center gap-1 text-indigo-600 font-bold uppercase tracking-wider">
                     <Target className="w-2.5 h-2.5" /> Mục tiêu: {user.targetScore.toFixed(1)}
                   </span>
                 </div>
                 <div className="relative group">
-                  <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 shadow-md border-2 border-slate-800 flex items-center justify-center text-white font-bold cursor-pointer">
+                  <div className="h-9 w-9 rounded-xl bg-indigo-600 shadow-md border-2 border-white flex items-center justify-center text-white font-bold cursor-pointer">
                     {user.name.charAt(0)}
                   </div>
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-slate-900 border border-slate-800 rounded-xl p-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all shadow-xl z-50">
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-xl p-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all shadow-xl z-50">
                     <button 
                       onClick={logout}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
                     >
                       <LogOut className="w-4 h-4" /> Đăng xuất
                     </button>
@@ -88,14 +88,14 @@ export default function Navbar() {
                 </div>
               </div>
             ) : (
-              <div className="h-9 w-9 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400">
+              <Link href="/dashboard" className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all">
                 <User className="w-5 h-5" />
-              </div>
+              </Link>
             )}
 
             {/* Mobile Menu Button */}
             <button 
-              className="md:hidden p-2 text-slate-400 hover:text-white transition-colors"
+              className="md:hidden p-2 text-slate-500 hover:text-indigo-600 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -112,13 +112,13 @@ export default function Navbar() {
               exit={{ opacity: 0, y: -20 }}
               className="absolute top-full left-0 right-0 mt-2 mx-auto max-w-6xl pointer-events-auto"
             >
-              <div className="glass-premium bg-slate-950/90 border-white/10 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 backdrop-blur-2xl">
+              <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 backdrop-blur-2xl">
                 {navLinks.map((link) => (
                   <Link 
                     key={link.href} 
                     href={link.href} 
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="px-6 py-4 rounded-2xl hover:bg-white/5 text-slate-300 hover:text-white font-black uppercase tracking-widest text-[10px] transition-all border border-transparent hover:border-white/5"
+                    className="px-6 py-4 rounded-2xl hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 font-black uppercase tracking-widest text-[10px] transition-all border border-transparent hover:border-indigo-100"
                   >
                     {link.label}
                   </Link>
@@ -129,7 +129,7 @@ export default function Navbar() {
                       logout();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="flex items-center gap-3 px-6 py-4 text-rose-400 font-black uppercase tracking-widest text-[10px] hover:bg-rose-500/10 rounded-2xl transition-all border border-transparent hover:border-rose-500/20"
+                    className="flex items-center gap-3 px-6 py-4 text-rose-500 font-black uppercase tracking-widest text-[10px] hover:bg-rose-50 rounded-2xl transition-all border border-transparent hover:border-rose-100"
                   >
                     <LogOut className="w-4 h-4" /> Đăng xuất
                   </button>

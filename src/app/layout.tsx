@@ -27,11 +27,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-300`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-slate-900 transition-colors duration-300`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
-          forcedTheme="dark"
+          defaultTheme="light"
+          forcedTheme="light"
           disableTransitionOnChange
         >
           <UserProvider>

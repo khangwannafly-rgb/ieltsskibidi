@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --glass-bg: #0f172a;
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --card-bg: #1e293b;
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --card-bg: #ffffff;
   --tooltip-bg: #0f172a;
-  --tooltip-text: #f8fafc;
+  --tooltip-text: #ffffff;
   --accent-indigo: #6366f1;
   --accent-violet: #8b5cf6;
   --accent-emerald: #10b981;
   --accent-rose: #f43f5e;
-  --glow-color: rgba(99, 102, 241, 0.5);
-  --selection-bg: rgba(99, 102, 241, 0.3);
+  --glow-color: rgba(99, 102, 241, 0.2);
+  --selection-bg: rgba(99, 102, 241, 0.1);
 }
 
 @theme inline {
@@ -43,7 +43,7 @@
 
 ::selection {
   background-color: var(--selection-bg);
-  color: #fff;
+  color: var(--accent-indigo);
 }
 
 body {
@@ -51,10 +51,8 @@ body {
   color: var(--foreground);
   min-height: 100vh;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.1) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.05) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(34, 197, 94, 0.05) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.03) 0px, transparent 50%);
   background-attachment: fixed;
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
@@ -63,103 +61,36 @@ body {
 .glass {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
 }
 
 .glass-card {
   background: var(--card-bg);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
-  @apply rounded-[2rem] p-6 transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 hover:border-white/10;
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05);
+  @apply rounded-[2rem] p-6 transition-all duration-500 hover:shadow-2xl hover:shadow-indigo-500/5 hover:-translate-y-1 hover:border-indigo-500/10;
 }
 
 .glass-premium {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.05);
   @apply rounded-[2.5rem] p-10 transition-all duration-500;
 }
 
 .btn-primary {
   @apply px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs 
-         hover:bg-indigo-500 active:scale-95 transition-all duration-300 
+         hover:bg-indigo-700 active:scale-95 transition-all duration-300 
          shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40;
 }
 
 .btn-secondary {
-  @apply px-8 py-4 bg-slate-800/50 text-slate-200 rounded-2xl font-black uppercase tracking-widest text-xs 
-         border border-slate-700/50
-         hover:bg-slate-700 active:scale-95 transition-all duration-300;
+  @apply px-8 py-4 bg-white text-slate-600 rounded-2xl font-black uppercase tracking-widest text-xs 
+         border border-slate-200
+         hover:bg-slate-50 active:scale-95 transition-all duration-300;
 }
 
-                          /* Custom Scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.premium-title {
-  @apply text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] mb-6;
-}
-
-.premium-subtitle {
-  @apply text-xl text-slate-400 font-medium leading-relaxed max-w-xl mx-auto;
-}
-
-.animate-spin-slow {
-  animation: spin-slow 3s linear infinite;
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400;
-}
-
-.premium-title {
-  @apply text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9] drop-shadow-2xl;
-}
-
-.premium-subtitle {
-  @apply text-slate-400 font-medium text-lg md:text-xl leading-relaxed max-w-2xl;
-}
-
-.gradient-border {
-  position: relative;
-  background: var(--card-bg);
-  border-radius: 2rem;
-}
-
-.gradient-border::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: 2rem;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(139, 92, 246, 0.5));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* Custom scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -170,13 +101,45 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 10px;
   transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600;
+}
+
+.premium-title {
+  @apply text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-[0.9];
+}
+
+.premium-subtitle {
+  @apply text-slate-500 font-medium text-lg md:text-xl leading-relaxed max-w-2xl;
+}
+
+.gradient-border {
+  position: relative;
+  background: #ffffff;
+  border-radius: 2rem;
+}
+
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 2rem;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .glass-shine {

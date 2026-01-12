@@ -78,32 +78,32 @@ export default function WritingPage() {
 
   if (loading && !question) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950">
-        <div className="w-full max-w-md p-12 glass-premium border-white/10 text-center space-y-8 relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="w-full max-w-md p-12 bg-white rounded-[2.5rem] border border-slate-100 shadow-2xl text-center space-y-8 relative overflow-hidden">
           <div className="absolute inset-0 bg-indigo-500/5 blur-3xl rounded-full" />
           <div className="relative w-28 h-28 mx-auto">
             <motion.div 
               animate={{ rotate: 360 }}
               transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 border-b-2 border-indigo-500 rounded-full"
+              className="absolute inset-0 border-b-2 border-indigo-600 rounded-full"
             />
             <motion.div 
               animate={{ rotate: -360 }}
               transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-2 border-t-2 border-violet-500/30 rounded-full"
+              className="absolute inset-2 border-t-2 border-indigo-200 rounded-full"
             />
-            <PenTool className="absolute inset-0 m-auto w-12 h-12 text-indigo-400" />
+            <PenTool className="absolute inset-0 m-auto w-12 h-12 text-indigo-600" />
           </div>
           <div className="space-y-4 relative">
-            <h2 className="text-3xl font-black text-white tracking-tight">Đang soạn đề bài...</h2>
-            <p className="text-slate-400 font-medium leading-relaxed">AI đang biên soạn đề bài Writing phù hợp với mục tiêu Band {user?.targetScore || 6.5} của bạn.</p>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Đang soạn đề bài...</h2>
+            <p className="text-slate-500 font-medium leading-relaxed">AI đang biên soạn đề bài Writing phù hợp với mục tiêu Band {user?.targetScore || 6.5} của bạn.</p>
           </div>
-          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden relative">
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden relative">
             <motion.div 
               initial={{ x: "-100%" }}
               animate={{ x: "100%" }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-500 to-transparent w-1/2"
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-600 to-transparent w-1/2"
             />
           </div>
         </div>
@@ -113,20 +113,20 @@ export default function WritingPage() {
 
   if (question?.error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-950">
-        <div className="max-w-md w-full p-12 glass-premium border-rose-500/20 text-center space-y-10">
-          <div className="w-24 h-24 bg-rose-500/10 rounded-[2.5rem] flex items-center justify-center mx-auto text-rose-400 border border-rose-500/20 shadow-2xl shadow-rose-500/10">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
+        <div className="max-w-md w-full p-12 bg-white rounded-[2.5rem] border border-rose-100 text-center space-y-10 shadow-2xl">
+          <div className="w-24 h-24 bg-rose-50 rounded-[2.5rem] flex items-center justify-center mx-auto text-rose-600 border border-rose-100 shadow-2xl shadow-rose-500/5">
             <AlertTriangle className="w-12 h-12" />
           </div>
           <div className="space-y-4">
-            <h2 className="text-4xl font-black text-white tracking-tight">Lỗi hệ thống</h2>
-            <p className="text-slate-400 font-medium leading-relaxed">
+            <h2 className="text-4xl font-black text-slate-900 tracking-tight">Lỗi hệ thống</h2>
+            <p className="text-slate-500 font-medium leading-relaxed">
               {question.error || "Không thể kết nối với AI để tạo đề bài. Vui lòng thử lại sau giây lát."}
             </p>
           </div>
           <button 
             onClick={() => generateTask(taskType)}
-            className="btn-primary w-full py-5 text-lg shadow-rose-500/20"
+            className="btn-primary w-full py-5 text-lg shadow-rose-500/10"
           >
             Thử lại ngay
           </button>
@@ -136,33 +136,33 @@ export default function WritingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 pt-8 pb-24">
+    <div className="min-h-screen bg-white pt-32 pb-24">
       <div className="max-w-[1600px] mx-auto px-6 space-y-12">
         {/* Header Section */}
         {!question && (
-          <div className="flex flex-col lg:flex-row justify-between items-end gap-12 border-b border-white/5 pb-12">
+          <div className="flex flex-col lg:flex-row justify-between items-end gap-12 border-b border-slate-100 pb-12">
             <div className="space-y-6 flex-1">
               <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-indigo-500/10 text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] border border-indigo-500/20"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] border border-indigo-100"
               >
                 <Sparkles className="w-3 h-3" />
                 AI-Powered Learning
               </motion.div>
-              <h1 className="premium-title">
-                Writing <span className="gradient-text">Mastery</span>
+              <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-[0.9]">
+                Writing <span className="text-indigo-600">Mastery</span>
               </h1>
-              <p className="premium-subtitle">
+              <p className="text-slate-600 font-medium text-lg md:text-xl leading-relaxed max-w-2xl">
                 Luyện tập viết luận Task 1 & 2 với phản hồi chi tiết từ AI dựa trên các tiêu chí chấm điểm IELTS chính thức.
               </p>
             </div>
             
-            <div className="flex bg-slate-900/50 p-2 rounded-[2rem] border border-white/5 backdrop-blur-xl shadow-2xl">
+            <div className="flex bg-slate-50 p-2 rounded-[2rem] border border-slate-100 shadow-lg shadow-indigo-500/5">
               <button 
                 onClick={() => setTaskType("task1")}
                 className={`px-10 py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 ${
-                  taskType === 'task1' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 scale-105' : 'text-slate-500 hover:text-slate-300'
+                  taskType === 'task1' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 scale-105' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 Task 1
@@ -170,7 +170,7 @@ export default function WritingPage() {
               <button 
                 onClick={() => setTaskType("task2")}
                 className={`px-10 py-4 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.2em] transition-all duration-300 ${
-                  taskType === 'task2' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 scale-105' : 'text-slate-500 hover:text-slate-300'
+                  taskType === 'task2' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/20 scale-105' : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
                 Task 2
@@ -184,23 +184,23 @@ export default function WritingPage() {
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between bg-slate-900/40 p-4 rounded-3xl border border-white/5 backdrop-blur-md"
+            className="flex items-center justify-between bg-white p-4 rounded-3xl border border-slate-100 shadow-lg shadow-indigo-500/5"
           >
             <button 
               onClick={() => setQuestion(null)}
-              className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-800 transition-all font-black uppercase tracking-widest text-[10px] border border-white/5"
+              className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-slate-50 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all font-black uppercase tracking-widest text-[10px] border border-slate-100"
             >
               <ChevronRight className="w-4 h-4 rotate-180" /> Quay lại danh sách
             </button>
             <div className="flex items-center gap-4 px-6">
               <div className="flex flex-col items-end">
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Đang luyện tập</span>
-                <span className="text-sm font-black text-white uppercase tracking-tighter">Writing {taskType === 'task1' ? 'Task 1' : 'Task 2'}</span>
+                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Đang luyện tập</span>
+                <span className="text-sm font-black text-slate-900 uppercase tracking-tighter">Writing {taskType === 'task1' ? 'Task 1' : 'Task 2'}</span>
               </div>
-              <div className="w-px h-8 bg-white/10" />
+              <div className="w-px h-8 bg-slate-100" />
               <div className="flex items-center gap-2">
-                <Timer className="w-5 h-5 text-indigo-400" />
-                <span className="text-xl font-black text-white tabular-nums tracking-tighter">{taskType === 'task1' ? '20:00' : '40:00'}</span>
+                <Timer className="w-5 h-5 text-indigo-600" />
+                <span className="text-xl font-black text-slate-900 tabular-nums tracking-tighter">{taskType === 'task1' ? '20:00' : '40:00'}</span>
               </div>
             </div>
           </motion.div>
@@ -211,17 +211,17 @@ export default function WritingPage() {
             <motion.button 
               whileHover={{ y: -12, scale: 1.02 }}
               onClick={() => generateTask("task1")}
-              className="glass-card !p-12 text-left group transition-all duration-500 border-white/5 bg-slate-900/40 hover:bg-slate-900/60 relative overflow-hidden"
+              className="bg-white rounded-[2.5rem] p-12 text-left group transition-all duration-500 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/5 hover:border-indigo-500/20 relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-blue-500/10 transition-colors" />
-              <div className="w-20 h-20 bg-blue-500/10 rounded-[2rem] flex items-center justify-center text-blue-400 mb-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-white/5 shadow-inner">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-indigo-500/10 transition-colors" />
+              <div className="w-20 h-20 bg-indigo-50 rounded-[2rem] flex items-center justify-center text-indigo-600 mb-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-indigo-100">
                 <BarChart2 className="w-10 h-10" />
               </div>
-              <h3 className="text-3xl font-black text-white mb-4 group-hover:gradient-text transition-all tracking-tight">Academic Task 1</h3>
-              <p className="text-slate-400 font-medium leading-relaxed mb-10 text-lg">
+              <h3 className="text-3xl font-black text-slate-900 mb-4 group-hover:text-indigo-600 transition-all tracking-tight">Academic Task 1</h3>
+              <p className="text-slate-500 font-medium leading-relaxed mb-10 text-lg">
                 Mô tả và giải thích dữ liệu từ biểu đồ đường, cột, tròn hoặc quy trình sản xuất. Rèn luyện kỹ năng phân tích số liệu chính xác.
               </p>
-              <div className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.3em] text-blue-400 group-hover:translate-x-2 transition-transform">
+              <div className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.3em] text-indigo-600 group-hover:translate-x-2 transition-transform">
                 Bắt đầu ngay <ChevronRight className="w-5 h-5" />
               </div>
             </motion.button>
@@ -229,17 +229,17 @@ export default function WritingPage() {
             <motion.button 
               whileHover={{ y: -12, scale: 1.02 }}
               onClick={() => generateTask("task2")}
-              className="glass-card !p-12 text-left group transition-all duration-500 border-white/5 bg-slate-900/40 hover:bg-slate-900/60 relative overflow-hidden"
+              className="bg-white rounded-[2.5rem] p-12 text-left group transition-all duration-500 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/5 hover:border-indigo-500/20 relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-indigo-500/10 transition-colors" />
-              <div className="w-20 h-20 bg-indigo-500/10 rounded-[2rem] flex items-center justify-center text-indigo-400 mb-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-white/5 shadow-inner">
+              <div className="w-20 h-20 bg-indigo-50 rounded-[2rem] flex items-center justify-center text-indigo-600 mb-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-indigo-100">
                 <PenTool className="w-10 h-10" />
               </div>
-              <h3 className="text-3xl font-black text-white mb-4 group-hover:gradient-text transition-all tracking-tight">Academic Task 2</h3>
-              <p className="text-slate-400 font-medium leading-relaxed mb-10 text-lg">
+              <h3 className="text-3xl font-black text-slate-900 mb-4 group-hover:text-indigo-600 transition-all tracking-tight">Academic Task 2</h3>
+              <p className="text-slate-500 font-medium leading-relaxed mb-10 text-lg">
                 Viết bài luận nghị luận về các chủ đề xã hội, giáo dục hoặc môi trường. Tập trung vào tư duy phản biện và cấu trúc bài viết.
               </p>
-              <div className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.3em] text-indigo-400 group-hover:translate-x-2 transition-transform">
+              <div className="flex items-center gap-3 text-xs font-black uppercase tracking-[0.3em] text-indigo-600 group-hover:translate-x-2 transition-transform">
                 Bắt đầu ngay <ChevronRight className="w-5 h-5" />
               </div>
             </motion.button>
@@ -251,49 +251,49 @@ export default function WritingPage() {
               <motion.div 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="glass-card !p-10 space-y-8 relative overflow-hidden border-white/5 bg-slate-900/40"
+                className="bg-white rounded-[2.5rem] p-10 space-y-8 relative overflow-hidden border border-slate-100 shadow-sm"
               >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-32 -mt-32" />
                 
                 <div className="flex justify-between items-start relative">
                   <div className="space-y-2">
-                    <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em]">Practice Content</span>
-                    <h2 className="text-3xl font-black text-white tracking-tight">Đề bài chi tiết</h2>
+                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Practice Content</span>
+                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">Đề bài chi tiết</h2>
                   </div>
-                  <div className="px-5 py-2.5 bg-indigo-500/10 text-indigo-400 text-[10px] font-black rounded-2xl border border-indigo-500/20 uppercase tracking-[0.2em] shadow-2xl">
+                  <div className="px-5 py-2.5 bg-indigo-50 text-indigo-600 text-[10px] font-black rounded-2xl border border-indigo-100 uppercase tracking-[0.2em]">
                     Mục tiêu Band {question.difficulty_estimate_band}
                   </div>
                 </div>
 
-                <div className="p-8 bg-slate-950/50 rounded-[2rem] border border-white/5 shadow-inner relative group">
-                  <p className="text-white font-bold text-xl leading-relaxed italic">
+                <div className="p-8 bg-slate-50 rounded-[2rem] border border-slate-100 relative group">
+                  <p className="text-slate-900 font-bold text-xl leading-relaxed italic">
                     "{question.question}"
                   </p>
                 </div>
 
                 {taskType === 'task1' && question.chart_data && (
-                  <div className="glass-card !p-8 bg-slate-950/30 border-white/5 min-h-[450px]">
+                  <div className="bg-white rounded-[2rem] p-8 border border-slate-100 min-h-[450px]">
                     <WritingTask1Chart data={question.chart_data} />
                   </div>
                 )}
 
-                <div className="flex flex-wrap gap-8 pt-8 border-t border-white/5">
+                <div className="flex flex-wrap gap-8 pt-8 border-t border-slate-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center border border-white/5">
-                      <Clock className="w-5 h-5 text-indigo-400" />
+                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100">
+                      <Clock className="w-5 h-5 text-indigo-600" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Thời gian</span>
-                      <span className="text-sm font-black text-white uppercase tracking-tight">{taskType === 'task1' ? '20' : '40'} Phút</span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Thời gian</span>
+                      <span className="text-sm font-black text-slate-900 uppercase tracking-tight">{taskType === 'task1' ? '20' : '40'} Phút</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center border border-white/5">
-                      <BookOpen className="w-5 h-5 text-indigo-400" />
+                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100">
+                      <BookOpen className="w-5 h-5 text-indigo-600" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Yêu cầu</span>
-                      <span className="text-sm font-black text-white uppercase tracking-tight">Tối thiểu {question.min_words} từ</span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Yêu cầu</span>
+                      <span className="text-sm font-black text-slate-900 uppercase tracking-tight">Tối thiểu {question.min_words} từ</span>
                     </div>
                   </div>
                 </div>
@@ -305,25 +305,25 @@ export default function WritingPage() {
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-card !p-0 overflow-hidden shadow-2xl border-white/5 bg-slate-900/40 backdrop-blur-2xl"
+                className="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100"
               >
-                <div className="bg-slate-900/60 px-8 py-6 flex justify-between items-center border-b border-white/5">
+                <div className="bg-slate-50 px-8 py-6 flex justify-between items-center border-b border-slate-100">
                   <div className="flex items-center gap-4">
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_20px_rgba(16,185,129,0.6)]" />
-                    <span className="text-white text-[10px] font-black uppercase tracking-[0.3em]">Editor Mode</span>
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-slate-900 text-[10px] font-black uppercase tracking-[0.3em]">Editor Mode</span>
                   </div>
-                  <div className={`text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl border transition-colors duration-500 ${wordCount < (question.min_words || 150) ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+                  <div className={`text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-xl border transition-colors duration-500 ${wordCount < (question.min_words || 150) ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                     {wordCount} Words
                   </div>
                 </div>
                 <textarea 
-                  className="w-full h-[600px] p-10 outline-none bg-transparent text-slate-200 font-medium text-lg leading-relaxed resize-none transition-colors placeholder:text-slate-600 selection:bg-indigo-500/30"
+                  className="w-full h-[600px] p-10 outline-none bg-transparent text-slate-900 font-medium text-lg leading-relaxed resize-none transition-colors placeholder:text-slate-300 selection:bg-indigo-100"
                   placeholder="Bắt đầu viết bài luận của bạn tại đây..."
                   value={essay}
                   onChange={(e) => setEssay(e.target.value)}
                   disabled={loading || !!result}
                 />
-                <div className="p-8 bg-slate-950/40 border-t border-white/5 flex justify-end gap-6">
+                <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end gap-6">
                   {!result ? (
                     <button 
                       onClick={submitEssay}
@@ -352,13 +352,13 @@ export default function WritingPage() {
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="glass-card !p-8 space-y-6 border-white/5 bg-slate-900/40"
+                className="bg-white rounded-[2.5rem] p-8 space-y-6 border border-slate-100 shadow-sm"
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 bg-indigo-500/10 rounded-lg flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                  <div className="w-8 h-8 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600 border border-indigo-100">
                     <Trophy className="w-4 h-4" />
                   </div>
-                  <h3 className="text-sm font-black text-white uppercase tracking-wider">Cấu trúc chuẩn</h3>
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">Cấu trúc chuẩn</h3>
                 </div>
 
                 {question.structure_tips && (
