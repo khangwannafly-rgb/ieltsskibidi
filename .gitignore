@@ -41,3 +41,15 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# unrelated or large files
+/ielts_pdfs
+/chess_assistant
+*.CPP
+*.INP
+*.OUT
+*.PY
+*.db
+*.csv
+*.png
+*.html

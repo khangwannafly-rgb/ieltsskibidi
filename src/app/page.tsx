@@ -1,485 +1,391 @@
-"use client";
+'use client';
 
-import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend
-} from 'recharts';
-import { BookOpen, Headphones, PenTool, Mic, ArrowRight, Zap, Target, TrendingUp, Star } from "lucide-react";
-import Link from "next/link";
-import { useUser } from "@/context/UserContext";
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import React, { useEffect } from 'react';
+import Link from 'next/link';
+import './landing.css';
 
-const mockDescriptorData = [
-  { subject: 'TR / FC', A: 7.5, fullMark: 9 },
-  { subject: 'CC', A: 6.5, fullMark: 9 },
-  { subject: 'LR', A: 8.0, fullMark: 9 },
-  { subject: 'GRA', A: 6.0, fullMark: 9 },
-  { subject: 'PR', A: 7.0, fullMark: 9 },
-];
-
-const mockProgressData = [
-  { name: 'Tuần 1', band: 6.0 },
-  { name: 'Tuần 2', band: 6.5 },
-  { name: 'Tuần 3', band: 6.5 },
-  { name: 'Tuần 4', band: 7.0 },
-  { name: 'Tuần 5', band: 7.2 },
-];
-
-const skills = [
-  { 
-    name: 'Kỹ năng Đọc', 
-    icon: BookOpen, 
-    color: 'text-indigo-400', 
-    bgColor: 'bg-indigo-500/10',
-    borderColor: 'group-hover:border-indigo-500/30',
-    href: '/reading',
-    desc: 'Luyện tập với các đoạn văn học thuật và các dạng câu hỏi thực tế.'
-  },
-  { 
-    name: 'Kỹ năng Nghe', 
-    icon: Headphones, 
-    color: 'text-emerald-400', 
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'group-hover:border-emerald-500/30',
-    href: '/listening',
-    desc: 'Cải thiện kỹ năng nghe với nhiều giọng đọc và tốc độ khác nhau.'
-  },
-  { 
-    name: 'Kỹ năng Viết', 
-    icon: PenTool, 
-    color: 'text-rose-400', 
-    bgColor: 'bg-rose-500/10',
-    borderColor: 'group-hover:border-rose-500/30',
-    href: '/writing',
-    desc: 'Hoàn thiện cấu trúc bài viết Task 1 & 2 với sự hỗ trợ từ AI.'
-  },
-  { 
-    name: 'Kỹ năng Nói', 
-    icon: Mic, 
-    color: 'text-amber-400', 
-    bgColor: 'bg-amber-500/10',
-    borderColor: 'group-hover:border-amber-500/30',
-    href: '/speaking',
-    desc: 'Mô phỏng phỏng vấn và cải thiện độ trôi chảy khi nói.'
-  },
-];
-
-export default function Dashboard() {
-  const { user } = useUser();
-  const [isMounted, setIsMounted] = useState(false);
-
+export default function LandingPage() {
   useEffect(() => {
-    setIsMounted(true);
-  }, []);
-  
-  // Calculate real progress from submissions
-  const submissions = user?.submissions || [];
-  
-  // Current Band: average of last 5 submissions (or all if < 5)
-  const lastSubmissions = submissions.slice(0, 5).reverse();
-  const currentBand = submissions.length > 0 
-    ? submissions.reduce((acc, sub) => acc + sub.band, 0) / submissions.length
-    : 0;
-  
-  const targetBand = user?.targetScore || 6.5;
-  const progressPercent = targetBand > 0 ? Math.min(100, Math.max(0, (currentBand / targetBand) * 100)) : 0;
+    // Animate progress bars on scroll
+    const observerOptions = {
+      threshold: 0.3,
+      rootMargin: '0px'
+    };
 
-  // Real Progress Data for Line Chart
-  const progressData = lastSubmissions.length > 0
-    ? lastSubmissions.map((sub, idx) => ({
-        name: `Bài ${idx + 1}`,
-        band: sub.band,
-        skill: sub.skill.charAt(0).toUpperCase() + sub.skill.slice(1)
-      }))
-    : mockProgressData;
+    const animateProgress = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const progressBars = entry.target.querySelectorAll('[data-progress]');
+          progressBars.forEach(bar => {
+            const progress = (bar as HTMLElement).getAttribute('data-progress');
+            (bar as HTMLElement).style.width = '0%';
+            setTimeout(() => {
+              (bar as HTMLElement).style.width = progress + '%';
+            }, 200);
+          });
+          observer.unobserve(entry.target);
+        }
+      });
+    };
 
-  // Real Descriptor Data for Radar Chart (using latest Writing/Speaking if available)
-  const latestDetailedSub = submissions.find(sub => sub.skill === 'writing' || sub.skill === 'speaking');
-  const descriptorData = latestDetailedSub ? [
-    { 
-      subject: 'TR / FC', 
-      A: latestDetailedSub.skill === 'writing' 
-        ? latestDetailedSub.details.criteria_scores.task_achievement 
-        : latestDetailedSub.details.criteria.fluency_and_coherence.score, 
-      fullMark: 9 
-    },
-    { 
-      subject: 'CC / LR', 
-      A: latestDetailedSub.skill === 'writing' 
-        ? latestDetailedSub.details.criteria_scores.coherence_and_cohesion 
-        : latestDetailedSub.details.criteria.lexical_resource.score, 
-      fullMark: 9 
-    },
-    { 
-      subject: 'LR / GRA', 
-      A: latestDetailedSub.skill === 'writing' 
-        ? latestDetailedSub.details.criteria_scores.lexical_resource 
-        : latestDetailedSub.details.criteria.grammatical_range_and_accuracy.score, 
-      fullMark: 9 
-    },
-    { 
-      subject: 'GRA / PR', 
-      A: latestDetailedSub.skill === 'writing' 
-        ? latestDetailedSub.details.criteria_scores.grammatical_range_and_accuracy 
-        : latestDetailedSub.details.criteria.pronunciation.score, 
-      fullMark: 9 
-    },
-    { 
-      subject: 'Overall', 
-      A: latestDetailedSub.band, 
-      fullMark: 9 
-    },
-  ] : mockDescriptorData;
+    const observer = new IntersectionObserver(animateProgress, observerOptions);
 
-  const getStrengthsText = () => {
-    if (submissions.length === 0) return "Hãy làm bài kiểm tra đầu tiên để AI phân tích kỹ năng của bạn.";
-    
-    // Simple logic to find best skill
-    const skillAverages = ['reading', 'listening', 'writing', 'speaking'].map(s => {
-      const skillSubs = submissions.filter(sub => sub.skill === s);
-      return {
-        skill: s,
-        avg: skillSubs.length > 0 ? skillSubs.reduce((a, b) => a + b.band, 0) / skillSubs.length : 0
-      };
+    // Observe sections
+    document.querySelectorAll('.landing-skills-section, .landing-dashboard-section').forEach(section => {
+      observer.observe(section);
     });
-    
-    const bestSkill = skillAverages.reduce((a, b) => a.avg > b.avg ? a : b);
-    if (bestSkill.avg === 0) return "Đang phân tích điểm mạnh của bạn...";
-    
-    const skillNames: any = { reading: 'Đọc', listening: 'Nghe', writing: 'Viết', speaking: 'Nói' };
-    return `Kỹ năng ${skillNames[bestSkill.skill]} hiện là điểm mạnh nhất của bạn.`;
-  };
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="relative max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-4 pb-24 overflow-hidden">
-      {/* Welcome Header */}
-      {user && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-12"
-        >
-          <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-500/20">
-            {user.name.charAt(0)}
-          </div>
-          <div>
-            <h2 className="text-2xl font-black text-white tracking-tight">Chào mừng trở lại, {user.name}! 👋</h2>
-            <p className="text-slate-500 text-sm font-medium">Hôm nay bạn muốn luyện tập kỹ năng nào?</p>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Background Decorative Elements */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-[128px] -z-10 animate-float" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-fuchsia-600/10 rounded-full blur-[128px] -z-10 animate-float" style={{ animationDelay: '-3s' }} />
-      
-      {/* Stats Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-4"
-      >
-        {[
-          { label: 'Bài tập hoàn thành', value: submissions.length, icon: Target, color: 'text-indigo-400' },
-          { label: 'Band trung bình', value: currentBand.toFixed(1), icon: TrendingUp, color: 'text-emerald-400' },
-          { label: 'Mục tiêu', value: targetBand.toFixed(1), icon: Star, color: 'text-amber-400' },
-          { label: 'Điểm mạnh nhất', value: getStrengthsText().split(' ')[1] || '---', icon: Zap, color: 'text-rose-400' },
-        ].map((stat, i) => (
-          <div key={i} className="glass-premium flex flex-col items-center justify-center p-6 text-center space-y-2 border-white/5 bg-slate-900/40">
-            <stat.icon className={`w-6 h-6 ${stat.color} mb-2`} />
-            <div className="text-3xl font-black text-white">{stat.value}</div>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{stat.label}</div>
-          </div>
-        ))}
-      </motion.div>
+    <div className="landing-body">
+      {/* Navigation */}
+      <nav className="landing-nav">
+        <div className="landing-logo">🚀 IELTS Skibidi</div>
+        <ul className="landing-nav-links">
+          <li><a href="#skills">Skills</a></li>
+          <li><a href="#practice">Practice</a></li>
+          <li><Link href="/dashboard">Dashboard</Link></li>
+          <li><a href="#resources">Resources</a></li>
+        </ul>
+        <div className="landing-nav-buttons">
+          <Link href="/dashboard" className="landing-btn-ghost">Log In</Link>
+          <Link href="/dashboard" className="landing-btn-primary">Start Free 🎉</Link>
+        </div>
+      </nav>
 
       {/* Hero Section */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-16 relative">
-        <div className="flex-1 space-y-8 text-center lg:text-left">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-[0.3em] mb-4"
-          >
-            <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            AI Learning Dashboard v2.0
-          </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="premium-title"
-          >
-            Chinh phục <br />
-            <span className="gradient-text">IELTS</span> cùng IELTS SKIBIDI
-          </motion.h1>
-
-          <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="premium-subtitle"
-          >
-            Nền tảng luyện thi IELTS ứng dụng trí tuệ nhân tạo thế hệ mới. <br />
-            Mục tiêu của bạn là Band <span className="text-indigo-400 font-black tracking-wider underline decoration-indigo-500/30 underline-offset-8">{targetBand.toFixed(1)}</span>. 
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-wrap gap-4 justify-center lg:justify-start pt-4"
-          >
-            <Link href="/writing" className="btn-primary flex items-center gap-3 group">
-              Bắt đầu luyện tập
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <button className="btn-secondary group relative overflow-hidden">
-              <span className="relative z-10">Xem lộ trình học</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-transparent translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
-            </button>
-          </motion.div>
+      <section className="landing-hero">
+        <div className="landing-hero-content">
+          <div className="landing-hero-badge">✨ 50,000+ Students Crushing It</div>
+          <h1>Master IELTS. <span className="landing-highlight">No Cap.</span> 🎯</h1>
+          <p>Học IELTS cực cuốn, Band Score cực Skibidi! No cap! Master English with fun practice tests, AI feedback, and gamified learning. Track progress, earn badges, and flex on your dream score.</p>
+          <div className="landing-hero-buttons">
+            <Link href="/dashboard" className="landing-btn-primary landing-btn-white">Start Free Practice 🚀</Link>
+            <a href="#practice" className="landing-btn-secondary">Take Mock Test</a>
+          </div>
+          <div className="landing-hero-stats">
+            <div className="landing-stat">
+              <div className="landing-stat-number">50K+</div>
+              <div className="landing-stat-label">Active Learners</div>
+            </div>
+            <div className="landing-stat">
+              <div className="landing-stat-number">7.8</div>
+              <div className="landing-stat-label">Avg Band Score</div>
+            </div>
+            <div className="landing-stat">
+              <div className="landing-stat-number">96%</div>
+              <div className="landing-stat-label">Success Rate</div>
+            </div>
+          </div>
         </div>
+        <div className="landing-hero-image">
+          <div className="landing-hero-illustration">📚</div>
+        </div>
+      </section>
 
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", damping: 20 }}
-          className="relative group w-full lg:w-auto"
-        >
-          <div className="absolute inset-0 bg-indigo-500/20 blur-[120px] rounded-full group-hover:bg-indigo-500/30 transition-all duration-700" />
-          <div className="relative glass-premium border-white/10 text-center space-y-8 min-w-[340px] shadow-2xl animate-float">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2.5rem] bg-indigo-600 shadow-2xl shadow-indigo-500/40 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-              <Target className="w-12 h-12 text-white" />
+      {/* Skills Section */}
+      <section className="landing-skills-section" id="skills">
+        <div className="landing-section-header">
+          <div className="landing-section-badge">🎯 All Four Skills</div>
+          <h2>Master Every Section</h2>
+          <p>Interactive practice for Listening, Reading, Writing, and Speaking with instant AI-powered feedback that actually slaps. No more boring study sessions!</p>
+        </div>
+        <div className="landing-skills-grid">
+          <div className="landing-skill-card">
+            <div className="landing-skill-badge-top">📈 25% Complete</div>
+            <div className="landing-skill-icon">👂</div>
+            <h3>Listening</h3>
+            <p>Train your ears with real exam audios. Practice conversations, monologues, and academic lectures like a pro.</p>
+            <div className="landing-skill-progress">
+              <div className="landing-skill-progress-fill" style={{ width: '25%' }} data-progress="25"></div>
             </div>
-            <div className="space-y-2">
-              <span className="text-xs font-black text-indigo-400 uppercase tracking-[0.3em]">Trình độ hiện tại</span>
-              <div className="text-8xl font-black text-white tracking-tighter tabular-nums drop-shadow-2xl">
-                {currentBand.toFixed(1)}
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="w-full h-3 bg-slate-800/50 rounded-full overflow-hidden p-0.5 border border-white/5">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressPercent}%` }}
-                  transition={{ duration: 1.5, ease: "easeOut" }}
-                  className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 rounded-full"
-                />
-              </div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex justify-between">
-                <span>Khởi đầu</span>
-                <span>{progressPercent.toFixed(0)}% Mục tiêu</span>
-                <span>Band {targetBand.toFixed(1)}</span>
-              </p>
-            </div>
+            <Link href="/listening" className="landing-skill-link">Start Practice →</Link>
           </div>
-        </motion.div>
-      </div>
+          <div className="landing-skill-card">
+            <div className="landing-skill-badge-top">📈 60% Complete</div>
+            <div className="landing-skill-icon">📖</div>
+            <h3>Reading</h3>
+            <p>Master academic texts with timed exercises, vocabulary tips, and smart strategies that work.</p>
+            <div className="landing-skill-progress">
+              <div className="landing-skill-progress-fill" style={{ width: '60%' }} data-progress="60"></div>
+            </div>
+            <Link href="/reading" className="landing-skill-link">Start Practice →</Link>
+          </div>
+          <div className="landing-skill-card">
+            <div className="landing-skill-badge-top">📈 40% Complete</div>
+            <div className="landing-skill-icon">✍️</div>
+            <h3>Writing</h3>
+            <p>Get AI feedback on Task 1 & 2. Improve grammar, vocabulary, coherence, and task achievement instantly.</p>
+            <div className="landing-skill-progress">
+              <div className="landing-skill-progress-fill" style={{ width: '40%' }} data-progress="40"></div>
+            </div>
+            <Link href="/writing" className="landing-skill-link">Start Practice →</Link>
+          </div>
+          <div className="landing-skill-card">
+            <div className="landing-skill-badge-top">📈 15% Complete</div>
+            <div className="landing-skill-icon">🗣️</div>
+            <h3>Speaking</h3>
+            <p>Record your answers and get pronunciation, fluency, and grammar feedback that's actually helpful.</p>
+            <div className="landing-skill-progress">
+              <div className="landing-skill-progress-fill" style={{ width: '15%' }} data-progress="15"></div>
+            </div>
+            <Link href="/speaking" className="landing-skill-link">Start Practice →</Link>
+          </div>
+        </div>
+      </section>
 
-      {/* Skills Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
-        {skills.map((skill, index) => (
-          <motion.div
-            key={skill.name}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * index }}
-          >
-            <Link 
-              href={skill.href} 
-              className={`group glass-premium h-full flex flex-col items-start gap-6 border-transparent ${skill.borderColor} glass-shine bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500`}
-            >
-              <div className={`p-4 rounded-2xl ${skill.bgColor} ${skill.color} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                <skill.icon className="w-8 h-8" />
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">
-                  {skill.name}
-                </h3>
-                <p className="text-slate-400 text-sm leading-relaxed line-clamp-3">
-                  {skill.desc}
-                </p>
-              </div>
-              <div className={`mt-auto pt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${skill.color} opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0`}>
-                Luyện tập ngay <ArrowRight className="w-3 h-3" />
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Radar Chart */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="lg:col-span-1 glass-premium space-y-10 !p-10 border-white/5 bg-slate-900/40"
-        >
-          <div className="space-y-2">
-            <h2 className="text-2xl font-black text-white tracking-tight">Cơ cấu Kỹ năng</h2>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Phân tích chi tiết theo tiêu chí</p>
-          </div>
-          <div className="h-[320px] -mx-4 min-h-[320px]">
-            {isMounted && (
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={descriptorData}>
-                  <PolarGrid stroke="#334155" strokeDasharray="3 3" opacity={0.5} />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 900 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 9]} tick={false} axisLine={false} />
-                  <Radar 
-                    name="Thí sinh" 
-                    dataKey="A" 
-                    stroke="#6366f1" 
-                    strokeWidth={3}
-                    fill="#6366f1" 
-                    fillOpacity={0.2} 
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-          <div className="pt-8 border-t border-white/5 flex items-start gap-4 text-slate-400 text-sm font-medium leading-relaxed bg-indigo-500/5 -mx-10 -mb-10 p-10 rounded-b-[2rem]">
-            <div className="mt-1 p-2 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
+      {/* Practice Test Section */}
+      <section className="landing-practice-section" id="practice">
+        <div className="landing-practice-content">
+          <h2>Full Practice Tests</h2>
+          <p>Experience the real deal with authentic IELTS practice tests. Timed, scored, and reviewed instantly. Get that bag! 💰</p>
+          <Link href="/dashboard" className="landing-btn-primary landing-btn-white">Start Full Test Now 🎯</Link>
+          
+          <div className="landing-practice-features">
+            <div className="landing-feature-item">
+              <div className="landing-feature-icon">⏱️</div>
+              <h4>Real Timing</h4>
+              <p>Practice under actual exam conditions with precise timing</p>
             </div>
-            {getStrengthsText()}
-          </div>
-        </motion.div>
-
-        {/* Line Chart */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="lg:col-span-2 glass-premium space-y-10 !p-10 border-white/5 bg-slate-900/40"
-        >
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-white tracking-tight">Tiến độ Phát triển</h2>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Lịch sử rèn luyện gần nhất</p>
+            <div className="landing-feature-item">
+              <div className="landing-feature-icon">🤖</div>
+              <h4>AI Scoring</h4>
+              <p>Get instant band scores with detailed breakdowns</p>
             </div>
-            {submissions.length > 1 && (
-              <div className="px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                <TrendingUp className="w-3 h-3" />
-                +{ (submissions[0].band - submissions[submissions.length-1].band).toFixed(1) } Band
-              </div>
-            )}
+            <div className="landing-feature-item">
+              <div className="landing-feature-icon">📊</div>
+              <h4>Analytics</h4>
+              <p>Track your progress with insightful performance metrics</p>
+            </div>
           </div>
-          <div className="h-[320px] -mx-4 min-h-[320px]">
-            {isMounted && (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={progressData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} opacity={0.3} />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
-                    dy={15}
-                  />
-                  <YAxis 
-                    domain={[0, 9]} 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#64748b', fontSize: 12, fontWeight: 700 }}
-                    dx={-10}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#0f172a', 
-                      borderRadius: '1.25rem', 
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
-                      padding: '1rem'
-                    }}
-                    itemStyle={{ color: '#fff', fontWeight: 900 }}
-                    labelStyle={{ color: '#64748b', marginBottom: '0.5rem', fontWeight: 900, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="band" 
-                    stroke="#6366f1" 
-                    strokeWidth={5} 
-                    dot={{ r: 6, fill: '#6366f1', strokeWidth: 3, stroke: '#1e293b' }}
-                    activeDot={{ r: 8, fill: '#fff', strokeWidth: 4, stroke: '#6366f1' }}
-                    animationDuration={2000}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </motion.div>
-      </div>
+        </div>
+      </section>
 
-      {/* Recent Submissions Table */}
-      {submissions.length > 0 && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="glass-premium !p-10 space-y-10 border-white/5 bg-slate-900/40"
-        >
-          <div className="space-y-2">
-            <h2 className="text-2xl font-black text-white tracking-tight">Hoạt động Gần đây</h2>
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">5 bài nộp mới nhất của bạn</p>
+      {/* Dashboard Preview */}
+      <section className="landing-dashboard-section" id="dashboard">
+        <div className="landing-section-header">
+          <div className="landing-section-badge">📊 Your Progress</div>
+          <h2>Track Your Glow Up</h2>
+          <p>Visualize your improvement with detailed analytics and personalized insights that hit different</p>
+        </div>
+        <div className="landing-dashboard-grid">
+          <div className="landing-dashboard-card">
+            <h3>Current Band Score</h3>
+            <div className="landing-big-number">7.5</div>
+            <div className="landing-subtitle">+0.5 from last week 🎉</div>
+            <div className="landing-progress-bar-container">
+              <div className="landing-progress-bar-fill-dash" style={{ width: '75%' }} data-progress="75"></div>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-white/5">
-                  <th className="pb-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Kỹ năng</th>
-                  <th className="pb-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Điểm số</th>
-                  <th className="pb-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Ngày hoàn thành</th>
-                  <th className="pb-6"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {submissions.slice(0, 5).map((sub) => (
-                  <tr key={sub.id} className="group hover:bg-white/5 transition-colors">
-                    <td className="py-6 pr-4">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-white/5 shadow-inner ${
-                          sub.skill === 'reading' ? 'bg-indigo-500/10 text-indigo-400' :
-                          sub.skill === 'listening' ? 'bg-emerald-500/10 text-emerald-400' :
-                          sub.skill === 'writing' ? 'bg-rose-500/10 text-rose-400' :
-                          'bg-amber-500/10 text-amber-400'
-                        }`}>
-                          {sub.skill === 'reading' && <BookOpen className="w-5 h-5" />}
-                          {sub.skill === 'listening' && <Headphones className="w-5 h-5" />}
-                          {sub.skill === 'writing' && <PenTool className="w-5 h-5" />}
-                          {sub.skill === 'speaking' && <Mic className="w-5 h-5" />}
-                        </div>
-                        <span className="font-black text-slate-200 capitalize tracking-tight">{sub.skill}</span>
-                      </div>
-                    </td>
-                    <td className="py-6">
-                      <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-slate-800/50 border border-white/5 text-white font-black text-sm tabular-nums">
-                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                        {sub.band.toFixed(1)}
-                      </span>
-                    </td>
-                    <td className="py-6 text-sm font-bold text-slate-500">
-                      {new Date(sub.date).toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' })}
-                    </td>
-                    <td className="py-6 text-right">
-                      <Link 
-                        href={`/${sub.skill}`}
-                        className="px-6 py-2 rounded-xl bg-indigo-600/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 hover:bg-indigo-600 hover:text-white transition-all duration-300"
-                      >
-                        Luyện tập lại
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="landing-dashboard-card landing-streak-card">
+            <h3>Study Streak</h3>
+            <div className="landing-big-number">14 🔥</div>
+            <div className="landing-subtitle">Keep it up! You're on fire!</div>
+            <div className="landing-progress-bar-container">
+              <div className="landing-progress-bar-fill-dash" style={{ width: '93%' }} data-progress="93"></div>
+            </div>
           </div>
-        </motion.div>
-      )}
+          <div className="landing-dashboard-card landing-success-card">
+            <h3>Tests Completed</h3>
+            <div className="landing-big-number">12</div>
+            <div className="landing-subtitle">3 more than last month 💪</div>
+            <div className="landing-progress-bar-container">
+              <div className="landing-progress-bar-fill-dash" style={{ width: '60%' }} data-progress="60"></div>
+            </div>
+          </div>
+          <div className="landing-dashboard-card landing-warning-card">
+            <h3>Weakest Skill</h3>
+            <div className="landing-big-number" style={{ fontSize: '40px' }}>Speaking 🗣️</div>
+            <div className="landing-subtitle">Cần "rizz" thêm chút nữa!</div>
+            <Link href="/speaking" style={{ color: 'white', textDecoration: 'none', fontWeight: 800, marginTop: '20px', display: 'inline-block', fontSize: '15px' }}>Practice Now →</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Gamification Badges */}
+      <section className="landing-gamification-section">
+        <div className="landing-section-header">
+          <div className="landing-section-badge">🎮 Earn Rewards</div>
+          <h2>Collect Epic Badges</h2>
+          <p>Turn study time into game time. Earn badges, build streaks, and flex on your friends 💯</p>
+        </div>
+        <div className="landing-badges-container">
+          <div className="landing-badge-item">
+            <span className="landing-badge-icon-large">🔥</span>
+            <div className="landing-badge-label">Fire Streak</div>
+            <div className="landing-badge-description">Study 7 days straight</div>
+          </div>
+          <div className="landing-badge-item">
+            <span className="landing-badge-icon-large">⭐</span>
+            <div className="landing-badge-label">First Victory</div>
+            <div className="landing-badge-description">Complete first test</div>
+          </div>
+          <div className="landing-badge-item">
+            <span className="landing-badge-icon-large">🏆</span>
+            <div className="landing-badge-label">Band 7+ Club</div>
+            <div className="landing-badge-description">Score Band 7 or higher</div>
+          </div>
+          <div className="landing-badge-item">
+            <span className="landing-badge-icon-large">💯</span>
+            <div className="landing-badge-label">Perfect Score</div>
+            <div className="landing-badge-description">Ace a practice section</div>
+          </div>
+          <div className="landing-badge-item">
+            <span className="landing-badge-icon-large">🎯</span>
+            <div className="landing-badge-label">Sharpshooter</div>
+            <div className="landing-badge-description">90%+ accuracy rate</div>
+          </div>
+          <div className="landing-badge-item">
+            <span className="landing-badge-icon-large">⚡</span>
+            <div className="landing-badge-label">Speed Demon</div>
+            <div className="landing-badge-description">Finish test early</div>
+          </div>
+          <div className="landing-badge-item">
+            <span className="landing-badge-icon-large">🌟</span>
+            <div className="landing-badge-label">Rising Star</div>
+            <div className="landing-badge-description">Improve 1+ band score</div>
+          </div>
+          <div className="landing-badge-item">
+            <span className="landing-badge-icon-large">👑</span>
+            <div className="landing-badge-label">IELTS King</div>
+            <div className="landing-badge-description">Band 8.5+ overall</div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="landing-testimonials">
+        <div className="landing-section-header">
+          <div className="landing-section-badge">💬 Success Stories</div>
+          <h2>Students Are Winning</h2>
+          <p>See how IELTS Skibidi helped thousands achieve their dream scores fr fr</p>
+        </div>
+        <div className="landing-testimonial-grid">
+          <div className="landing-testimonial-card">
+            <div className="landing-quote-icon">"</div>
+            <div className="landing-testimonial-header">
+              <div className="landing-avatar">AK</div>
+              <div className="landing-testimonial-info">
+                <h4>Anh Khoa Nguyen</h4>
+                <div className="landing-band-score">⭐ Band 8.0</div>
+              </div>
+            </div>
+            <p className="landing-testimonial-text">"Yo this app is fire! The gamification kept me locked in every single day. Went from 6.5 to 8.0 in just 2 months. No cap, best decision ever! 🚀"</p>
+          </div>
+          <div className="landing-testimonial-card">
+            <div className="landing-quote-icon">"</div>
+            <div className="landing-testimonial-header">
+              <div className="landing-avatar">ML</div>
+              <div className="landing-testimonial-info">
+                <h4>Mai Linh Tran</h4>
+                <div className="landing-band-score">⭐ Band 7.5</div>
+              </div>
+            </div>
+            <p className="landing-testimonial-text">"The AI feedback is insane! It's like having a personal tutor 24/7. My writing went from 6.0 to 7.5 in 8 weeks. Worth every penny! 💯"</p>
+          </div>
+          <div className="landing-testimonial-card">
+            <div className="landing-quote-icon">"</div>
+            <div className="landing-testimonial-header">
+              <div className="landing-avatar">TN</div>
+              <div className="landing-testimonial-info">
+                <h4>Thanh Nguyen</h4>
+                <div className="landing-band-score">⭐ Band 8.5</div>
+              </div>
+            </div>
+            <p className="landing-testimonial-text">"Best investment for IELTS prep! Speaking practice with instant feedback hit different. Dashboard analytics showed exactly where to improve. 10/10! 🎯"</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Resources Section */}
+      <section className="landing-resources-section" id="resources">
+        <div className="landing-section-header">
+          <div className="landing-section-badge">📚 Free Learning</div>
+          <h2>Level Up Your Prep</h2>
+          <p>Get access to our exclusive study materials and guides to boost your score without the stress.</p>
+        </div>
+        <div className="landing-resources-grid">
+          <div className="landing-resource-card">
+            <div className="landing-resource-icon">📖</div>
+            <h4>IELTS Vocabulary Bible</h4>
+            <p>1000+ high-level words for Band 7+ success.</p>
+            <a href="#" className="landing-resource-link">Download PDF ↓</a>
+          </div>
+          <div className="landing-resource-card">
+            <div className="landing-resource-icon">✍️</div>
+            <h4>Writing Task 2 Guide</h4>
+            <p>The ultimate structure for perfect essays.</p>
+            <a href="#" className="landing-resource-link">Read Guide →</a>
+          </div>
+          <div className="landing-resource-card">
+            <div className="landing-resource-icon">🗣️</div>
+            <h4>Speaking Part 3 Secrets</h4>
+            <p>How to answer complex questions with confidence.</p>
+            <a href="#" className="landing-resource-link">Watch Video →</a>
+          </div>
+          <div className="landing-resource-card">
+            <div className="landing-resource-icon">📝</div>
+            <h4>Common Mistakes PDF</h4>
+            <p>Avoid the errors that kill your band score.</p>
+            <a href="#" className="landing-resource-link">Get Free PDF ↓</a>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="landing-footer">
+        <div className="landing-footer-grid">
+          <div className="landing-footer-brand">
+            <h3>🚀 IELTS Skibidi</h3>
+            <p>Your ride-or-die partner for IELTS success. We help Gen Z students worldwide achieve their dream band scores with fun, engaging, and effective learning tools that actually work.</p>
+            <div className="landing-footer-socials">
+              <div className="landing-social-icon">📘</div>
+              <div className="landing-social-icon">📸</div>
+              <div className="landing-social-icon">🐦</div>
+              <div className="landing-social-icon">💼</div>
+              <div className="landing-social-icon">📺</div>
+            </div>
+          </div>
+          <div className="landing-footer-links">
+            <h4>Platform</h4>
+            <ul>
+              <li><Link href="/listening">Listening Practice</Link></li>
+              <li><Link href="/reading">Reading Practice</Link></li>
+              <li><Link href="/writing">Writing Practice</Link></li>
+              <li><Link href="/speaking">Speaking Practice</Link></li>
+              <li><Link href="/dashboard">Full Practice Tests</Link></li>
+              <li><Link href="/dashboard">Student Dashboard</Link></li>
+            </ul>
+          </div>
+          <div className="landing-footer-links">
+            <h4>Resources</h4>
+            <ul>
+              <li><a href="#">Study Guides</a></li>
+              <li><a href="#">Exam Tips & Tricks</a></li>
+              <li><a href="#">Blog & Articles</a></li>
+              <li><a href="#">Video Tutorials</a></li>
+              <li><a href="#">FAQ</a></li>
+              <li><a href="#">Success Stories</a></li>
+            </ul>
+          </div>
+          <div className="landing-footer-links">
+            <h4>Company</h4>
+            <ul>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Contact Support</a></li>
+              <li><a href="#">Pricing Plans</a></li>
+              <li><a href="#">Affiliate Program</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+        <div className="landing-footer-bottom">
+          <p>&copy; 2026 IELTS Skibidi. Made with 💜 for students worldwide. All rights reserved. | <a href="#">Privacy</a> | <a href="#">Terms</a></p>
+        </div>
+      </footer>
     </div>
   );
 }
