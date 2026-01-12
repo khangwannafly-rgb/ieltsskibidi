@@ -18,6 +18,9 @@ interface User {
   currentLevel: string;
   submissions: Submission[];
   badges?: string[];
+  streak: number;
+  xp: number;
+  lastActiveDate?: string;
 }
 
 interface UserContextType {
@@ -44,6 +47,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       if (!parsedUser.submissions) {
         parsedUser.submissions = [];
       }
+      if (parsedUser.streak === undefined) parsedUser.streak = 0;
+      if (parsedUser.xp === undefined) parsedUser.xp = 0;
+      if (!parsedUser.badges) parsedUser.badges = [];
+      
       setUser(parsedUser);
     }
     setLoading(false);
@@ -57,9 +64,48 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       targetScore,
       currentLevel: 'Intermediate',
       submissions: [],
+      streak: 0,
+      xp: 0,
+      badges: [],
     };
     setUser(newUser);
     localStorage.setItem('ielts_user', JSON.stringify(newUser));
+  };
+
+  const calculateStreak = (submissions: Submission[]) => {
+    if (submissions.length === 0) return 0;
+    
+    const dates = submissions
+      .map(s => new Date(s.date).toDateString())
+      .filter((v, i, a) => a.indexOf(v) === i); // Unique dates
+
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let currentDate = new Date(today);
+    
+    // Check if the user has practiced today or yesterday to continue streak
+    const lastPracticeDate = new Date(dates[0]);
+    lastPracticeDate.setHours(0, 0, 0, 0);
+    
+    const diffDays = Math.floor((today.getTime() - lastPracticeDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 1) return 0; // Streak broken
+
+    for (let i = 0; i < dates.length; i++) {
+      const practiceDate = new Date(dates[i]);
+      practiceDate.setHours(0, 0, 0, 0);
+      
+      if (practiceDate.getTime() === currentDate.getTime()) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      } else if (practiceDate.getTime() < currentDate.getTime()) {
+        break;
+      }
+    }
+    
+    return streak;
   };
 
   const logout = () => {
@@ -76,9 +122,16 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       date: new Date().toISOString(),
     };
 
-    const updatedUser = {
+    const newSubmissions = [newSubmission, ...user.submissions];
+    const newStreak = calculateStreak(newSubmissions);
+    const newXP = user.xp + 100; // 100 XP per submission
+
+    const updatedUser: User = {
       ...user,
-      submissions: [newSubmission, ...user.submissions],
+      submissions: newSubmissions,
+      streak: newStreak,
+      xp: newXP,
+      lastActiveDate: new Date().toISOString(),
     };
 
     setUser(updatedUser);

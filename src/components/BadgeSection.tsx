@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Headphones, Book, PenTool, Mic, Flame, Star, Trophy, Crown, CheckCircle2, Zap, Lock, X, Sparkles
+  Headphones, Book, PenTool, Mic, Flame, Star, Trophy, Crown, CheckCircle2, Zap, Lock, X, Sparkles, Moon, Sun
 } from 'lucide-react';
+import { useUser } from '@/context/UserContext';
 
 interface Badge {
   id: string;
@@ -108,60 +109,84 @@ const BADGES: Badge[] = [
     category: 'Milestone'
   },
   {
-    id: 'band-8.0',
-    name: 'Band 8.0 Elite',
-    description: 'Đẳng cấp tinh hoa! Gia nhập câu lạc bộ 8.0 siêu hiếm.',
-    icon: Crown,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-200',
-    glowColor: 'shadow-purple-500/50',
+    id: 'night-owl',
+    name: 'Night Owl',
+    description: 'Cú đêm chăm chỉ! Hoàn thành bài học sau 10 giờ tối.',
+    icon: Moon,
+    color: 'text-indigo-500',
+    bgColor: 'bg-indigo-100',
+    glowColor: 'shadow-indigo-400/50',
     unlocked: false,
-    category: 'Milestone'
+    category: 'Lifestyle'
   },
   {
-    id: 'first-mock',
-    name: 'First Blood',
-    description: 'Vạn sự khởi đầu nan! Hoàn thành bài thi thử (Mock Test) đầu tiên.',
-    icon: CheckCircle2,
-    color: 'text-emerald-500',
-    bgColor: 'bg-emerald-100',
-    glowColor: 'shadow-emerald-400/50',
-    unlocked: true,
-    category: 'General'
-  },
-  {
-    id: 'daily-hero',
-    name: 'Daily Hero',
-    description: 'Siêu anh hùng mỗi ngày! Hoàn thành tất cả nhiệm vụ trong ngày.',
-    icon: Zap,
-    color: 'text-yellow-400',
-    bgColor: 'bg-yellow-50',
-    glowColor: 'shadow-yellow-300/50',
+    id: 'early-bird',
+    name: 'Early Bird',
+    description: 'Dậy sớm để thành công! Hoàn thành bài học trước 6 giờ sáng.',
+    icon: Sun,
+    color: 'text-amber-500',
+    bgColor: 'bg-amber-100',
+    glowColor: 'shadow-amber-400/50',
     unlocked: false,
-    category: 'General'
-  }
+    category: 'Lifestyle'
+  },
 ];
 
 export default function BadgeSection() {
+  const { user } = useUser();
   const [selectedBadge, setSelectedBadge] = useState<Badge | null>(null);
 
+  // Calculate unlocked status based on user data
+  const processedBadges = BADGES.map(badge => {
+    let isUnlocked = false;
+    
+    if (!user) return { ...badge, unlocked: false };
+    
+    // Check if badge is already unlocked in user profile
+    if (user.badges?.includes(badge.id)) return { ...badge, unlocked: true };
+
+    // Logic for checking unlock conditions based on user stats
+    switch (badge.id) {
+      case 'streak-7':
+        isUnlocked = (user.streak || 0) >= 7;
+        break;
+      case 'streak-30':
+        isUnlocked = (user.streak || 0) >= 30;
+        break;
+      case 'band-6.5':
+        const avgBand = user.submissions.length > 0 
+          ? user.submissions.reduce((acc, sub) => acc + sub.band, 0) / user.submissions.length 
+          : 0;
+        isUnlocked = avgBand >= 6.5;
+        break;
+      case 'band-7.0':
+        const avgBand7 = user.submissions.length > 0 
+          ? user.submissions.reduce((acc, sub) => acc + sub.band, 0) / user.submissions.length 
+          : 0;
+        isUnlocked = avgBand7 >= 7.0;
+        break;
+      // Add more conditions here as needed
+      default:
+        isUnlocked = badge.unlocked; // Fallback to default state
+    }
+
+    return { ...badge, unlocked: isUnlocked };
+  });
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h3 className="text-3xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-3">
-            Hệ thống Huy hiệu
-            <Sparkles className="w-8 h-8 text-purple-500 animate-pulse" />
-          </h3>
-          <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.2em]">
-            Thu thập sticker - Khẳng định đẳng cấp Gen Z
-          </p>
+        <div>
+          <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Bộ sưu tập huy hiệu</h3>
+          <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Sưu tầm: {processedBadges.filter(b => b.unlocked).length}/{processedBadges.length}</p>
+        </div>
+        <div className="w-12 h-12 rounded-2xl bg-yellow-50 text-yellow-500 flex items-center justify-center">
+          <Trophy className="w-6 h-6" />
         </div>
       </div>
 
-      {/* Badge Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-        {BADGES.map((badge) => (
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
+        {processedBadges.map((badge) => (
           <motion.div
             key={badge.id}
             whileHover={{ 
@@ -179,126 +204,94 @@ export default function BadgeSection() {
               }
             `}
           >
-            {/* Sparkle effects for unlocked badges */}
-            {badge.unlocked && (
-              <motion.div
-                animate={{ opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute top-4 right-4 text-white"
-              >
-                <Sparkles className="w-4 h-4" />
-              </motion.div>
-            )}
-
             <div className={`
-              w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-3xl
-              ${badge.unlocked ? 'bg-white shadow-inner' : 'bg-slate-200'}
+              ${badge.unlocked ? badge.color : 'text-slate-400'}
+              transition-colors duration-300
             `}>
-              <badge.icon className={`w-10 h-10 sm:w-12 sm:h-12 ${badge.unlocked ? badge.color : 'text-slate-400'}`} />
+              <badge.icon className="w-8 h-8" strokeWidth={2.5} />
             </div>
-
+            
             {!badge.unlocked && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-900/10 rounded-[2.5rem]">
-                <div className="bg-white/90 p-2 rounded-xl shadow-lg">
-                  <Lock className="w-5 h-5 text-slate-600" />
-                </div>
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-100/50 backdrop-blur-[1px] rounded-[2.3rem]">
+                <Lock className="w-6 h-6 text-slate-400" />
               </div>
             )}
-            
-            {/* Badge Outline/Border for Pixel Art Vibe */}
-            <div className="absolute inset-0 rounded-[2.5rem] border-[3px] border-black/5 pointer-events-none" />
           </motion.div>
         ))}
       </div>
 
-      {/* Badge Details Modal */}
       <AnimatePresence>
         {selectedBadge && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedBadge(null)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
-            />
-            
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/20 backdrop-blur-sm"
+            onClick={() => setSelectedBadge(null)}
+          >
             <motion.div
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className={`
-                relative w-full max-w-md bg-white rounded-[3.5rem] shadow-2xl overflow-hidden border-8 border-white
-                ${selectedBadge.unlocked ? '' : 'grayscale-[0.5]'}
-              `}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white p-8 rounded-[3rem] shadow-2xl max-w-sm w-full relative overflow-hidden"
             >
-              {/* Modal Header/Background */}
-              <div className={`h-40 w-full relative flex items-center justify-center ${selectedBadge.bgColor}`}>
-                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="absolute w-64 h-64 bg-white/20 rounded-full blur-3xl"
-                />
-                
-                <div className={`
-                  w-24 h-24 bg-white rounded-[2rem] shadow-xl flex items-center justify-center relative z-10
-                  ${selectedBadge.unlocked ? 'animate-bounce' : ''}
-                `}>
-                  <selectedBadge.icon className={`w-14 h-14 ${selectedBadge.color}`} />
-                </div>
-                
-                <button 
-                  onClick={() => setSelectedBadge(null)}
-                  className="absolute top-6 right-6 p-2 bg-white/50 hover:bg-white rounded-2xl transition-colors z-20"
-                >
-                  <X className="w-6 h-6 text-slate-900" />
-                </button>
-              </div>
+              <button 
+                onClick={() => setSelectedBadge(null)}
+                className="absolute top-6 right-6 p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
 
-              <div className="p-10 space-y-6 text-center">
+              <div className="flex flex-col items-center text-center space-y-6">
+                <div className={`
+                  w-32 h-32 rounded-full flex items-center justify-center
+                  ${selectedBadge.unlocked ? selectedBadge.bgColor : 'bg-slate-100'}
+                  mb-2 relative
+                `}>
+                  <selectedBadge.icon className={`w-16 h-16 ${selectedBadge.unlocked ? selectedBadge.color : 'text-slate-400'}`} />
+                  {selectedBadge.unlocked && (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                      className="absolute inset-0 border-4 border-dashed border-current opacity-30 rounded-full"
+                      style={{ color: 'currentColor' }} 
+                    />
+                  )}
+                </div>
+
                 <div className="space-y-2">
-                  <div className="flex items-center justify-center gap-2">
-                    <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${selectedBadge.bgColor} ${selectedBadge.color}`}>
-                      {selectedBadge.category}
-                    </span>
+                  <h3 className="text-2xl font-black text-slate-900">{selectedBadge.name}</h3>
+                  <div className={`
+                    inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest
+                    ${selectedBadge.unlocked ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-500'}
+                  `}>
                     {selectedBadge.unlocked ? (
-                      <span className="bg-emerald-100 text-emerald-600 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                        Unlocked
-                      </span>
+                      <>
+                        <CheckCircle2 className="w-3 h-3" />
+                        Đã mở khóa
+                      </>
                     ) : (
-                      <span className="bg-slate-100 text-slate-500 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1">
-                        <Lock className="w-3 h-3" /> Locked
-                      </span>
+                      <>
+                        <Lock className="w-3 h-3" />
+                        Chưa mở khóa
+                      </>
                     )}
                   </div>
-                  <h4 className="text-3xl font-black text-slate-900 uppercase tracking-tight">
-                    {selectedBadge.name}
-                  </h4>
                 </div>
 
-                <p className="text-slate-600 font-medium text-lg leading-relaxed">
+                <p className="text-slate-500 font-medium leading-relaxed">
                   {selectedBadge.description}
                 </p>
 
-                {selectedBadge.unlocked ? (
-                  <div className="pt-4">
-                    <div className="bg-purple-50 p-6 rounded-3xl border border-purple-100 inline-block">
-                      <p className="text-purple-600 font-black text-sm uppercase tracking-widest">
-                        🎉 Đã thu thập vào bộ sưu tập!
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="pt-4">
-                    <button className="w-full py-5 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest text-sm hover:bg-purple-600 transition-colors shadow-xl shadow-purple-500/20">
-                      Luyện tập ngay để mở khóa
-                    </button>
+                {!selectedBadge.unlocked && (
+                  <div className="w-full p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wide">
+                    Tiếp tục cố gắng nhé! 🚀
                   </div>
                 )}
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

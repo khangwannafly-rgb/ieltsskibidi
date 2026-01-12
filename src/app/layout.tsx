@@ -13,7 +13,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
-  subsets: ["latin", "vietnamese"],
+  subsets: ["latin"],
 });
 
 export const metadata: Metadata = {

@@ -8,6 +8,8 @@ import {
   BookOpen, Headphones, PenTool, Mic, ArrowRight, Zap, Target, TrendingUp, Star, Award, Shield, Flame, CheckCircle
 } from 'lucide-react';
 import BadgeSection from "@/components/BadgeSection";
+import DailyStreak from "@/components/DailyStreak";
+import StudyPlan from "@/components/StudyPlan";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { motion } from "framer-motion";
@@ -187,6 +189,8 @@ export default function Dashboard() {
           </motion.div>
         )}
 
+        <DailyStreak />
+
         {/* Hero Dashboard Section */}
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Chart Section */}
@@ -317,6 +321,8 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
+            
+            <StudyPlan />
 
             {/* Target Progress */}
             <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 space-y-8 relative overflow-hidden">
