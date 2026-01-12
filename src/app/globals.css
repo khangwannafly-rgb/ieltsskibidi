@@ -31,8 +31,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Inter', var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-jakarta-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
   --animate-shimmer: shimmer 2s linear infinite;
   --animate-glow: glow 2s ease-in-out infinite alternate;
   --animate-float: float 8s ease-in-out infinite;
@@ -85,13 +85,14 @@ body {
   background: var(--bg-light);
   color: var(--text-dark);
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-jakarta-sans), system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5 {
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-jakarta-sans), system-ui, sans-serif;
+  font-weight: 900;
 }
 
 .glass {
