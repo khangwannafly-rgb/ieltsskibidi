@@ -413,7 +413,7 @@ export default function ReviewsPage() {
               Tư vấn lộ trình
             </button>
           </div>
-        </motion.div>"}]}
+        </motion.div>
       </div>
     </div>
   );
