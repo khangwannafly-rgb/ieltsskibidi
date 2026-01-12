@@ -43,7 +43,7 @@ export default function Onboarding() {
             <div 
               key={i} 
               className={`h-1.5 w-8 rounded-full transition-all duration-300 ${
-                step >= i ? 'bg-indigo-600' : 'bg-slate-200'
+                step >= i ? 'bg-purple-600' : 'bg-slate-200'
               }`}
             />
           ))}
@@ -66,7 +66,7 @@ export default function Onboarding() {
                     placeholder="Tên của bạn"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
                   />
                 </div>
                 <div className="relative">
@@ -76,14 +76,14 @@ export default function Onboarding() {
                     placeholder="Địa chỉ Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
                   />
                 </div>
               </div>
               <button
                 onClick={handleNext}
                 disabled={!name || !email}
-                className="btn-primary w-full flex items-center justify-center gap-2 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold disabled:opacity-50 transition-all"
+                className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-white rounded-xl font-bold disabled:opacity-50 transition-all"
               >
                 Tiếp tục <ChevronRight className="w-5 h-5" />
               </button>
@@ -97,7 +97,7 @@ export default function Onboarding() {
               className="space-y-6"
             >
               <div className="text-center">
-                <Target className="w-12 h-12 text-indigo-600 mx-auto mb-4" />
+                <Target className="w-12 h-12 text-purple-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-slate-900">Chọn Band điểm mục tiêu</h3>
                 <p className="text-slate-600 text-sm">Chúng tôi sẽ điều chỉnh theo dõi tiến độ theo mục tiêu này</p>
               </div>
@@ -109,8 +109,8 @@ export default function Onboarding() {
                     onClick={() => setTarget(val)}
                     className={`py-3 rounded-xl font-bold transition-all border ${
                       target === val 
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-200' 
-                        : 'bg-white text-slate-600 border-slate-100 hover:border-indigo-200'
+                        ? 'bg-purple-600 text-white border-purple-600 shadow-lg shadow-purple-200' 
+                        : 'bg-white text-slate-600 border-slate-100 hover:border-purple-200'
                     }`}
                   >
                     {val.toFixed(1)}
@@ -120,7 +120,7 @@ export default function Onboarding() {
 
               <button
                 onClick={handleNext}
-                className="btn-primary w-full flex items-center justify-center gap-2 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all"
+                className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-white rounded-xl font-bold transition-all"
               >
                 Bắt đầu học ngay <Check className="w-5 h-5" />
               </button>

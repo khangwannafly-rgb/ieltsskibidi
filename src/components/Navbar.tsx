@@ -39,7 +39,7 @@ export default function Navbar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] pt-4 px-4 pointer-events-none">
       <motion.nav 
-        className="mx-auto max-w-6xl pointer-events-auto"
+        className="mx-auto max-w-7xl pointer-events-auto"
         initial={{ y: 0, opacity: 1 }}
         animate={{ 
           y: isVisible ? 0 : -120,
@@ -50,16 +50,22 @@ export default function Navbar() {
           ease: [0.22, 1, 0.36, 1]
         }}
       >
-        <div className="bg-white/80 border border-slate-200/50 rounded-2xl px-6 h-16 flex items-center justify-between shadow-lg shadow-indigo-500/5 backdrop-blur-xl transition-all duration-300">
-          <Link href="/" className="text-2xl font-black tracking-tight text-indigo-600 hover:scale-105 transition-transform">
-            IELTS SKIBIDI
+        <div className="glass rounded-[2rem] px-8 h-20 flex items-center justify-between transition-all duration-300">
+          <Link href="/" className="logo text-3xl font-black flex items-center gap-3">
+            <span className="text-4xl">🚀</span>
+            <span className="text-gradient">IELTS SKIBIDI</span>
           </Link>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-widest text-slate-500">
+          <div className="hidden md:flex gap-10 items-center">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className="hover:text-indigo-600 transition-colors">
+              <Link 
+                key={link.href} 
+                href={link.href} 
+                className="relative py-2 text-[15px] font-bold text-slate-500 hover:text-purple-600 transition-all group"
+              >
                 {link.label}
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-1 bg-gradient-purple rounded-full transition-all duration-300 group-hover:w-full"></span>
               </Link>
             ))}
           </div>
@@ -68,19 +74,23 @@ export default function Navbar() {
             {user ? (
               <div className="flex items-center gap-3">
                 <div className="hidden sm:flex flex-col items-end mr-2">
-                  <span className="text-xs font-bold text-slate-900">{user.name}</span>
-                  <span className="text-[10px] flex items-center gap-1 text-indigo-600 font-bold uppercase tracking-wider">
-                    <Target className="w-2.5 h-2.5" /> Mục tiêu: {user.targetScore.toFixed(1)}
+                  <span className="text-sm font-bold text-slate-900">{user.name}</span>
+                  <span className="text-[11px] flex items-center gap-1 text-purple-600 font-extrabold uppercase tracking-wider">
+                    <Target className="w-3 h-3" /> Mục tiêu: {user.targetScore.toFixed(1)}
                   </span>
                 </div>
                 <div className="relative group">
-                  <div className="h-9 w-9 rounded-xl bg-indigo-600 shadow-md border-2 border-white flex items-center justify-center text-white font-bold cursor-pointer">
+                  <div className="h-11 w-11 rounded-2xl bg-gradient-purple shadow-lg border-2 border-white flex items-center justify-center text-white font-black text-lg cursor-pointer transition-transform hover:scale-110 active:scale-95">
                     {user.name.charAt(0)}
                   </div>
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-xl p-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all shadow-xl z-50">
+                  <div className="absolute right-0 top-full mt-3 w-56 bg-white border border-slate-100 rounded-2xl p-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all shadow-2xl z-50">
+                    <div className="px-4 py-3 border-bottom border-slate-50 mb-1">
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Tài khoản</p>
+                      <p className="text-sm font-black text-slate-900 truncate">{user.name}</p>
+                    </div>
                     <button 
                       onClick={logout}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 rounded-lg transition-colors"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all"
                     >
                       <LogOut className="w-4 h-4" /> Đăng xuất
                     </button>
@@ -88,57 +98,62 @@ export default function Navbar() {
                 </div>
               </div>
             ) : (
-              <Link href="/dashboard" className="h-9 w-9 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-all">
-                <User className="w-5 h-5" />
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link href="/dashboard" className="px-6 py-3 text-sm font-bold text-purple-600 hover:bg-purple-50 rounded-full transition-all">
+                  Đăng nhập
+                </Link>
+                <Link href="/dashboard" className="btn-primary !py-3 !px-6 text-sm">
+                  Bắt đầu ngay
+                </Link>
+              </div>
             )}
 
             {/* Mobile Menu Button */}
             <button 
-              className="md:hidden p-2 text-slate-500 hover:text-indigo-600 transition-colors"
+              className="md:hidden p-3 text-slate-500 hover:text-purple-600 bg-slate-50 rounded-2xl transition-all"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
+      </motion.nav>
 
-        {/* Mobile Menu Content */}
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="absolute top-full left-0 right-0 mt-2 mx-auto max-w-6xl pointer-events-auto"
-            >
-              <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-2xl flex flex-col gap-4 backdrop-blur-2xl">
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="md:hidden mt-4 mx-auto max-w-7xl pointer-events-auto"
+          >
+            <div className="glass rounded-[2rem] p-6 shadow-2xl">
+              <div className="flex flex-col gap-4">
                 {navLinks.map((link) => (
-                  <Link 
-                    key={link.href} 
-                    href={link.href} 
+                  <Link
+                    key={link.href}
+                    href={link.href}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="px-6 py-4 rounded-2xl hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 font-black uppercase tracking-widest text-[10px] transition-all border border-transparent hover:border-indigo-100"
+                    className="px-6 py-4 rounded-2xl font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-600 transition-all"
                   >
                     {link.label}
                   </Link>
                 ))}
-                {user && (
-                  <button 
-                    onClick={() => {
-                      logout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 px-6 py-4 text-rose-500 font-black uppercase tracking-widest text-[10px] hover:bg-rose-50 rounded-2xl transition-all border border-transparent hover:border-rose-100"
+                {!user && (
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="btn-primary text-center mt-2"
                   >
-                    <LogOut className="w-4 h-4" /> Đăng xuất
-                  </button>
+                    Bắt đầu ngay
+                  </Link>
                 )}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

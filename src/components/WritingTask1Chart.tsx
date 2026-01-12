@@ -38,7 +38,7 @@ interface ChartData {
   }[];
 }
 
-const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+const COLORS = ['#9333ea', '#db2777', '#7c3aed', '#ec4899', '#6366f1', '#4f46e5'];
 
 export default function WritingTask1Chart({ data }: { data: ChartData }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -71,7 +71,7 @@ export default function WritingTask1Chart({ data }: { data: ChartData }) {
         <div key={index} className="w-full h-full flex flex-col">
           <div className="mb-4">
             <h3 className="text-sm font-black text-slate-900 tracking-wider uppercase">{chart.title}</h3>
-            <div className="h-1 w-8 bg-indigo-500 rounded-full mt-1.5" />
+            <div className="h-1 w-8 bg-purple-500 rounded-full mt-1.5" />
           </div>
           <div className="flex-1 overflow-auto border border-slate-100 rounded-2xl bg-white shadow-sm">
             <table className="min-w-full divide-y divide-slate-100">
@@ -103,7 +103,7 @@ export default function WritingTask1Chart({ data }: { data: ChartData }) {
       <div key={index} className="w-full h-full min-h-[300px] flex flex-col">
         <div className="mb-4">
           <h3 className="text-sm font-black text-slate-900 tracking-wider uppercase">{chart.title}</h3>
-          <div className="h-1 w-8 bg-indigo-500 rounded-full mt-1.5" />
+          <div className="h-1 w-8 bg-purple-500 rounded-full mt-1.5" />
         </div>
         <div className="flex-1 min-h-0 w-full">
           {isMounted && (
@@ -114,7 +114,7 @@ export default function WritingTask1Chart({ data }: { data: ChartData }) {
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700 }} />
                   <Tooltip 
-                    cursor={{ fill: 'rgba(99, 102, 241, 0.05)' }}
+                    cursor={{ fill: 'rgba(147, 51, 234, 0.05)' }}
                     contentStyle={{ borderRadius: '12px', border: '1px solid rgba(0,0,0,0.05)', backgroundColor: '#ffffff', color: '#0f172a' }}
                   />
                   <Legend verticalAlign="top" align="right" iconType="circle" height={30} wrapperStyle={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', color: '#94a3b8' }} />
@@ -159,7 +159,7 @@ export default function WritingTask1Chart({ data }: { data: ChartData }) {
     return (
       <div className="w-full h-full flex flex-col space-y-12">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 border border-indigo-100">
+          <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 border border-purple-100">
             <Layout className="w-5 h-5" />
           </div>
           <div>
@@ -177,7 +177,7 @@ export default function WritingTask1Chart({ data }: { data: ChartData }) {
         </div>
 
         {data.description && (
-          <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-50 text-center">
+          <div className="bg-purple-50/50 p-6 rounded-2xl border border-purple-50 text-center">
             <p className="text-sm text-slate-600 font-medium italic">"{data.description}"</p>
           </div>
         )}
@@ -190,7 +190,7 @@ export default function WritingTask1Chart({ data }: { data: ChartData }) {
       <div className="w-full h-full flex flex-col">
         <div className="mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 border border-indigo-100 shadow-sm">
+            <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 border border-purple-100 shadow-sm">
               {data.type === 'map' ? <MapIcon className="w-5 h-5" /> : <RefreshCw className="w-5 h-5" />}
             </div>
             <div>
@@ -201,22 +201,22 @@ export default function WritingTask1Chart({ data }: { data: ChartData }) {
         </div>
 
         <div className="flex-1 bg-slate-50 rounded-[2.5rem] border border-slate-100 p-10 flex flex-col items-center justify-center text-center space-y-8 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-b from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
           
           <div className="w-28 h-28 bg-white rounded-[2.5rem] flex items-center justify-center border border-slate-100 relative z-10 shadow-xl group-hover:scale-110 transition-transform duration-500">
             {data.type === 'map' ? (
-              <Layout className="w-12 h-12 text-indigo-600" />
+              <Layout className="w-12 h-12 text-purple-600" />
             ) : (
               <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse" />
-                <ArrowRight className="w-10 h-10 text-indigo-600" />
-                <div className="w-2.5 h-2.5 rounded-full bg-indigo-200" />
+                <div className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
+                <ArrowRight className="w-10 h-10 text-purple-600" />
+                <div className="w-2.5 h-2.5 rounded-full bg-purple-200" />
               </div>
             )}
           </div>
 
           <div className="max-w-xl space-y-6 relative z-10">
-            <div className="inline-block px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-[10px] font-black text-indigo-600 uppercase tracking-widest">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-[10px] font-black text-purple-600 uppercase tracking-widest">
               Thông tin chi tiết
             </div>
             <p className="text-lg text-slate-700 font-medium leading-relaxed italic">
@@ -226,9 +226,9 @@ export default function WritingTask1Chart({ data }: { data: ChartData }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl relative z-10">
             {data.labels?.map((label, idx) => (
-              <div key={idx} className="p-5 bg-white rounded-2xl border border-slate-100 text-left hover:border-indigo-200 transition-all group/item shadow-sm">
+              <div key={idx} className="p-5 bg-white rounded-2xl border border-slate-100 text-left hover:border-purple-200 transition-all group/item shadow-sm">
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="w-6 h-6 rounded-lg bg-indigo-50 flex items-center justify-center text-[10px] font-black text-indigo-600 border border-indigo-100 group-hover/item:bg-indigo-600 group-hover/item:text-white transition-all">
+                  <span className="w-6 h-6 rounded-lg bg-purple-50 flex items-center justify-center text-[10px] font-black text-purple-600 border border-purple-100 group-hover/item:bg-purple-600 group-hover/item:text-white transition-all">
                     {idx + 1}
                   </span>
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">

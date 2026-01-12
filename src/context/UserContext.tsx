@@ -17,6 +17,7 @@ interface User {
   targetScore: number;
   currentLevel: string;
   submissions: Submission[];
+  badges?: string[];
 }
 
 interface UserContextType {

@@ -20,9 +20,9 @@ import {
 } from 'lucide-react';
 
 const stats = [
-  { label: "Active Learners", value: "50K+", icon: Users, color: "text-indigo-600" },
-  { label: "Avg Band Score", value: "7.8", icon: Award, color: "text-rose-600" },
-  { label: "Success Rate", value: "96%", icon: Target, color: "text-emerald-600" },
+  { label: "Active Learners", value: "50K+", icon: Users, color: "text-purple-600" },
+  { label: "Avg Band Score", value: "7.8", icon: Award, color: "text-purple-600" },
+  { label: "Success Rate", value: "96%", icon: Target, color: "text-purple-600" },
 ];
 
 const skills = [
@@ -30,113 +30,91 @@ const skills = [
     title: "Listening", 
     desc: "Train your ears with real exam audios. Practice conversations and academic lectures.",
     icon: Headphones,
-    href: "/listening",
-    color: "indigo"
+    href: "/listening"
   },
   { 
     title: "Reading", 
     desc: "Master academic texts with timed exercises and smart strategies that work.",
     icon: BookOpen,
-    href: "/reading",
-    color: "emerald"
+    href: "/reading"
   },
   { 
     title: "Writing", 
     desc: "Get AI feedback on Task 1 & 2. Improve grammar and coherence instantly.",
     icon: PenTool,
-    href: "/writing",
-    color: "rose"
+    href: "/writing"
   },
   { 
     title: "Speaking", 
     desc: "Record your answers and get pronunciation and fluency feedback that helps.",
     icon: Mic,
-    href: "/speaking",
-    color: "amber"
+    href: "/speaking"
   },
 ];
 
 export default function LandingPage() {
   return (
-    <div className="bg-white min-h-screen relative overflow-hidden">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100 px-6 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-12">
-          <Link href="/" className="text-2xl font-black tracking-tighter text-indigo-600">
-            IELTS SKIBIDI
-          </Link>
-          <div className="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-            <a href="#skills" className="hover:text-slate-900 transition-colors">Skills</a>
-            <a href="#features" className="hover:text-slate-900 transition-colors">Features</a>
-            <Link href="/reviews" className="hover:text-slate-900 transition-colors">Reviews</Link>
-            <Link href="/dashboard" className="hover:text-slate-900 transition-colors">Dashboard</Link>
-          </div>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="px-6 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-900 hover:text-indigo-600 transition-colors">
-            Log In
-          </Link>
-          <Link href="/dashboard" className="px-8 py-3 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 transition-all hover:-translate-y-0.5">
-            Start Free 🎉
-          </Link>
-        </div>
-      </nav>
-
+    <div className="bg-[#F9FAFB] min-h-screen relative overflow-hidden">
       {/* Hero Section */}
-      <section className="pt-48 pb-32 px-6">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center">
+      <section className="relative pt-40 pb-32 px-6 bg-gradient-purple overflow-hidden">
+        {/* Floating Background Orbs */}
+        <div className="absolute top-[-200px] right-[-100px] w-[600px] h-[600px] bg-white opacity-10 rounded-full animate-float"></div>
+        <div className="absolute bottom-[-150px] left-[-100px] w-[400px] h-[400px] bg-white opacity-10 rounded-full animate-float" style={{ animationDelay: '2s' }}></div>
+
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-20 items-center relative z-10">
           <div className="space-y-10">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-[0.3em]"
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-black uppercase tracking-widest"
             >
-              <Sparkles className="w-4 h-4" />
-              50,000+ Students Crushing It
+              <Sparkles className="w-5 h-5" />
+              50,000+ Học viên đang bứt phá
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-7xl md:text-[9rem] font-black text-slate-900 tracking-tighter leading-[0.85] uppercase"
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-7xl md:text-8xl font-black text-white tracking-tighter leading-[0.95]"
             >
-              Master <br />
-              <span className="text-indigo-600">IELTS.</span> <br />
-              <span className="relative">
-                No Cap.
-                <div className="absolute -bottom-4 left-0 w-full h-4 bg-indigo-500/10 -rotate-2 -z-10" />
-              </span>
+              Lên Band <br />
+              <span className="relative inline-block">
+                IELTS
+                <div className="absolute bottom-4 left-0 w-full h-4 bg-white/30 -rotate-2 -z-10 rounded-full" />
+              </span> <br />
+              Cực Skibidi! 🚀
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-slate-500 text-xl max-w-xl font-medium leading-relaxed"
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-white/90 text-xl max-w-xl font-medium leading-relaxed"
             >
-              Học IELTS cực cuốn, Band Score cực Skibidi! No cap! Master English with fun practice tests, AI feedback, and gamified learning.
+              Học IELTS không còn nhàm chán! Trải nghiệm lộ trình học cá nhân hóa với AI, chấm điểm tức thì và giao diện cực cuốn. No cap!
             </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.3 }}
               className="flex flex-wrap gap-6"
             >
-              <Link href="/dashboard" className="group px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-indigo-700 transition-all shadow-2xl shadow-indigo-500/30 flex items-center gap-4 hover:-translate-y-1">
-                Start Free Practice 🚀
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Link href="/dashboard" className="btn-white !px-12 !py-6 !text-sm flex items-center gap-4 group">
+                Bắt đầu học ngay
+                <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
               </Link>
-              <Link href="/dashboard" className="px-10 py-5 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-[0.2em] text-xs border-2 border-slate-100 hover:border-slate-900 transition-all hover:-translate-y-1 shadow-sm">
-                Take Mock Test
+              <Link href="/dashboard" className="px-12 py-6 rounded-full border-2 border-white text-white font-black uppercase tracking-widest text-xs hover:bg-white hover:text-purple-600 transition-all active:scale-95">
+                Thi thử miễn phí
               </Link>
             </motion.div>
 
-            <div className="grid grid-cols-3 gap-12 pt-12 border-t border-slate-100">
+            <div className="grid grid-cols-3 gap-12 pt-12 border-t border-white/20">
               {stats.map((stat, i) => (
-                <div key={i} className="space-y-1">
-                  <div className="text-3xl font-black text-slate-900 tracking-tighter">{stat.value}</div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{stat.label}</div>
+                <div key={i} className="space-y-2">
+                  <div className="text-4xl font-black text-white tracking-tighter">{stat.value}</div>
+                  <div className="text-[11px] font-black uppercase tracking-widest text-white/70">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -144,36 +122,34 @@ export default function LandingPage() {
 
           <div className="relative">
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-              className="aspect-square bg-slate-50 rounded-[4rem] relative flex items-center justify-center border border-slate-100 shadow-inner overflow-hidden"
+              initial={{ opacity: 0, y: 60 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 1 }}
+              className="aspect-square bg-white/20 backdrop-blur-[40px] rounded-[4rem] relative flex items-center justify-center border-2 border-white/30 shadow-2xl overflow-hidden animate-pulse-custom"
             >
-              {/* Decorative elements */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-indigo-500/5 via-transparent to-rose-500/5 rotate-12" />
-              <div className="text-[12rem] relative z-10 animate-bounce-slow">🚀</div>
+              <div className="text-[14rem] relative z-10 drop-shadow-2xl">🚀</div>
               
               {/* Floating badges */}
-              <div className="absolute top-20 right-10 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 animate-float">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6" />
+              <div className="absolute top-20 right-10 bg-white p-5 rounded-3xl shadow-2xl animate-float">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <TrendingUp className="w-7 h-7" />
                   </div>
                   <div>
-                    <div className="text-xs font-black text-slate-900">+1.5 Band</div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Improvement</div>
+                    <div className="text-sm font-black text-slate-900">+1.5 Band</div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Cải thiện</div>
                   </div>
                 </div>
               </div>
 
-              <div className="absolute bottom-20 left-10 bg-white p-4 rounded-2xl shadow-xl border border-slate-50 animate-float-delayed">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                    <Star className="w-6 h-6" />
+              <div className="absolute bottom-20 left-10 bg-white p-5 rounded-3xl shadow-2xl animate-float" style={{ animationDelay: '1s' }}>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <Star className="w-7 h-7" />
                   </div>
                   <div>
-                    <div className="text-xs font-black text-slate-900">Expert AI</div>
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Feedback 24/7</div>
+                    <div className="text-sm font-black text-slate-900">AI Expert</div>
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Chấm điểm 24/7</div>
                   </div>
                 </div>
               </div>
@@ -183,16 +159,16 @@ export default function LandingPage() {
       </section>
 
       {/* Skills Section */}
-      <section id="skills" className="py-32 px-6 bg-slate-50/50">
-        <div className="max-w-7xl mx-auto space-y-20">
-          <div className="text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-100 text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
-              <Target className="w-3.5 h-3.5" />
-              All Four Skills
+      <section id="skills" className="py-40 px-6">
+        <div className="max-w-7xl mx-auto space-y-24">
+          <div className="text-center space-y-6">
+            <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-gradient-purple text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-purple-500/30">
+              <Target className="w-4 h-4" />
+              Luyện đủ 4 kỹ năng
             </div>
-            <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter uppercase">Master Every Section</h2>
-            <p className="text-slate-500 text-xl max-w-2xl mx-auto font-medium">
-              Interactive practice for all skills with instant AI-powered feedback that actually slaps.
+            <h2 className="text-6xl md:text-7xl font-black text-slate-900 tracking-tighter uppercase">Làm chủ IELTS</h2>
+            <p className="text-slate-500 text-xl max-w-2xl mx-auto font-medium leading-relaxed">
+              Phương pháp luyện tập hiện đại, giao diện trực quan và AI hỗ trợ tận răng giúp bạn bứt phá band điểm.
             </p>
           </div>
 
@@ -200,18 +176,22 @@ export default function LandingPage() {
             {skills.map((skill, i) => (
               <motion.div
                 key={i}
-                whileHover={{ y: -10 }}
-                className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 space-y-8 group"
+                whileHover={{ y: -16, scale: 1.02 }}
+                className="bg-white p-12 rounded-[3rem] border border-slate-100 shadow-xl hover:shadow-purple-500/20 transition-all duration-500 space-y-10 group relative overflow-hidden"
               >
-                <div className={`w-16 h-16 rounded-2xl bg-${skill.color}-50 text-${skill.color}-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-500`}>
-                  <skill.icon className="w-8 h-8" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-purple transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                
+                <div className={`w-20 h-20 rounded-3xl bg-gradient-purple text-white flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform duration-500`}>
+                  <skill.icon className="w-10 h-10" />
                 </div>
-                <div className="space-y-3">
-                  <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">{skill.title}</h3>
-                  <p className="text-slate-500 font-medium text-sm leading-relaxed">{skill.desc}</p>
+                
+                <div className="space-y-4">
+                  <h3 className="text-3xl font-black text-slate-900 tracking-tight uppercase">{skill.title}</h3>
+                  <p className="text-slate-500 font-medium text-base leading-relaxed">{skill.desc}</p>
                 </div>
-                <Link href={skill.href} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 group-hover:gap-4 transition-all pt-4">
-                  Start Practice <ArrowRight className="w-4 h-4" />
+                
+                <Link href={skill.href} className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-purple-600 group-hover:gap-5 transition-all pt-6">
+                  Luyện tập ngay <ArrowRight className="w-5 h-5" />
                 </Link>
               </motion.div>
             ))}
@@ -219,106 +199,75 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Practice Test Section */}
-      <section id="features" className="py-32 px-6">
-        <div className="max-w-7xl mx-auto bg-slate-900 rounded-[4rem] p-12 md:p-24 relative overflow-hidden shadow-2xl">
-          <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-indigo-500/20 via-transparent to-transparent pointer-events-none" />
+      {/* Practice Test CTA Section */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto bg-white rounded-[5rem] p-16 md:p-32 relative overflow-hidden shadow-2xl border border-slate-100">
+          <div className="absolute top-0 right-0 w-full h-full bg-gradient-purple opacity-5 pointer-events-none" />
+          <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-purple-500/10 rounded-full blur-[100px]" />
           
-          <div className="grid lg:grid-cols-2 gap-20 items-center relative z-10">
-            <div className="space-y-10">
-              <div className="space-y-4">
-                <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-none">
+          <div className="grid lg:grid-cols-2 gap-24 items-center relative z-10">
+            <div className="space-y-12">
+              <div className="space-y-6">
+                <h2 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter uppercase leading-none">
                   Full Practice <br />
-                  <span className="text-indigo-400">Tests</span>
+                  <span className="text-gradient">Tests</span>
                 </h2>
-                <p className="text-slate-400 text-xl font-medium leading-relaxed">
-                  Experience the real deal with authentic IELTS practice tests. Timed, scored, and reviewed instantly. Get that bag! 💰
+                <p className="text-slate-500 text-xl font-bold leading-relaxed">
+                  Trải nghiệm thi thử như thật với kho đề thi cập nhật liên tục. Chấm điểm AI ngay lập tức, phân tích điểm mạnh yếu để bạn về đích nhanh nhất. 💰
                 </p>
               </div>
 
-              <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[
-                  "Real Exam Conditions",
-                  "Instant AI Band Scores",
-                  "Detailed Performance Analytics",
-                  "Vocabulary Recommendations"
+                  "Phòng thi ảo chuẩn quốc tế",
+                  "Chấm điểm AI tức thì",
+                  "Phân tích lỗi sai chi tiết",
+                  "Gợi ý từ vựng nâng band"
                 ].map((feature, i) => (
-                  <div key={i} className="flex items-center gap-4 text-white font-black uppercase tracking-[0.2em] text-[10px]">
-                    <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
-                      <CheckCircle2 className="w-4 h-4" />
+                  <div key={i} className="flex items-center gap-4 text-slate-900 font-black uppercase tracking-widest text-xs">
+                    <div className="w-10 h-10 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100 shadow-sm">
+                      <CheckCircle2 className="w-6 h-6" />
                     </div>
                     {feature}
                   </div>
                 ))}
               </div>
 
-              <Link href="/dashboard" className="group px-10 py-5 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-indigo-50 transition-all flex items-center gap-4 w-fit">
-                Start Full Test Now 🎯
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <Link href="/dashboard" className="btn-primary !px-12 !py-6 !text-sm inline-flex items-center gap-4 group">
+                Vào thi thử ngay
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-3 transition-transform" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              {[
-                { label: "Real Timing", icon: "⏱️" },
-                { label: "AI Scoring", icon: "🤖" },
-                { label: "Analytics", icon: "📊" },
-                { label: "Feedback", icon: "📝" }
-              ].map((item, i) => (
-                <div key={i} className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-3xl space-y-4 hover:bg-white/10 transition-colors">
-                  <div className="text-4xl">{item.icon}</div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white">{item.label}</div>
+            <div className="relative hidden lg:block">
+              <div className="aspect-square bg-slate-50 rounded-[4rem] border border-slate-200 flex items-center justify-center animate-float shadow-inner">
+                <div className="text-[15rem] drop-shadow-2xl">📝</div>
+                <div className="absolute top-10 right-10 bg-gradient-purple p-8 rounded-3xl shadow-2xl -rotate-6">
+                  <div className="text-white font-black text-5xl">8.5</div>
+                  <div className="text-white/70 text-[10px] font-black uppercase tracking-widest">Target Score</div>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Footer */}
-      <footer className="py-32 px-6 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto space-y-20">
-          <div className="grid md:grid-cols-4 gap-12">
-            <div className="col-span-1 md:col-span-2 space-y-8">
-              <Link href="/" className="text-3xl font-black tracking-tighter text-indigo-600">
-                IELTS SKIBIDI
-              </Link>
-              <p className="text-slate-500 text-lg font-medium max-w-md leading-relaxed">
-                Your ride-or-die partner for IELTS success. We help Gen Z students worldwide achieve their dream band scores with fun, engaging, and effective learning tools.
-              </p>
-            </div>
-            
-            <div className="space-y-6">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Platform</h4>
-              <ul className="space-y-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                <li><Link href="/listening" className="hover:text-indigo-600 transition-colors">Listening</Link></li>
-                <li><Link href="/reading" className="hover:text-indigo-600 transition-colors">Reading</Link></li>
-                <li><Link href="/writing" className="hover:text-indigo-600 transition-colors">Writing</Link></li>
-                <li><Link href="/speaking" className="hover:text-indigo-600 transition-colors">Speaking</Link></li>
-              </ul>
-            </div>
-
-            <div className="space-y-6">
-              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Support</h4>
-              <ul className="space-y-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                <li><a href="#" className="hover:text-indigo-600 transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-indigo-600 transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-indigo-600 transition-colors">Privacy</a></li>
-                <li><a href="#" className="hover:text-indigo-600 transition-colors">Terms</a></li>
-              </ul>
-            </div>
+      {/* Footer Section */}
+      <footer className="py-20 border-t border-slate-100 bg-white">
+        <div className="max-w-7xl mx-auto px-6 text-center space-y-12">
+          <Link href="/" className="logo text-4xl font-black inline-flex items-center gap-4">
+            <span className="text-5xl">🚀</span>
+            <span className="text-gradient">IELTS SKIBIDI</span>
+          </Link>
+          <div className="flex justify-center gap-12 text-sm font-black uppercase tracking-widest text-slate-400">
+            <a href="#" className="hover:text-purple-600 transition-colors">Về chúng tôi</a>
+            <a href="#" className="hover:text-purple-600 transition-colors">Điều khoản</a>
+            <a href="#" className="hover:text-purple-600 transition-colors">Bảo mật</a>
+            <Link href="/reviews" className="hover:text-purple-600 transition-colors">Đánh giá</Link>
           </div>
-
-          <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-              © 2026 IELTS Skibidi. Made with 💜 for students worldwide.
-            </div>
-            <div className="flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-              <a href="#" className="hover:text-indigo-600">Twitter</a>
-              <a href="#" className="hover:text-indigo-600">Instagram</a>
-              <a href="#" className="hover:text-indigo-600">Discord</a>
-            </div>
-          </div>
+          <p className="text-slate-400 text-sm font-medium">
+            © 2026 IELTS SKIBIDI. All rights reserved. No cap, just band.
+          </p>
         </div>
       </footer>
     </div>

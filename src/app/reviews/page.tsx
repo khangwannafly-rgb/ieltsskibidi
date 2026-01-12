@@ -14,7 +14,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbwOaIfBgo681SnQ9tXxsYxs7XP6IRLfDmUw&s",
     date: "15/12/2025",
     size: "wide",
-    accent: "from-indigo-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 2,
@@ -25,7 +25,7 @@ const reviews = [
     image: "https://cdn2.tuoitre.vn/thumb_w/480/471584752817336320/2025/11/20/0b89fcc0-92c9-4458-addd-1f4b13bbf00b-17636300163231290204390.jpg",
     date: "10/12/2025",
     size: "small",
-    accent: "from-rose-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 3,
@@ -36,7 +36,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREK5zSrwzVYwXVoazwMynFv4szRnlLA1MAFQ&s",
     date: "05/12/2025",
     size: "small",
-    accent: "from-emerald-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 4,
@@ -47,7 +47,7 @@ const reviews = [
     image: "https://yt3.googleusercontent.com/c-Z7mIlntSpG6VyQ5ZqaPggqkZRhaySr-H5ZEazFN2iR1pP4eD1UGekwu0y--c4CSVhJJ1A4QT8=s900-c-k-c0x00ffffff-no-rj",
     date: "01/12/2025",
     size: "wide",
-    accent: "from-violet-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 5,
@@ -58,7 +58,7 @@ const reviews = [
     image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop",
     date: "20/12/2025",
     size: "small",
-    accent: "from-blue-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 6,
@@ -69,7 +69,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSq7tW8t6O7Y2_J5n9_v8Z7y-U5Z6L-n5p8_Q&s",
     date: "25/12/2025",
     size: "wide",
-    accent: "from-amber-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 7,
@@ -80,7 +80,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0Y6M8p8vW9Z8Y_mYp8_z_z_z_z_z_z_z_z_z&s",
     date: "28/12/2025",
     size: "small",
-    accent: "from-teal-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 8,
@@ -91,7 +91,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSW8y1p_79fN2_Xm9r8Tz_Z_z_z_z_z_z_z_z_z&s",
     date: "30/12/2025",
     size: "wide",
-    accent: "from-pink-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 9,
@@ -102,7 +102,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr3n_W7rL_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "02/01/2026",
     size: "small",
-    accent: "from-orange-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 10,
@@ -113,7 +113,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7y_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "03/01/2026",
     size: "wide",
-    accent: "from-cyan-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 11,
@@ -124,7 +124,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "04/01/2026",
     size: "small",
-    accent: "from-fuchsia-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 12,
@@ -135,7 +135,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "05/01/2026",
     size: "small",
-    accent: "from-yellow-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 13,
@@ -146,7 +146,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "06/01/2026",
     size: "small",
-    accent: "from-orange-400/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 14,
@@ -157,7 +157,7 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "07/01/2026",
     size: "wide",
-    accent: "from-red-500/20"
+    accent: "from-purple-500/20"
   },
   {
     id: 15,
@@ -179,15 +179,15 @@ const reviews = [
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "10/01/2026",
     size: "small",
-    accent: "from-blue-600/20"
+    accent: "from-purple-500/20"
   }
 ];
 
 const stats = [
-  { label: "Học viên", value: "5,000+", icon: Users, color: "text-indigo-400" },
-  { label: "Band cao nhất", value: "8.5", icon: Award, color: "text-rose-400" },
-  { label: "Mục tiêu đạt được", value: "92%", icon: Target, color: "text-emerald-400" },
-  { label: "Bài làm mỗi ngày", value: "1,200+", icon: TrendingUp, color: "text-amber-400" },
+  { label: "Học viên", value: "5,000+", icon: Users, color: "text-purple-600" },
+  { label: "Band cao nhất", value: "8.5", icon: Award, color: "text-purple-600" },
+  { label: "Mục tiêu đạt được", value: "92%", icon: Target, color: "text-purple-600" },
+  { label: "Bài làm mỗi ngày", value: "1,200+", icon: TrendingUp, color: "text-purple-600" },
 ];
 
 const categories = [
@@ -224,9 +224,9 @@ function ReviewCard({ review, index }: { review: any; index: number }) {
         delay: index * 0.02,
         layout: { duration: 0.3 }
       }}
-      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group h-full min-h-[340px] bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 p-8 relative overflow-hidden`}
+      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group h-full min-h-[340px] bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 p-8 relative overflow-hidden`}
     >
-      <div className="absolute top-6 right-8 text-8xl font-serif text-indigo-500/5 select-none pointer-events-none">"</div>
+      <div className="absolute top-6 right-8 text-8xl font-serif text-purple-500/5 select-none pointer-events-none">"</div>
 
       <div className="flex flex-col h-full relative z-10">
         <div className="flex items-center gap-4 mb-8">
@@ -236,7 +236,7 @@ function ReviewCard({ review, index }: { review: any; index: number }) {
           <div className="space-y-1">
             <h4 className="text-lg font-black text-slate-900 tracking-tight">{review.name}</h4>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-600 text-[10px] font-black uppercase tracking-wider">{review.score}</span>
+              <span className="px-2 py-0.5 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black uppercase tracking-wider">{review.score}</span>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">• {review.skill}</span>
             </div>
           </div>
@@ -254,7 +254,7 @@ function ReviewCard({ review, index }: { review: any; index: number }) {
               <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
             ))}
           </div>
-          <div className="text-[10px] font-black text-indigo-500 uppercase tracking-widest bg-indigo-50/50 px-3 py-1 rounded-full">
+          <div className="text-[10px] font-black text-purple-500 uppercase tracking-widest bg-purple-50/50 px-3 py-1 rounded-full">
             {review.date}
           </div>
         </div>
@@ -275,7 +275,7 @@ export default function ReviewsPage() {
     <div className="bg-slate-50/50 min-h-screen pt-32 pb-24 relative overflow-hidden">
       {/* Background Orbs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-200/20 rounded-full blur-[120px]" />
+        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-200/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-rose-200/20 rounded-full blur-[120px]" />
       </div>
 
@@ -285,7 +285,7 @@ export default function ReviewsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white border border-slate-100 text-indigo-600 text-[10px] font-black uppercase tracking-[0.3em] shadow-sm"
+            className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white border border-slate-100 text-purple-600 text-[10px] font-black uppercase tracking-[0.3em] shadow-sm"
           >
             <Sparkles className="w-4 h-4" />
             Community Wall of Fame
@@ -296,7 +296,7 @@ export default function ReviewsPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-7xl md:text-9xl font-black text-slate-900 tracking-tighter leading-[0.9] uppercase"
           >
-            THE <span className="text-indigo-600">SUCCESS</span><br />CHRONICLES
+            THE <span className="text-purple-600">SUCCESS</span><br />CHRONICLES
           </motion.h1>
 
           <motion.p
@@ -317,11 +317,11 @@ export default function ReviewsPage() {
               onClick={() => setFilter(cat.id)}
               className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 border-2 ${
                 filter === cat.id 
-                ? 'bg-slate-900 border-slate-900 text-white shadow-2xl shadow-slate-900/20 -translate-y-1' 
+                ? 'bg-purple-600 border-purple-600 text-white shadow-2xl shadow-purple-500/30 -translate-y-1' 
                 : 'bg-white border-transparent text-slate-400 hover:border-slate-200 hover:text-slate-600 hover:bg-slate-50 shadow-sm'
               }`}
             >
-              <cat.icon className={`w-4 h-4 ${filter === cat.id ? 'text-indigo-400' : ''}`} />
+              <cat.icon className={`w-4 h-4 ${filter === cat.id ? 'text-purple-400' : ''}`} />
               {cat.label}
             </button>
           ))}
@@ -335,9 +335,9 @@ export default function ReviewsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 + i * 0.1 }}
-              className="bg-white p-10 rounded-[3rem] text-center space-y-6 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-700 group relative overflow-hidden"
+              className="bg-white p-10 rounded-[3rem] text-center space-y-6 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-700 group relative overflow-hidden"
             >
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
               <div className={`w-16 h-16 rounded-[2rem] bg-slate-50 flex items-center justify-center mx-auto ${stat.color} shadow-inner group-hover:scale-110 transition-transform duration-500`}>
                 <stat.icon className="w-8 h-8" />
               </div>
@@ -366,7 +366,7 @@ export default function ReviewsPage() {
               layout
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              className="col-span-1 md:col-span-2 row-span-1 bg-indigo-600 p-12 flex flex-col justify-between group cursor-pointer shadow-2xl shadow-indigo-500/30 rounded-[3rem] min-h-[340px] relative overflow-hidden"
+              className="col-span-1 md:col-span-2 row-span-1 bg-purple-600 p-12 flex flex-col justify-between group cursor-pointer shadow-2xl shadow-purple-500/30 rounded-[3rem] min-h-[340px] relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-white/20 transition-colors duration-700" />
               
@@ -376,7 +376,7 @@ export default function ReviewsPage() {
                 </div>
                 <div className="space-y-3">
                   <h2 className="text-4xl font-black text-white tracking-tighter leading-tight uppercase">CÂU CHUYỆN<br />CỦA BẠN?</h2>
-                  <p className="text-indigo-100 text-lg font-medium leading-relaxed max-w-[280px]">
+                  <p className="text-purple-100 text-lg font-medium leading-relaxed max-w-[280px]">
                     Hãy bắt đầu hành trình ngay hôm nay để ghi tên mình lên bảng vàng Skibidi.
                   </p>
                 </div>
@@ -395,7 +395,7 @@ export default function ReviewsPage() {
           whileInView={{ opacity: 1 }}
           className="py-32 text-center space-y-16 border-t border-slate-100 relative"
         >
-          <div className="absolute top-[-1px] left-1/2 -translate-x-1/2 w-32 h-[2px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
+          <div className="absolute top-[-1px] left-1/2 -translate-x-1/2 w-32 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
           
           <div className="space-y-4">
             <h2 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter uppercase">
@@ -405,7 +405,7 @@ export default function ReviewsPage() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-8">
-            <button className="group px-12 py-6 bg-indigo-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-indigo-700 transition-all duration-500 flex items-center gap-4 shadow-2xl shadow-indigo-500/40 hover:-translate-y-1">
+            <button className="group px-12 py-6 bg-purple-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-purple-700 transition-all duration-500 flex items-center gap-4 shadow-2xl shadow-purple-500/40 hover:-translate-y-1">
               Bắt đầu học ngay
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
@@ -413,7 +413,7 @@ export default function ReviewsPage() {
               Tư vấn lộ trình
             </button>
           </div>
-        </motion.div>
+        </motion.div>"}]}
       </div>
     </div>
   );

@@ -4,7 +4,16 @@ import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend
 } from 'recharts';
-import { BookOpen, Headphones, PenTool, Mic, ArrowRight, Zap, Target, TrendingUp, Star } from "lucide-react";
+import { 
+  BookOpen, Headphones, PenTool, Mic, ArrowRight, Zap, Target, TrendingUp, Star, Award, Shield, Flame, CheckCircle
+} from 'lucide-react';
+
+const badges = [
+  { id: 'streak', name: '7 Ngày Bất Bại', icon: Flame, color: 'text-orange-500', bgColor: 'bg-orange-50', desc: 'Duy trì học tập 7 ngày liên tiếp' },
+  { id: 'top-reading', name: 'Thánh Đọc', icon: BookOpen, color: 'text-purple-600', bgColor: 'bg-purple-50', desc: 'Đạt Band 8.0+ kỹ năng Đọc' },
+  { id: 'pro-writer', name: 'Cây Bút Trẻ', icon: PenTool, color: 'text-blue-500', bgColor: 'bg-blue-50', desc: 'Hoàn thành 10 bài viết Task 2' },
+  { id: 'speaker', name: 'Diễn Thuyết Gia', icon: Mic, color: 'text-rose-500', bgColor: 'bg-rose-50', desc: 'Luyện Speaking hơn 60 phút' },
+];
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { motion } from "framer-motion";
@@ -30,36 +39,36 @@ const skills = [
   { 
     name: 'Kỹ năng Đọc', 
     icon: BookOpen, 
-    color: 'text-indigo-400', 
-    bgColor: 'bg-indigo-500/10',
-    borderColor: 'group-hover:border-indigo-500/30',
+    color: 'text-purple-600', 
+    bgColor: 'bg-purple-50',
+    borderColor: 'group-hover:border-purple-500/30',
     href: '/reading',
     desc: 'Luyện tập với các đoạn văn học thuật và các dạng câu hỏi thực tế.'
   },
   { 
     name: 'Kỹ năng Nghe', 
     icon: Headphones, 
-    color: 'text-emerald-400', 
-    bgColor: 'bg-emerald-500/10',
-    borderColor: 'group-hover:border-emerald-500/30',
+    color: 'text-purple-600', 
+    bgColor: 'bg-purple-50',
+    borderColor: 'group-hover:border-purple-500/30',
     href: '/listening',
     desc: 'Cải thiện kỹ năng nghe với nhiều giọng đọc và tốc độ khác nhau.'
   },
   { 
     name: 'Kỹ năng Viết', 
     icon: PenTool, 
-    color: 'text-rose-400', 
-    bgColor: 'bg-rose-500/10',
-    borderColor: 'group-hover:border-rose-500/30',
+    color: 'text-purple-600', 
+    bgColor: 'bg-purple-50',
+    borderColor: 'group-hover:border-purple-500/30',
     href: '/writing',
     desc: 'Hoàn thiện cấu trúc bài viết Task 1 & 2 với sự hỗ trợ từ AI.'
   },
   { 
     name: 'Kỹ năng Nói', 
     icon: Mic, 
-    color: 'text-amber-400', 
-    bgColor: 'bg-amber-500/10',
-    borderColor: 'group-hover:border-amber-500/30',
+    color: 'text-purple-600', 
+    bgColor: 'bg-purple-50',
+    borderColor: 'group-hover:border-purple-500/30',
     href: '/speaking',
     desc: 'Mô phỏng phỏng vấn và cải thiện độ trôi chảy khi nói.'
   },
@@ -152,330 +161,256 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="landing-body relative max-w-7xl mx-auto p-4 md:p-8 space-y-16 pt-32 pb-24 overflow-hidden">
-      {/* Welcome Header */}
-      {user && (
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 mb-12"
-        >
-          <div className="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-indigo-500/20">
-            {user.name.charAt(0)}
-          </div>
-          <div>
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Chào mừng trở lại, {user.name}! 👋</h2>
-            <p className="text-slate-500 text-sm font-medium">Hôm nay bạn muốn luyện tập kỹ năng nào?</p>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Stats Section */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-4"
-      >
-        {[
-          { label: 'Bài tập hoàn thành', value: submissions.length, icon: Target, color: 'text-indigo-600' },
-          { label: 'Band trung bình', value: currentBand.toFixed(1), icon: TrendingUp, color: 'text-emerald-600' },
-          { label: 'Mục tiêu', value: targetBand.toFixed(1), icon: Star, color: 'text-amber-600' },
-          { label: 'Điểm mạnh nhất', value: getStrengthsText().split(' ')[1] || '---', icon: Zap, color: 'text-rose-600' },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center justify-center p-6 text-center space-y-2 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500">
-            <stat.icon className={`w-6 h-6 ${stat.color} mb-2`} />
-            <div className="text-3xl font-black text-slate-900">{stat.value}</div>
-            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{stat.label}</div>
-          </div>
-        ))}
-      </motion.div>
-
-      {/* Hero Section */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-16 relative">
-        <div className="flex-1 space-y-8 text-center lg:text-left">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 text-xs font-black uppercase tracking-[0.3em] mb-4"
+    <div className="bg-[#F9FAFB] min-h-screen pt-32 pb-24 px-6">
+      <div className="max-w-7xl mx-auto space-y-16">
+        {/* Welcome Header */}
+        {user && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col md:flex-row md:items-center justify-between gap-8"
           >
-            <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-            AI Learning Dashboard v2.0
+            <div className="flex items-center gap-6">
+              <div className="h-16 w-16 rounded-3xl bg-gradient-purple flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-purple-500/20">
+                {user.name.charAt(0)}
+              </div>
+              <div>
+                <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Chào mừng trở lại, {user.name}! 👋</h2>
+                <p className="text-slate-500 font-medium text-lg">Hôm nay bạn muốn bứt phá kỹ năng nào?</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4 bg-white p-2 rounded-3xl border border-slate-100 shadow-sm">
+              <div className="px-6 py-3 bg-purple-50 rounded-2xl border border-purple-100">
+                <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">Mục tiêu</p>
+                <p className="text-2xl font-black text-purple-600">{targetBand.toFixed(1)}</p>
+              </div>
+              <div className="px-6 py-3 bg-purple-50 rounded-2xl border border-purple-100">
+                <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">Hiện tại</p>
+                <p className="text-2xl font-black text-purple-600">{currentBand.toFixed(1)}</p>
+              </div>
+            </div>
           </motion.div>
-          
-          <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter leading-[0.9]"
-          >
-            Chinh phục <br />
-            <span className="text-indigo-600">IELTS</span> cùng IELTS SKIBIDI
-          </motion.h1>
+        )}
 
-          <motion.p 
+        {/* Hero Dashboard Section */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Chart Section */}
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="lg:col-span-2 space-y-8"
+          >
+            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Tiến trình học tập</h3>
+                  <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Phân tích 5 bài gần nhất</p>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6" />
+                </div>
+              </div>
+              
+              <div className="h-[300px] w-full">
+                {isMounted && (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={progressData}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
+                        dy={10}
+                      />
+                      <YAxis 
+                        domain={[0, 9]} 
+                        axisLine={false} 
+                        tickLine={false}
+                        tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '15px' }}
+                        itemStyle={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '10px' }}
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="band" 
+                        stroke="#8B5CF6" 
+                        strokeWidth={5} 
+                        dot={{ r: 8, fill: '#8B5CF6', strokeWidth: 4, stroke: '#fff' }}
+                        activeDot={{ r: 10, fill: '#EC4899', strokeWidth: 4, stroke: '#fff' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Skills Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {skills.map((skill, i) => (
+                <Link key={i} href={skill.href} className="group">
+                  <motion.div 
+                    whileHover={{ y: -8 }}
+                    className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-lg hover:shadow-2xl transition-all duration-500 text-center space-y-4"
+                  >
+                    <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-purple text-white flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform`}>
+                      <skill.icon className="w-8 h-8" />
+                    </div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-purple-600 transition-colors">{skill.name}</div>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Badges Section */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl space-y-10"
+            >
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Huy hiệu thành tích</h3>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mở khóa các cột mốc quan trọng</p>
+                </div>
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-sm">
+                  <Award className="w-6 h-6" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                {badges.map((badge, i) => {
+                  const isUnlocked = i < 2; // Mock: first two badges unlocked
+                  return (
+                    <div 
+                      key={badge.id}
+                      className={`relative p-6 rounded-[2rem] border transition-all duration-500 group ${
+                        isUnlocked 
+                        ? 'bg-white border-slate-100 shadow-sm hover:shadow-xl hover:shadow-purple-500/10' 
+                        : 'bg-slate-50/50 border-slate-100 opacity-60'
+                      }`}
+                    >
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 ${
+                          isUnlocked ? `${badge.bgColor} ${badge.color} group-hover:scale-110 group-hover:rotate-6` : 'bg-slate-200 text-slate-400'
+                        }`}>
+                          <badge.icon className="w-8 h-8" />
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className={`text-sm font-black uppercase tracking-tight ${isUnlocked ? 'text-slate-900' : 'text-slate-400'}`}>
+                            {badge.name}
+                          </h4>
+                          <p className="text-[10px] font-medium text-slate-500 leading-tight">
+                            {badge.desc}
+                          </p>
+                        </div>
+                      </div>
+                      {!isUnlocked && (
+                        <div className="absolute top-4 right-4">
+                          <Shield className="w-4 h-4 text-slate-300" />
+                        </div>
+                      )}
+                      {isUnlocked && (
+                        <div className="absolute top-4 right-4">
+                          <CheckCircle className="w-4 h-4 text-purple-600" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Sidebar Analysis Section */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-slate-600 font-medium text-lg md:text-xl leading-relaxed max-w-2xl"
+            className="space-y-8"
           >
-            Nền tảng luyện thi IELTS ứng dụng trí tuệ nhân tạo thế hệ mới. <br />
-            Mục tiêu của bạn là Band <span className="text-indigo-600 font-black tracking-wider underline decoration-indigo-500/30 underline-offset-8">{targetBand.toFixed(1)}</span>. 
-          </motion.p>
+            {/* Radar Chart */}
+            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl space-y-8">
+              <div className="text-center space-y-2">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Phân tích kỹ năng</h3>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Điểm mạnh & Điểm yếu</p>
+              </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-wrap gap-4 justify-center lg:justify-start pt-4"
-          >
-            <Link href="/writing" className="btn-primary flex items-center gap-3 group">
-              Bắt đầu luyện tập
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <button className="btn-secondary group relative overflow-hidden">
-              <span className="relative z-10">Xem lộ trình học</span>
-              <div className="absolute inset-0 bg-indigo-50 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
-            </button>
+              <div className="h-[250px] w-full">
+                {isMounted && (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={descriptorData}>
+                      <PolarGrid stroke="#f1f5f9" />
+                      <PolarAngleAxis 
+                        dataKey="subject" 
+                        tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 800 }} 
+                      />
+                      <Radar
+                        name="Kỹ năng"
+                        dataKey="A"
+                        stroke="#8B5CF6"
+                        fill="#8B5CF6"
+                        fillOpacity={0.15}
+                        strokeWidth={4}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+
+              <div className="bg-purple-50 p-6 rounded-3xl border border-purple-100">
+                <div className="flex items-center gap-3 mb-2">
+                  <Zap className="w-5 h-5 text-purple-600" />
+                  <span className="text-xs font-black text-purple-600 uppercase tracking-widest">AI Nhận xét</span>
+                </div>
+                <p className="text-slate-600 text-sm font-bold leading-relaxed">
+                  {getStrengthsText()}
+                </p>
+              </div>
+            </div>
+
+            {/* Target Progress */}
+            <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 space-y-8 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-[60px] rounded-full" />
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Mục tiêu Band {targetBand.toFixed(1)}</h3>
+                  <div className="text-purple-600 font-black text-2xl">{Math.round(progressPercent)}%</div>
+                </div>
+                
+                <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPercent}%` }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    className="h-full bg-gradient-purple shadow-[0_0_15px_rgba(147,51,234,0.3)]"
+                  />
+                </div>
+                
+                <p className="text-slate-500 text-xs font-bold leading-relaxed">
+                  Bạn chỉ còn cách mục tiêu <span className="text-purple-600 font-black">{(targetBand - currentBand).toFixed(1)} band</span> nữa thôi. Cố lên, no cap! 🚀
+                </p>
+              </div>
+            </div>
           </motion.div>
         </div>
 
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", damping: 20 }}
-          className="relative group w-full lg:w-auto"
-        >
-          <div className="absolute inset-0 bg-indigo-500/5 blur-[120px] rounded-full group-hover:bg-indigo-500/10 transition-all duration-700" />
-          <div className="relative bg-white border border-slate-100 rounded-[2.5rem] p-10 text-center space-y-8 min-w-[340px] shadow-2xl shadow-indigo-500/5 animate-float">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-[2.5rem] bg-indigo-600 shadow-2xl shadow-indigo-500/20 mb-4 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-              <Target className="w-12 h-12 text-white" />
-            </div>
-            <div className="space-y-2">
-              <span className="text-xs font-black text-indigo-600 uppercase tracking-[0.3em]">Trình độ hiện tại</span>
-              <div className="text-8xl font-black text-slate-900 tracking-tighter tabular-nums">
-                {currentBand.toFixed(1)}
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="w-full h-3 bg-slate-50 rounded-full overflow-hidden p-0.5 border border-slate-100">
-                <motion.div 
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressPercent}%` }}
-                  transition={{ duration: 1.5, ease: "easeOut" }}
-                  className="h-full bg-indigo-600 rounded-full"
-                />
-              </div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex justify-between">
-                <span>Khởi đầu</span>
-                <span>{progressPercent.toFixed(0)}% Mục tiêu</span>
-                <span>Band {targetBand.toFixed(1)}</span>
-              </p>
-            </div>
-          </div>
-        </motion.div>
+        {/* Footer */}
+        <footer className="pt-20 border-t border-slate-100 text-center space-y-6">
+          <Link href="/" className="logo text-3xl font-black inline-flex items-center gap-3">
+            <span className="text-4xl">🚀</span>
+            <span className="text-gradient">IELTS SKIBIDI</span>
+          </Link>
+          <p className="text-slate-400 text-xs font-black uppercase tracking-widest">
+            © 2026 IELTS SKIBIDI. All rights reserved. No cap, just band.
+          </p>
+        </footer>
       </div>
-
-      {/* Skills Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
-        {skills.map((skill, index) => (
-          <motion.div
-            key={skill.name}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * index }}
-          >
-            <Link 
-              href={skill.href} 
-              className={`group bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm flex flex-col items-start gap-6 hover:border-indigo-500/20 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500`}
-            >
-              <div className={`p-4 rounded-2xl ${skill.bgColor} ${skill.color} transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
-                <skill.icon className="w-8 h-8" />
-              </div>
-              <div className="space-y-3">
-                <h3 className="text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                  {skill.name}
-                </h3>
-                <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">
-                  {skill.desc}
-                </p>
-              </div>
-              <div className={`mt-auto pt-4 flex items-center gap-2 text-xs font-bold uppercase tracking-widest ${skill.color} opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-2 group-hover:translate-y-0`}>
-                Luyện tập ngay <ArrowRight className="w-3 h-3" />
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Radar Chart */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="lg:col-span-1 bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-10 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500"
-        >
-          <div className="space-y-2">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Cơ cấu Kỹ năng</h2>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Phân tích chi tiết theo tiêu chí</p>
-          </div>
-          <div className="h-[320px] -mx-4 min-h-[320px]">
-            {isMounted && (
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={descriptorData}>
-                  <PolarGrid stroke="#e2e8f0" strokeDasharray="3 3" opacity={0.5} />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 900 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 9]} tick={false} axisLine={false} />
-                  <Radar 
-                    name="Thí sinh" 
-                    dataKey="A" 
-                    stroke="#6366f1" 
-                    strokeWidth={3}
-                    fill="#6366f1" 
-                    fillOpacity={0.1} 
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-          <div className="pt-8 border-t border-slate-50 flex items-start gap-4 text-slate-500 text-sm font-medium leading-relaxed bg-indigo-50/30 -mx-10 -mb-10 p-10 rounded-b-[2rem]">
-            <div className="mt-1 p-2 bg-indigo-100 rounded-xl border border-indigo-200">
-              <TrendingUp className="w-4 h-4 text-indigo-600" />
-            </div>
-            {getStrengthsText()}
-          </div>
-        </motion.div>
-
-        {/* Line Chart */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="lg:col-span-2 bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-10 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500"
-        >
-          <div className="flex items-center justify-between">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Tiến độ Phát triển</h2>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Lịch sử rèn luyện gần nhất</p>
-            </div>
-            {submissions.length > 1 && (
-              <div className="px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                <TrendingUp className="w-3 h-3" />
-                +{ (submissions[0].band - submissions[submissions.length-1].band).toFixed(1) } Band
-              </div>
-            )}
-          </div>
-          <div className="h-[320px] -mx-4 min-h-[320px]">
-            {isMounted && (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={progressData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} opacity={0.3} />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
-                    dy={15}
-                  />
-                  <YAxis 
-                    domain={[0, 9]} 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
-                    dx={-10}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#ffffff', 
-                      borderRadius: '1.25rem', 
-                      border: '1px solid #f1f5f9',
-                      boxShadow: '0 25px 50px -12px rgba(0,0,0,0.05)',
-                      padding: '1rem'
-                    }}
-                    itemStyle={{ color: '#0f172a', fontWeight: 900 }}
-                    labelStyle={{ color: '#94a3b8', marginBottom: '0.5rem', fontWeight: 900, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em' }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="band" 
-                    stroke="#6366f1" 
-                    strokeWidth={5} 
-                    dot={{ r: 6, fill: '#6366f1', strokeWidth: 3, stroke: '#ffffff' }}
-                    activeDot={{ r: 8, fill: '#6366f1', strokeWidth: 4, stroke: '#ffffff' }}
-                    animationDuration={2000}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Recent Submissions Table */}
-      {submissions.length > 0 && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-          className="bg-white border border-slate-100 rounded-[2.5rem] p-10 space-y-10 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-500"
-        >
-          <div className="space-y-2">
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Hoạt động Gần đây</h2>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">5 bài nộp mới nhất của bạn</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-slate-50">
-                  <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Kỹ năng</th>
-                  <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Điểm số</th>
-                  <th className="pb-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Ngày hoàn thành</th>
-                  <th className="pb-6"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {submissions.slice(0, 5).map((sub) => (
-                  <tr key={sub.id} className="group hover:bg-indigo-50/30 transition-colors">
-                    <td className="py-6 pr-4">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center border border-white/5 shadow-inner ${
-                          sub.skill === 'reading' ? 'bg-indigo-500/10 text-indigo-400' :
-                          sub.skill === 'listening' ? 'bg-emerald-500/10 text-emerald-400' :
-                          sub.skill === 'writing' ? 'bg-rose-500/10 text-rose-400' :
-                          'bg-amber-500/10 text-amber-400'
-                        }`}>
-                          {sub.skill === 'reading' && <BookOpen className="w-5 h-5" />}
-                          {sub.skill === 'listening' && <Headphones className="w-5 h-5" />}
-                          {sub.skill === 'writing' && <PenTool className="w-5 h-5" />}
-                          {sub.skill === 'speaking' && <Mic className="w-5 h-5" />}
-                        </div>
-                        <span className="font-black text-slate-200 capitalize tracking-tight">{sub.skill}</span>
-                      </div>
-                    </td>
-                    <td className="py-6">
-                      <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-xl bg-slate-800/50 border border-white/5 text-white font-black text-sm tabular-nums">
-                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                        {sub.band.toFixed(1)}
-                      </span>
-                    </td>
-                    <td className="py-6 text-sm font-bold text-slate-500">
-                      {new Date(sub.date).toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' })}
-                    </td>
-                    <td className="py-6 text-right">
-                      <Link 
-                        href={`/${sub.skill}`}
-                        className="px-6 py-2 rounded-xl bg-indigo-600/10 text-indigo-400 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 hover:bg-indigo-600 hover:text-white transition-all duration-300"
-                      >
-                        Luyện tập lại
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
-      )}
     </div>
   );
 }
