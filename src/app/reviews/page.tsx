@@ -224,7 +224,7 @@ function ReviewCard({ review, index }: { review: any; index: number }) {
         delay: index * 0.02,
         layout: { duration: 0.3 }
       }}
-      className={`${sizeClasses[review.size as keyof 'small' | 'wide']} group relative overflow-hidden rounded-[2.5rem] glass-premium border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500 flex flex-col h-full min-h-[340px]`}
+      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group relative overflow-hidden rounded-[2.5rem] glass-premium border-white/5 bg-slate-900/40 hover:bg-slate-900/60 transition-all duration-500 flex flex-col h-full min-h-[340px]`}
     >
       {/* Background Glow */}
       <div className={`absolute -top-24 -right-24 w-64 h-64 bg-gradient-to-br ${review.accent} to-transparent rounded-full blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
