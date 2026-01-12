@@ -7,13 +7,7 @@ import {
 import { 
   BookOpen, Headphones, PenTool, Mic, ArrowRight, Zap, Target, TrendingUp, Star, Award, Shield, Flame, CheckCircle
 } from 'lucide-react';
-
-const badges = [
-  { id: 'streak', name: '7 Ngày Bất Bại', icon: Flame, color: 'text-orange-500', bgColor: 'bg-orange-50', desc: 'Duy trì học tập 7 ngày liên tiếp' },
-  { id: 'top-reading', name: 'Thánh Đọc', icon: BookOpen, color: 'text-purple-600', bgColor: 'bg-purple-50', desc: 'Đạt Band 8.0+ kỹ năng Đọc' },
-  { id: 'pro-writer', name: 'Cây Bút Trẻ', icon: PenTool, color: 'text-blue-500', bgColor: 'bg-blue-50', desc: 'Hoàn thành 10 bài viết Task 2' },
-  { id: 'speaker', name: 'Diễn Thuyết Gia', icon: Mic, color: 'text-rose-500', bgColor: 'bg-rose-50', desc: 'Luyện Speaking hơn 60 phút' },
-];
+import BadgeSection from "@/components/BadgeSection";
 import Link from "next/link";
 import { useUser } from "@/context/UserContext";
 import { motion } from "framer-motion";
@@ -271,59 +265,9 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl space-y-10"
+              className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl"
             >
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Huy hiệu thành tích</h3>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mở khóa các cột mốc quan trọng</p>
-                </div>
-                <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-sm">
-                  <Award className="w-6 h-6" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {badges.map((badge, i) => {
-                  const isUnlocked = i < 2; // Mock: first two badges unlocked
-                  return (
-                    <div 
-                      key={badge.id}
-                      className={`relative p-6 rounded-[2rem] border transition-all duration-500 group ${
-                        isUnlocked 
-                        ? 'bg-white border-slate-100 shadow-sm hover:shadow-xl hover:shadow-purple-500/10' 
-                        : 'bg-slate-50/50 border-slate-100 opacity-60'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center text-center space-y-4">
-                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-500 ${
-                          isUnlocked ? `${badge.bgColor} ${badge.color} group-hover:scale-110 group-hover:rotate-6` : 'bg-slate-200 text-slate-400'
-                        }`}>
-                          <badge.icon className="w-8 h-8" />
-                        </div>
-                        <div className="space-y-1">
-                          <h4 className={`text-sm font-black uppercase tracking-tight ${isUnlocked ? 'text-slate-900' : 'text-slate-400'}`}>
-                            {badge.name}
-                          </h4>
-                          <p className="text-[10px] font-medium text-slate-500 leading-tight">
-                            {badge.desc}
-                          </p>
-                        </div>
-                      </div>
-                      {!isUnlocked && (
-                        <div className="absolute top-4 right-4">
-                          <Shield className="w-4 h-4 text-slate-300" />
-                        </div>
-                      )}
-                      {isUnlocked && (
-                        <div className="absolute top-4 right-4">
-                          <CheckCircle className="w-4 h-4 text-purple-600" />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              <BadgeSection />
             </motion.div>
           </motion.div>
 
