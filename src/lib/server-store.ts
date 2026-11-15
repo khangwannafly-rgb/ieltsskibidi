@@ -151,6 +151,11 @@ export function computeUserAnalytics(email: string) {
   };
 }
 
+export function getAllServerUsers(): ServerUser[] {
+  const store = readStore();
+  return Object.values(store.users);
+}
+
 export function getStoreStats() {
   const store = readStore();
   const users = Object.values(store.users);

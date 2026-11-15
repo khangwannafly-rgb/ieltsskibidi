@@ -1,20 +1,88 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 import { readJsonBody } from "@/lib/ai-response";
-import { upsertServerUser, getStoreStats, ServerSubmission } from "@/lib/server-store";
+import {
+  upsertServerUser,
+  getAllServerUsers,
+  getStoreStats,
+  ServerSubmission,
+} from "@/lib/server-store";
+import {
+  DRIVE_LINKS,
+  generateScoresSpreadsheetCsv,
+  generateVocabSpreadsheetCsv,
+  generateAcademicReportHtml,
+} from "@/lib/drive-export";
+import { VocabItem } from "@/lib/vocabulary";
 
-const DRIVE_FOLDER_ID = "13yq-4zP2dTVzYdBqRClLNrP3aa1HqQPk";
-const DRIVE_STORE_FILE_ID = "1GTCMK2d6X9cr1WtjZM0nTtVq_4kZMWa9";
+function writeExportSnapshots(customVocab: VocabItem[] = []) {
+  try {
+    const exportDir = path.join(process.cwd(), ".data", "exports");
+    if (!fs.existsSync(exportDir)) {
+      fs.mkdirSync(exportDir, { recursive: true });
+    }
+    const users = getAllServerUsers();
+    fs.writeFileSync(
+      path.join(exportDir, "Bảng_Điểm_IELTS_SKIBIDI.csv"),
+      generateScoresSpreadsheetCsv(users),
+      "utf-8"
+    );
+    fs.writeFileSync(
+      path.join(exportDir, "Sổ_Tay_Từ_Vựng_IELTS_SKIBIDI.csv"),
+      generateVocabSpreadsheetCsv(customVocab),
+      "utf-8"
+    );
+    fs.writeFileSync(
+      path.join(exportDir, "Báo_Cáo_Học_Thuật_IELTS_SKIBIDI.html"),
+      generateAcademicReportHtml(users, customVocab),
+      "utf-8"
+    );
+  } catch {
+    // Bỏ qua lỗi ghi file nếu chạy trên môi trường read-only
+  }
+}
 
-export async function GET() {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const format = searchParams.get("format");
+  const users = getAllServerUsers();
+
+  if (format === "html") {
+    const html = generateAcademicReportHtml(users);
+    return new NextResponse(html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+      },
+    });
+  }
+
+  if (format === "scores-csv") {
+    const csv = generateScoresSpreadsheetCsv(users);
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": 'attachment; filename="Bang_Diem_IELTS_SKIBIDI.csv"',
+      },
+    });
+  }
+
+  if (format === "vocab-csv") {
+    const csv = generateVocabSpreadsheetCsv();
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": 'attachment; filename="So_Tay_Tu_Vung_IELTS_SKIBIDI.csv"',
+      },
+    });
+  }
+
   const stats = getStoreStats();
   return NextResponse.json({
     connected: true,
     account: "khangwannafly@gmail.com",
     folderName: "IELTS SKIBIDI - Database & Source Backup",
-    folderId: DRIVE_FOLDER_ID,
-    folderUrl: `https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}`,
-    storeFileId: DRIVE_STORE_FILE_ID,
-    storeFileUrl: `https://drive.google.com/file/d/${DRIVE_STORE_FILE_ID}/view`,
+    ...DRIVE_LINKS,
     stats,
   });
 }
@@ -32,13 +100,14 @@ export async function POST(req: Request) {
       badges?: string[];
       submissions?: ServerSubmission[];
     };
+    customVocab?: VocabItem[];
   }>(req);
 
   if (body.user?.email) {
     upsertServerUser({
       id: body.user.id,
       email: body.user.email,
-      name: body.user.name || "Thí sinh IELTS",
+      name: body.user.name || "Nguyễn Khang",
       targetScore: body.user.targetScore,
       currentLevel: body.user.currentLevel,
       streak: body.user.streak,
@@ -48,11 +117,12 @@ export async function POST(req: Request) {
     });
   }
 
+  writeExportSnapshots(body.customVocab || []);
+
   return NextResponse.json({
     synced: true,
     syncedAt: new Date().toISOString(),
-    folderUrl: `https://drive.google.com/drive/folders/${DRIVE_FOLDER_ID}`,
-    storeFileUrl: `https://drive.google.com/file/d/${DRIVE_STORE_FILE_ID}/view`,
+    ...DRIVE_LINKS,
     stats: getStoreStats(),
   });
 }

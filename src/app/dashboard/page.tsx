@@ -119,7 +119,6 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);
 
@@ -519,21 +518,44 @@ export default function Dashboard() {
                     <CloudUpload className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900">Google Drive Cloud</h3>
+                    <h3 className="text-sm font-bold text-slate-900">Google Drive Workspace</h3>
                     <p className="text-[11px] text-slate-500">khangwannafly@gmail.com</p>
                   </div>
                 </div>
                 <span className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase">
-                  Đã kết nối
+                  Docs & Sheets
                 </span>
               </div>
 
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Thư mục lưu trữ:{" "}
-                <strong className="text-slate-900">
-                  IELTS SKIBIDI - Database & Source Backup
-                </strong>
-              </p>
+              <div className="space-y-1.5">
+                <a
+                  href="https://docs.google.com/document/d/1S2W98lOaWLOwIDrJgRoiUjxp7rfTSw1tMc72FrlajDM/edit"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 px-3 rounded-lg bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200/80 text-blue-900 text-xs font-semibold flex items-center justify-between transition-colors"
+                >
+                  <span>📄 Hồ Sơ & Báo Cáo Học Thuật (Google Docs)</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-blue-700 shrink-0" />
+                </a>
+                <a
+                  href="https://docs.google.com/spreadsheets/d/1W9Gl9LoQm6zL3cvOnr7LjQlkhF_cF_hrse2SYWSbxHQ/edit"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 px-3 rounded-lg bg-emerald-50/70 hover:bg-emerald-100/80 border border-emerald-200/80 text-emerald-900 text-xs font-semibold flex items-center justify-between transition-colors"
+                >
+                  <span>📊 Bảng Điểm & Lịch Sử Thi (Google Sheets)</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+                </a>
+                <a
+                  href="https://docs.google.com/spreadsheets/d/1FQdNal7cuivifJQYczeNSXyB854wD3Up_CoNiB5WL_w/edit"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2 px-3 rounded-lg bg-amber-50/70 hover:bg-amber-100/80 border border-amber-200/80 text-amber-900 text-xs font-semibold flex items-center justify-between transition-colors"
+                >
+                  <span>📗 Sổ Tay Từ Vựng C1–C2 (Google Sheets)</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                </a>
+              </div>
 
               {driveSyncMsg && (
                 <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
@@ -541,22 +563,22 @@ export default function Dashboard() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <button
                   type="button"
                   onClick={handleSyncDrive}
                   disabled={driveSyncing}
                   className="py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors disabled:opacity-50"
                 >
-                  {driveSyncing ? "Đang đồng bộ..." : "Đồng bộ ngay"}
+                  {driveSyncing ? "Đang đồng bộ..." : "Cập nhật báo cáo"}
                 </button>
                 <a
-                  href="https://drive.google.com/drive/folders/13yq-4zP2dTVzYdBqRClLNrP3aa1HqQPk"
+                  href="/api/drive?format=html"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold inline-flex items-center justify-center gap-1 transition-colors"
                 >
-                  <span>Mở Drive</span>
+                  <span>Bản in Báo cáo</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
               </div>
