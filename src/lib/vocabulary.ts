@@ -4,6 +4,10 @@ export type VocabTopic =
   | "Education"
   | "Urbanisation"
   | "Economy & Society"
+  | "Health & Psychology"
+  | "Crime & Law"
+  | "Media & Culture"
+  | "Science & Innovation"
   | "Academic Task 1"
   | "Saved from Tests";
 
@@ -458,7 +462,302 @@ export const INITIAL_ACADEMIC_VOCAB: VocabItem[] = [
     synonyms: ["negatively correlated", "moved in opposite directions"],
     status: "learning",
   },
+
+  // Health & Psychology
+  {
+    id: "voc_25",
+    word: "sedentary lifestyle",
+    phonetic: "/ˈsed.ən.tər.i ˈlaɪf.staɪl/",
+    partOfSpeech: "noun phrase",
+    level: "C1",
+    topic: "Health & Psychology",
+    meaning: "Lối sống ít vận động, ngồi nhiều (nguyên nhân gây bệnh mãn tính)",
+    collocations: [
+      "lead an increasingly sedentary lifestyle",
+      "combat the prevalence of a sedentary lifestyle",
+      "adverse repercussions of a sedentary lifestyle",
+    ],
+    example:
+      "The shift towards desk-bound occupations has led millions of urban residents to adopt an increasingly sedentary lifestyle.",
+    synonyms: ["physical inactivity", "desk-bound routine"],
+    status: "learning",
+  },
+  {
+    id: "voc_26",
+    word: "cognitive resilience",
+    phonetic: "/ˈkɒɡ.nə.tɪv rɪˈzɪl.jəns/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Health & Psychology",
+    meaning: "Khả năng phục hồi nhận thức và tâm lý trước áp lực hoặc lão hóa",
+    collocations: [
+      "bolster cognitive resilience",
+      "foster psychological and cognitive resilience",
+      "preserve cognitive resilience in later life",
+    ],
+    example:
+      "Lifelong bilingualism has been clinically shown to bolster cognitive resilience against age-related neurological decline.",
+    synonyms: ["mental fortitude", "neuroplastic adaptability"],
+    status: "learning",
+  },
+  {
+    id: "voc_27",
+    word: "preventative healthcare",
+    phonetic: "/prɪˈven.tə.tɪv ˈhelθ.keər/",
+    partOfSpeech: "noun phrase",
+    level: "C1",
+    topic: "Health & Psychology",
+    meaning: "Y tế dự phòng (phòng bệnh trước khi phát sinh thay vì chỉ điều trị)",
+    collocations: [
+      "allocate funding to preventative healthcare",
+      "prioritise preventative healthcare over curative medicine",
+      "nationwide preventative healthcare campaigns",
+    ],
+    example:
+      "Allocating state budgets to preventative healthcare is far more cost-effective than subsidising late-stage clinical interventions.",
+    synonyms: ["prophylactic medicine", "early-stage health intervention"],
+    status: "learning",
+  },
+  {
+    id: "voc_28",
+    word: "chronic sleep deprivation",
+    phonetic: "/ˈkrɒn.ɪk sliːp ˌdep.rɪˈveɪ.ʃən/",
+    partOfSpeech: "noun phrase",
+    level: "C1",
+    topic: "Health & Psychology",
+    meaning: "Tình trạng thiếu ngủ mãn tính kéo dài",
+    collocations: [
+      "suffer from chronic sleep deprivation",
+      "exacerbate chronic sleep deprivation among adolescents",
+    ],
+    example:
+      "Excessive late-night screen exposure has triggered an epidemic of chronic sleep deprivation among secondary school students.",
+    synonyms: ["persistent insomnia", "prolonged sleep deficit"],
+    status: "learning",
+  },
+
+  // Crime & Law
+  {
+    id: "voc_29",
+    word: "recidivism",
+    phonetic: "/rɪˈsɪd.ɪ.vɪ.zəm/",
+    partOfSpeech: "noun",
+    level: "C2",
+    topic: "Crime & Law",
+    meaning: "Tình trạng tái phạm tội sau khi đã chấp hành án",
+    collocations: [
+      "curb recidivism rates",
+      "high rate of juvenile recidivism",
+      "vocational rehabilitation to reduce recidivism",
+    ],
+    example:
+      "Correctional systems that focus on vocational rehabilitation rather thanpurely punitive measures consistently achieve lower recidivism rates.",
+    synonyms: ["reoffending", "relapse into crime"],
+    status: "learning",
+  },
+  {
+    id: "voc_30",
+    word: "deterrent",
+    phonetic: "/dɪˈter.ənt/",
+    partOfSpeech: "noun",
+    level: "C1",
+    topic: "Crime & Law",
+    meaning: "Biện pháp răn đe, ngăn chặn hành vi phạm pháp",
+    collocations: [
+      "act as a potent deterrent against",
+      "serve as aeffective legal deterrent",
+      "question the efficacy of capital punishment as a deterrent",
+    ],
+    example:
+      "Strict financial penalties can act as a potent deterrent against corporate environmental negligence.",
+    synonyms: ["disincentive", "preventative measure"],
+    status: "learning",
+  },
+  {
+    id: "voc_31",
+    word: "social reintegration",
+    phonetic: "/ˈsəʊ.ʃəl ˌriː.ɪn.tɪˈɡreɪ.ʃən/",
+    partOfSpeech: "noun phrase",
+    level: "C1",
+    topic: "Crime & Law",
+    meaning: "Sự tái hòa nhập cộng đồng cho người từng lầm lỡ",
+    collocations: [
+      "facilitate the smooth social reintegration of ex-offenders",
+      "barriers to social reintegration",
+    ],
+    example:
+      "Providing stable employment opportunities is paramount to facilitating the social reintegration of former offenders.",
+    synonyms: ["rehabilitation into society", "community assimilation"],
+    status: "learning",
+  },
+  {
+    id: "voc_32",
+    word: "regulatory oversight",
+    phonetic: "/ˈreɡ.jə.lə.tər.i ˈəʊ.və.saɪt/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Crime & Law",
+    meaning: "Sự giám sát và quản lý theo quy định pháp luật",
+    collocations: [
+      "stringent regulatory oversight",
+      "evade regulatory oversight",
+      "subject AI deployment to rigorous regulatory oversight",
+    ],
+    example:
+      "Without stringent regulatory oversight, commercial data brokers may exploit consumer privacy with impunity.",
+    synonyms: ["statutory supervision", "institutional monitoring"],
+    status: "learning",
+  },
+
+  // Media & Culture
+  {
+    id: "voc_33",
+    word: "cultural homogenisation",
+    phonetic: "/ˈkʌl.tʃər.əl həˌmɒdʒ.ə.naɪˈzeɪ.ʃən/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Media & Culture",
+    meaning: "Sự đồng nhất hóa văn hóa (làm phai nhạt bản sắc riêng của từng địa phương)",
+    collocations: [
+      "accelerate global cultural homogenisation",
+      "threaten indigenous traditions through cultural homogenisation",
+    ],
+    example:
+      "Critics contend that the global dominance of Western entertainment conglomerates accelerates cultural homogenisation.",
+    synonyms: ["cultural standardisation", "erosion of cultural diversity"],
+    status: "learning",
+  },
+  {
+    id: "voc_34",
+    word: "echo chamber",
+    phonetic: "/ˈek.əʊ ˌtʃeɪm.bər/",
+    partOfSpeech: "noun phrase",
+    level: "C1",
+    topic: "Media & Culture",
+    meaning: "Buồng vang thông tin (môi trường mạng chỉ lặp lại các quan điểm giống nhau)",
+    collocations: [
+      "ideological echo chambers on social media",
+      "entrench polarisation within digital echo chambers",
+    ],
+    example:
+      "Personalised news feeds inadvertently trap users inside ideological echo chambers, stifling constructive public discourse.",
+    synonyms: ["information bubble", "filter bubble"],
+    status: "learning",
+  },
+  {
+    id: "voc_35",
+    word: "intangible cultural heritage",
+    phonetic: "/ɪnˈtæn.dʒə.bəl ˈkʌl.tʃər.əl ˈher.ɪ.tɪdʒ/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Media & Culture",
+    meaning: "Di sản văn hóa phi vật thể (phong tục, nghệ thuật truyền thống, ngôn ngữ)",
+    collocations: [
+      "safeguard intangible cultural heritage",
+      "revitalise endangered intangible cultural heritage",
+    ],
+    example:
+      "Digital archiving offers a viable avenue to safeguard intangible cultural heritage for future generations.",
+    synonyms: ["ancestral traditions", "non-material heritage"],
+    status: "learning",
+  },
+  {
+    id: "voc_36",
+    word: "sensationalism",
+    phonetic: "/senˈseɪ.ʃən.əl.ɪ.zəm/",
+    partOfSpeech: "noun",
+    level: "C1",
+    topic: "Media & Culture",
+    meaning: "Xu hướng giật gân câu khách trên truyền thông báo chí",
+    collocations: [
+      "resort to media sensationalism",
+      "prioritise sensationalism over journalistic integrity",
+    ],
+    example:
+      "Driven by advertising revenue, many online outlets prioritise sensationalism over objective investigative reporting.",
+    synonyms: ["yellow journalism", "fear-mongering"],
+    status: "learning",
+  },
+
+  // Science & Innovation
+  {
+    id: "voc_37",
+    word: "paradigm shift",
+    phonetic: "/ˈpær.ə.daɪm ʃɪft/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Science & Innovation",
+    meaning: "Sự thay đổi mang tính bước ngoặt trong tư duy hoặc phương thức hoạt động",
+    collocations: [
+      "catalyse a fundamental paradigm shift",
+      "usher in a paradigm shift in medical diagnostics",
+    ],
+    example:
+      "Generative artificial intelligence has catalysed a fundamental paradigm shift in how scientific research is synthesised.",
+    synonyms: ["revolutionary transformation", "sea change"],
+    status: "learning",
+  },
+  {
+    id: "voc_38",
+    word: "empirical scrutiny",
+    phonetic: "/ɪmˈpɪr.ɪ.kəl ˈskruː.tɪ.ni/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Science & Innovation",
+    meaning: "Sự kiểm chứng, thẩm định khắt khe dựa trên bằng chứng thực nghiệm",
+    collocations: [
+      "withstand rigorous empirical scrutiny",
+      "subject a hypothesis to empirical scrutiny",
+    ],
+    example:
+      "Any newly proposed pharmaceutical treatment must withstand rigorous empirical scrutiny before receiving clinical approval.",
+    synonyms: ["experimental verification", "scientific validation"],
+    status: "learning",
+  },
+  {
+    id: "voc_39",
+    word: "ethical quandary",
+    phonetic: "/ˈeθ.ɪ.kəl ˈkwɒn.drɪ/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Science & Innovation",
+    meaning: "Tình thế tiến thoái lưỡng nan về mặt đạo đức (trong khoa học, y sinh)",
+    collocations: [
+      "pose a profound ethical quandary",
+      "navigate complex ethical quandaries in gene editing",
+    ],
+    example:
+      "Advances in human embryonic gene editing pose a profound ethical quandary for international bioethicists.",
+    synonyms: ["moral dilemma", "bioethical predicament"],
+    status: "learning",
+  },
+  {
+    id: "voc_40",
+    word: "planned obsolescence",
+    phonetic: "/plænd ˌɒb.səlˈes.əns/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Science & Innovation",
+    meaning: "Chiến lược lỗi thời có tính toán (sản xuất đồ nhanh hỏng để kích cầu mua mới)",
+    collocations: [
+      "curb corporate planned obsolescence",
+      "electronic waste driven by planned obsolescence",
+    ],
+    example:
+      "Right-to-repair legislation aims to curb corporate planned obsolescence and extend the lifespan of consumer electronics.",
+    synonyms: ["built-in obsolescence", "premature product replacement"],
+    status: "learning",
+  },
 ];
+
+export function shuffleArray<T>(input: readonly T[]): T[] {
+  const arr = [...input];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export function loadVocabVault(): VocabItem[] {
   if (typeof window === "undefined") return INITIAL_ACADEMIC_VOCAB;
@@ -468,9 +767,20 @@ export function loadVocabVault(): VocabItem[] {
       localStorage.setItem(VOCAB_STORAGE_KEY, JSON.stringify(INITIAL_ACADEMIC_VOCAB));
       return INITIAL_ACADEMIC_VOCAB;
     }
-    const parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as VocabItem[];
     if (!Array.isArray(parsed) || parsed.length === 0) {
       return INITIAL_ACADEMIC_VOCAB;
+    }
+
+    // Tự động hợp nhất các từ học thuật C1-C2 mới bổ sung vào kho lưu trữ hiện có
+    const existingWords = new Set(parsed.map((item) => item.word.toLowerCase()));
+    const missingBuiltins = INITIAL_ACADEMIC_VOCAB.filter(
+      (builtin) => !existingWords.has(builtin.word.toLowerCase())
+    );
+    if (missingBuiltins.length > 0) {
+      const merged = [...parsed, ...missingBuiltins];
+      localStorage.setItem(VOCAB_STORAGE_KEY, JSON.stringify(merged));
+      return merged;
     }
     return parsed;
   } catch {
@@ -490,12 +800,14 @@ export function saveVocabVault(items: VocabItem[]) {
 
 export function addWordToVault(partial: {
   word: string;
+  phonetic?: string;
   meaning?: string;
   example?: string;
   topic?: VocabTopic;
   level?: "C1" | "C2";
   partOfSpeech?: string;
   collocations?: string[];
+  synonyms?: string[];
 }): { added: boolean; item: VocabItem } {
   const cleanWord = partial.word.trim();
   const current = loadVocabVault();
@@ -507,7 +819,7 @@ export function addWordToVault(partial: {
   const newItem: VocabItem = {
     id: "voc_custom_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
     word: cleanWord,
-    phonetic: "/IELTS Academic Term/",
+    phonetic: partial.phonetic || "/IELTS Academic Term/",
     partOfSpeech: partial.partOfSpeech || "academic phrase",
     level: partial.level || "C1",
     topic: partial.topic || "Saved from Tests",
@@ -521,7 +833,7 @@ export function addWordToVault(partial: {
     example:
       partial.example?.trim() ||
       `Using "${cleanWord}" accurately in Academic Writing and Speaking helps elevate Lexical Resource to Band 7.5+.`,
-    synonyms: [],
+    synonyms: partial.synonyms || [],
     status: "learning",
     isCustom: true,
   };
@@ -531,11 +843,52 @@ export function addWordToVault(partial: {
   return { added: true, item: newItem };
 }
 
+export function addBatchToVault(batch: Partial<VocabItem>[]): {
+  addedItems: VocabItem[];
+  allItems: VocabItem[];
+} {
+  const current = loadVocabVault();
+  const existingWords = new Set(current.map((v) => v.word.toLowerCase()));
+  const addedItems: VocabItem[] = [];
+
+  for (const item of batch) {
+    const cleanWord = item.word?.trim();
+    if (!cleanWord || existingWords.has(cleanWord.toLowerCase())) continue;
+    existingWords.add(cleanWord.toLowerCase());
+    addedItems.push({
+      id: "voc_rnd_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+      word: cleanWord,
+      phonetic: item.phonetic || "/Academic IPA/",
+      partOfSpeech: item.partOfSpeech || "noun phrase",
+      level: item.level === "C2" ? "C2" : "C1",
+      topic: (item.topic as VocabTopic) || "Economy & Society",
+      meaning: item.meaning || "Thuật ngữ học thuật nâng cao chuẩn IELTS Band 8.0+",
+      collocations:
+        Array.isArray(item.collocations) && item.collocations.length > 0
+          ? item.collocations
+          : [cleanWord],
+      example:
+        item.example ||
+        `Incorporating "${cleanWord}" strengthens lexical precision in academic discourse.`,
+      synonyms: Array.isArray(item.synonyms) ? item.synonyms : [],
+      status: "learning",
+      isCustom: true,
+    });
+  }
+
+  const next = [...addedItems, ...current];
+  saveVocabVault(next);
+  return { addedItems, allItems: next };
+}
+
 export function toggleVocabStatus(id: string): VocabItem[] {
   const current = loadVocabVault();
   const next = current.map((item) =>
     item.id === id
-      ? { ...item, status: item.status === "mastered" ? ("learning" as const) : ("mastered" as const) }
+      ? {
+          ...item,
+          status: item.status === "mastered" ? ("learning" as const) : ("mastered" as const),
+        }
       : item
   );
   saveVocabVault(next);
