@@ -1,5 +1,6 @@
 import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
-import { aiErrorResponse, parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { checkRateLimit, rateLimitExceededResponse, sanitizeTargetBand } from "@/lib/api-guard";
 import { getFallbackListeningTask } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
 
@@ -24,8 +25,13 @@ const LISTENING_FORMATS = [
 ];
 
 export async function POST(req: Request) {
+  const rl = checkRateLimit(req, "gen-listening", 25, 60_000);
+  if (!rl.allowed) return rateLimitExceededResponse(rl.retryAfterSeconds);
+
+  const body = await readJsonBody<{ targetScore: number; part?: number }>(req);
+  const targetScore = sanitizeTargetBand(body.targetScore, 6.5);
+  const part = body.part;
   try {
-    const { targetScore = 6.5, part } = await readJsonBody<{ targetScore: number; part?: number }>(req);
     if (!hasGeminiApiKey()) {
       return NextResponse.json(getFallbackListeningTask(targetScore, part));
     }
@@ -125,6 +131,7 @@ Return ONLY valid JSON:
       answers,
     });
   } catch (error) {
-    return aiErrorResponse(error, "Không thể tạo đề Listening");
+    console.warn("[Listening API] Gemini failed, falling back to Cambridge Listening Bank:", error);
+    return NextResponse.json(getFallbackListeningTask(targetScore, part));
   }
 }

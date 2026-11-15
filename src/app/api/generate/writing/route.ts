@@ -1,14 +1,18 @@
 import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
-import { aiErrorResponse, parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { checkRateLimit, rateLimitExceededResponse, sanitizeTargetBand } from "@/lib/api-guard";
 import { getFallbackWritingTask } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
+  const rl = checkRateLimit(req, "gen-writing", 25, 60_000);
+  if (!rl.allowed) return rateLimitExceededResponse(rl.retryAfterSeconds);
+
+  const body = await readJsonBody<{ type: string; targetScore: number; subType?: string }>(req);
+  const type = body.type === "task1" ? "task1" : "task2";
+  const targetScore = sanitizeTargetBand(body.targetScore, 6.5);
+  const subType = body.subType;
   try {
-    const body = await readJsonBody<{ type: string; targetScore: number; subType?: string }>(req);
-    const type = body.type === "task1" ? "task1" : "task2";
-    const targetScore = body.targetScore ?? 6.5;
-    const subType = body.subType;
     if (!hasGeminiApiKey()) {
       return NextResponse.json(getFallbackWritingTask(type, targetScore, subType));
     }
@@ -117,6 +121,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ...data, task_type: type });
   } catch (error) {
-    return aiErrorResponse(error, "Không thể tạo đề Writing");
+    console.warn("[Writing Generate API] Gemini failed, falling back to Cambridge Writing Bank:", error);
+    return NextResponse.json(getFallbackWritingTask(type, targetScore, subType));
   }
 }

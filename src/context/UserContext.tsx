@@ -145,6 +145,27 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     };
     setUser(newUser);
     persistUser(newUser);
+
+    // Đồng bộ hồ sơ với Server Backend Store (/api/user)
+    try {
+      const res = await fetch('/api/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newUser),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.user && Array.isArray(data.user.submissions) && data.user.submissions.length > 0) {
+          const synced = sanitizeUser(data.user);
+          if (synced) {
+            setUser(synced);
+            persistUser(synced);
+          }
+        }
+      }
+    } catch {
+      // Giữ trạng thái local nếu offline
+    }
   }, []);
 
   const logout = useCallback(() => {
@@ -177,6 +198,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         lastActiveDate: newSubmission.date,
       };
       persistUser(updatedUser);
+
+      // Đồng bộ bài thi mới lên Server Backend (/api/submissions)
+      fetch('/api/submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: updatedUser.email,
+          name: updatedUser.name,
+          submission: newSubmission,
+        }),
+      }).catch(() => {});
+
       return updatedUser;
     });
   }, []);

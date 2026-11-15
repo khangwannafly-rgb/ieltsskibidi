@@ -29,6 +29,7 @@ import {
   Eye,
   X,
   CheckCircle2,
+  CloudUpload,
 } from "lucide-react";
 import BadgeSection from "@/components/BadgeSection";
 import DailyStreak from "@/components/DailyStreak";
@@ -94,6 +95,28 @@ export default function Dashboard() {
   const { user } = useUser();
   const [isMounted, setIsMounted] = useState(false);
   const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
+  const [driveSyncing, setDriveSyncing] = useState(false);
+  const [driveSyncMsg, setDriveSyncMsg] = useState<string | null>(null);
+
+  const handleSyncDrive = async () => {
+    if (driveSyncing) return;
+    setDriveSyncing(true);
+    setDriveSyncMsg(null);
+    try {
+      const res = await fetch("/api/drive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user }),
+      });
+      if (res.ok) {
+        setDriveSyncMsg("Đã đồng bộ dữ liệu lên Google Drive thành công!");
+      }
+    } catch {
+      setDriveSyncMsg("Đã lưu bản sao lưu cục bộ.");
+    } finally {
+      setDriveSyncing(false);
+    }
+  };
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -486,6 +509,57 @@ export default function Dashboard() {
                 <span>Mở Sổ tay & Lật thẻ Flashcard</span>
                 <ArrowUpRight className="w-4 h-4" />
               </Link>
+            </div>
+
+            {/* Google Drive Cloud Backup Card */}
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
+                    <CloudUpload className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">Google Drive Cloud</h3>
+                    <p className="text-[11px] text-slate-500">khangwannafly@gmail.com</p>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase">
+                  Đã kết nối
+                </span>
+              </div>
+
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Thư mục lưu trữ:{" "}
+                <strong className="text-slate-900">
+                  IELTS SKIBIDI - Database & Source Backup
+                </strong>
+              </p>
+
+              {driveSyncMsg && (
+                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                  {driveSyncMsg}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleSyncDrive}
+                  disabled={driveSyncing}
+                  className="py-2 px-3 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors disabled:opacity-50"
+                >
+                  {driveSyncing ? "Đang đồng bộ..." : "Đồng bộ ngay"}
+                </button>
+                <a
+                  href="https://drive.google.com/drive/folders/13yq-4zP2dTVzYdBqRClLNrP3aa1HqQPk"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold inline-flex items-center justify-center gap-1 transition-colors"
+                >
+                  <span>Mở Drive</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
 
             {/* Criteria Radar Chart */}

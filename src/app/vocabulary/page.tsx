@@ -51,6 +51,29 @@ export default function VocabularyPage() {
   const [newExample, setNewExample] = useState("");
   const [newTopic, setNewTopic] = useState<VocabTopic>("Saved from Tests");
   const [newLevel, setNewLevel] = useState<"C1" | "C2">("C1");
+  const [aiExplaining, setAiExplaining] = useState(false);
+
+  const handleAIExplain = async () => {
+    if (!newWord.trim() || aiExplaining) return;
+    setAiExplaining(true);
+    try {
+      const res = await fetch("/api/ai/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ word: newWord.trim() }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.meaning) setNewMeaning(data.meaning);
+        if (data.example) setNewExample(data.example);
+        if (data.level === "C1" || data.level === "C2") setNewLevel(data.level);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setAiExplaining(false);
+    }
+  };
 
   // Flashcard state
   const [cardIdx, setCardIdx] = useState(0);
@@ -663,9 +686,20 @@ export default function VocabularyPage() {
 
             <form onSubmit={handleAddWord} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-700 block mb-1">
-                  Từ hoặc Cụm từ học thuật (Collocation) *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-xs font-semibold text-slate-700">
+                    Từ hoặc Cụm từ học thuật (Collocation) *
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleAIExplain}
+                    disabled={!newWord.trim() || aiExplaining}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 hover:underline disabled:opacity-40"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    {aiExplaining ? "Đang phân tích..." : "AI tự động điền nghĩa & ví dụ"}
+                  </button>
+                </div>
                 <input
                   type="text"
                   required

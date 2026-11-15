@@ -1,5 +1,6 @@
 import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
-import { aiErrorResponse, parseAIJson, readJsonBody, roundBand } from "@/lib/ai-response";
+import { parseAIJson, readJsonBody, roundBand } from "@/lib/ai-response";
+import { checkRateLimit, rateLimitExceededResponse, sanitizeString } from "@/lib/api-guard";
 import { scoreWritingFallback } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
 
@@ -14,16 +15,19 @@ interface WritingScoreAI {
 }
 
 export async function POST(req: Request) {
+  const rl = checkRateLimit(req, "score-writing", 20, 60_000);
+  if (!rl.allowed) return rateLimitExceededResponse(rl.retryAfterSeconds);
+
+  const body = await readJsonBody<{ question: string; essay: string; task_type: string }>(req);
+  const question = sanitizeString(body.question, 3000);
+  const essay = sanitizeString(body.essay, 15000);
+  const task_type = body.task_type === "task1" ? "task1" : "task2";
+
+  if (!question || !essay) {
+    return NextResponse.json({ error: "Question and essay are required" }, { status: 400 });
+  }
+
   try {
-    const body = await readJsonBody<{ question: string; essay: string; task_type: string }>(req);
-    const question = typeof body.question === "string" ? body.question.trim() : "";
-    const essay = typeof body.essay === "string" ? body.essay.trim() : "";
-    const task_type = body.task_type === "task1" ? "task1" : "task2";
-
-    if (!question || !essay) {
-      return NextResponse.json({ error: "Question and essay are required" }, { status: 400 });
-    }
-
     if (!hasGeminiApiKey()) {
       return NextResponse.json(scoreWritingFallback(essay, task_type));
     }
@@ -118,6 +122,7 @@ export async function POST(req: Request) {
       min_words: minWords,
     });
   } catch (error) {
-    return aiErrorResponse(error, "Không thể chấm bài Writing");
+    console.warn("[Writing Score API] Gemini failed, using Heuristic Examiner Fallback:", error);
+    return NextResponse.json(scoreWritingFallback(essay, task_type));
   }
 }

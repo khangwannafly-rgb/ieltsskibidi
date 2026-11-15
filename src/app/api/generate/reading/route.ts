@@ -1,5 +1,6 @@
 import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
-import { aiErrorResponse, parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { checkRateLimit, rateLimitExceededResponse, sanitizeTargetBand } from "@/lib/api-guard";
 import { getFallbackReadingTask } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
 
@@ -41,8 +42,13 @@ const TOPICS = [
 ];
 
 export async function POST(req: Request) {
+  const rl = checkRateLimit(req, "gen-reading", 25, 60_000);
+  if (!rl.allowed) return rateLimitExceededResponse(rl.retryAfterSeconds);
+
+  const body = await readJsonBody<{ targetScore: number; section?: string }>(req);
+  const targetScore = sanitizeTargetBand(body.targetScore, 6.5);
+  const section = body.section;
   try {
-    const { targetScore = 6.5, section } = await readJsonBody<{ targetScore: number; section?: string }>(req);
     if (!hasGeminiApiKey()) {
       return NextResponse.json(getFallbackReadingTask(targetScore, section));
     }
@@ -152,6 +158,7 @@ Return ONLY valid JSON:
       answers,
     });
   } catch (error) {
-    return aiErrorResponse(error, "Không thể tạo đề Reading");
+    console.warn("[Reading API] Gemini failed, falling back to Cambridge Reading Bank:", error);
+    return NextResponse.json(getFallbackReadingTask(targetScore, section));
   }
 }

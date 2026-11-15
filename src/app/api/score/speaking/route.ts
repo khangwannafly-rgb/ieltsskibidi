@@ -1,5 +1,6 @@
 import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
-import { aiErrorResponse, parseAIJson, readJsonBody, roundBand } from "@/lib/ai-response";
+import { parseAIJson, readJsonBody, roundBand } from "@/lib/ai-response";
+import { checkRateLimit, rateLimitExceededResponse } from "@/lib/api-guard";
 import { scoreSpeakingFallback } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
 
@@ -20,23 +21,26 @@ interface SpeakingScoreAI {
 interface AnswerItem { question: string; answer: string; duration?: number }
 
 export async function POST(req: Request) {
+  const rl = checkRateLimit(req, "score-speaking", 20, 60_000);
+  if (!rl.allowed) return rateLimitExceededResponse(rl.retryAfterSeconds);
+
+  const body = await readJsonBody<{ part: number; questions: string[]; answers: AnswerItem[]; transcript: string }>(req);
+  const part = Number(body.part) || 1;
+
+  // Hỗ trợ cả định dạng mới (answers theo từng câu hỏi) lẫn transcript dạng chuỗi
+  const answers: AnswerItem[] = Array.isArray(body.answers)
+    ? body.answers.filter(a => a && typeof a.answer === "string" && a.answer.trim())
+    : [];
+  const transcript = answers.length > 0
+    ? answers.map((a, i) => `Q${i + 1}: ${a.question}\nCandidate: ${a.answer.trim()}`).join("\n\n")
+    : (typeof body.transcript === "string" ? body.transcript.trim() : "");
+
+  const totalWords = transcript.split(/\s+/).filter(Boolean).length;
+  if (!transcript || totalWords < 5) {
+    return NextResponse.json({ error: "Chưa có câu trả lời nào được ghi nhận. Hãy nói (hoặc nhập) câu trả lời trước khi chấm điểm." }, { status: 400 });
+  }
+
   try {
-    const body = await readJsonBody<{ part: number; questions: string[]; answers: AnswerItem[]; transcript: string }>(req);
-    const part = Number(body.part) || 1;
-
-    // Hỗ trợ cả định dạng mới (answers theo từng câu hỏi) lẫn transcript dạng chuỗi
-    const answers: AnswerItem[] = Array.isArray(body.answers)
-      ? body.answers.filter(a => a && typeof a.answer === "string" && a.answer.trim())
-      : [];
-    const transcript = answers.length > 0
-      ? answers.map((a, i) => `Q${i + 1}: ${a.question}\nCandidate: ${a.answer.trim()}`).join("\n\n")
-      : (typeof body.transcript === "string" ? body.transcript.trim() : "");
-
-    const totalWords = transcript.split(/\s+/).filter(Boolean).length;
-    if (!transcript || totalWords < 5) {
-      return NextResponse.json({ error: "Chưa có câu trả lời nào được ghi nhận. Hãy nói (hoặc nhập) câu trả lời trước khi chấm điểm." }, { status: 400 });
-    }
-
     if (!hasGeminiApiKey()) {
       return NextResponse.json(scoreSpeakingFallback(transcript));
     }
@@ -102,6 +106,7 @@ export async function POST(req: Request) {
       transcript,
     });
   } catch (error) {
-    return aiErrorResponse(error, "Không thể chấm bài Speaking");
+    console.warn("[Speaking Score API] Gemini failed, using Heuristic Examiner Fallback:", error);
+    return NextResponse.json(scoreSpeakingFallback(transcript));
   }
 }

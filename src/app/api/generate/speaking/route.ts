@@ -1,13 +1,18 @@
 import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
-import { aiErrorResponse, parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { checkRateLimit, rateLimitExceededResponse, sanitizeTargetBand } from "@/lib/api-guard";
 import { getFallbackSpeakingTask } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
+  const rl = checkRateLimit(req, "gen-speaking", 25, 60_000);
+  if (!rl.allowed) return rateLimitExceededResponse(rl.retryAfterSeconds);
+
+  const body = await readJsonBody<{ part: number | string; topic: string; targetScore: number }>(req);
+  const part = Number(body.part) || 1;
+  const topic = body.topic;
+  const targetScore = sanitizeTargetBand(body.targetScore, 6.5);
   try {
-    const body = await readJsonBody<{ part: number | string; topic: string; targetScore: number }>(req);
-    const part = Number(body.part) || 1;
-    const { topic, targetScore = 6.5 } = body;
     if (!hasGeminiApiKey()) {
       return NextResponse.json(getFallbackSpeakingTask(part, targetScore, topic));
     }
@@ -75,6 +80,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ...data, part });
   } catch (error) {
-    return aiErrorResponse(error, "Không thể tạo câu hỏi Speaking");
+    console.warn("[Speaking Generate API] Gemini failed, falling back to Cambridge Speaking Bank:", error);
+    return NextResponse.json(getFallbackSpeakingTask(part, targetScore, topic));
   }
 }
