@@ -1,22 +1,52 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
-import { motion, AnimatePresence } from "framer-motion";
-import { Timer, BookOpen, CheckCircle, ChevronLeft, ChevronRight, Clock, HelpCircle, AlertTriangle, Target, Trophy } from "lucide-react";
+import { motion } from "framer-motion";
+import { BookOpen, ChevronRight, Clock, AlertTriangle, Trophy, Flag, RotateCcw, Type } from "lucide-react";
 import { useUser } from "@/context/UserContext";
+import { isAnswerCorrect } from "@/lib/answers";
+import ExamAnnotationSuite from "@/components/ExamAnnotationSuite";
+
+const TEST_DURATION = 1200; // 20 minutes per Reading Passage (60 mins / 3 passages in real IELTS)
+
+interface ReadingQuestion {
+  id: number;
+  type: string;
+  group?: string;
+  instruction?: string;
+  box_title?: string;
+  box_items?: string[];
+  word_limit?: string;
+  question: string;
+  options?: string[];
+}
+
+const PASSAGE_MODES = [
+  { id: "all", label: "Ngẫu nhiên (Đa dạng)", desc: "Xoay vòng đủ mọi dạng: Matching Headings (i–vii), Matching Researchers, Sentence Endings, Word Bank, T/F/NG, Y/N/NG" },
+  { id: "Passage 1", label: "Passage 1 · Descriptive", desc: "Sentence/Note Completion + True/False/Not Given + Matching Paragraph Info" },
+  { id: "Passage 2", label: "Passage 2 · Analytical", desc: "Matching Researchers (A–D) / Sentence Endings (A–F) + Yes/No/Not Given + MCQ" },
+  { id: "Passage 3", label: "Passage 3 · Argumentative", desc: "Matching Headings (i–vii) + Summary Word Bank (A–F) + Yes/No/Not Given" },
+];
 
 export default function ReadingPage() {
   const { user, addSubmission } = useUser();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [data, setData] = useState<any>(null);
+  const [selectedSection, setSelectedSection] = useState<string>("all");
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+  const [flagged, setFlagged] = useState<Record<number, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(3600); // 60 minutes
-  const [currentSection, setCurrentSection] = useState(0); // For pagination if needed
+  const [submitting, setSubmitting] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(TEST_DURATION);
+  const [fontScale, setFontScale] = useState<"sm" | "md" | "lg">("md");
+  const submittingRef = useRef(false);
+  const examContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (data && !submitted) {
+    if (data && !data.error && !submitted) {
       const timer = setInterval(() => {
         setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);
@@ -30,38 +60,61 @@ export default function ReadingPage() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const generateTask = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getAnswer = (id: number) => data?.answers?.find((a: any) => a.id === id);
+  const isCorrect = (id: number) => isAnswerCorrect(userAnswers[id], getAnswer(id)?.correct_answer);
+
+  const generateTask = async (sectionOverride?: string) => {
+    const sectionToUse = sectionOverride !== undefined ? sectionOverride : selectedSection;
     setLoading(true);
     setData(null);
     setUserAnswers({});
+    setFlagged({});
     setSubmitted(false);
-    setTimeLeft(3600);
+    setShowResultModal(false);
+    setTimeLeft(TEST_DURATION);
     try {
       const res = await fetch("/api/generate/reading", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          targetScore: user?.targetScore || 6.5
+          targetScore: user?.targetScore || 6.5,
+          section: sectionToUse,
         }),
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({ error: "Phản hồi từ máy chủ không hợp lệ" }));
+      if (!json.error && (!Array.isArray(json.questions) || !Array.isArray(json.answers))) {
+        json.error = "Đề bài AI tạo ra không hợp lệ. Vui lòng thử lại.";
+      }
       setData(json);
+      window.scrollTo({ top: 0 });
     } catch (error) {
       console.error(error);
-      setData({ error: "Failed to generate task" });
+      setData({ error: "Không thể kết nối tới máy chủ. Vui lòng kiểm tra mạng và thử lại." });
     } finally {
       setLoading(false);
     }
   };
 
   const handleAnswerChange = (id: number, value: string) => {
+    if (submitted) return;
     setUserAnswers((prev) => ({ ...prev, [id]: value }));
   };
 
-  const submitTest = async () => {
-    setLoading(true);
+  const toggleFlag = (id: number) => {
+    setFlagged((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const submitTest = useCallback(async (auto = false) => {
+    if (!data || submitted || submittingRef.current) return;
+    if (!auto) {
+      const unanswered = data.questions.filter((q: { id: number }) => !userAnswers[q.id]?.trim()).length;
+      if (unanswered > 0 && !window.confirm(`Bạn còn ${unanswered} câu chưa trả lời. Vẫn nộp bài?`)) return;
+    }
+    submittingRef.current = true;
+    setSubmitting(true);
     try {
-      // Map user answers to the same order as data.answers
-      const orderedUserAnswers = data.answers.map((ans: any) => userAnswers[ans.id] || "");
+      const orderedUserAnswers = data.answers.map((ans: { id: number }) => userAnswers[ans.id] || "");
       
       const res = await fetch("/api/score/reading", {
         method: "POST",
@@ -72,55 +125,56 @@ export default function ReadingPage() {
         })
       });
       const scoreData = await res.json();
+      if (!res.ok || scoreData.error) throw new Error(scoreData.error || "Failed to score");
+
       setData({ ...data, score: scoreData });
       setSubmitted(true);
+      setShowResultModal(true);
       
-      // Save submission
       addSubmission({
         skill: 'reading',
         band: scoreData.band,
         details: {
+          title: data.title,
+          section: data.section,
           rawScore: scoreData.rawScore,
-          totalQuestions: scoreData.totalQuestions
+          totalQuestions: scoreData.totalQuestions,
+          timeSpent: TEST_DURATION - timeLeft,
+          questions: data.questions,
+          answers: data.answers,
+          userAnswers,
         }
       });
     } catch (error) {
       console.error("Error submitting test:", error);
       alert("Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.");
     } finally {
-      setLoading(false);
+      submittingRef.current = false;
+      setSubmitting(false);
     }
-  };
+  }, [data, submitted, userAnswers, addSubmission, timeLeft]);
+
+  useEffect(() => {
+    if (timeLeft === 0 && data && !data.error && !submitted) {
+      submitTest(true);
+    }
+  }, [timeLeft, data, submitted, submitTest]);
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F9FAFB]">
-        <div className="w-full max-w-md p-12 bg-white rounded-[3rem] border border-slate-100 shadow-2xl text-center space-y-8 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-purple opacity-5 blur-3xl rounded-full" />
-          <div className="relative w-32 h-32 mx-auto">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-[#F9FAFB] p-6">
+        <div className="w-full max-w-md p-10 bg-white rounded-3xl border border-slate-200 shadow-xl text-center space-y-6">
+          <div className="relative w-20 h-20 mx-auto">
             <motion.div 
               animate={{ rotate: 360 }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               className="absolute inset-0 border-b-4 border-purple-600 rounded-full"
             />
-            <motion.div 
-              animate={{ rotate: -360 }}
-              transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-4 border-t-4 border-purple-200 rounded-full"
-            />
-            <BookOpen className="absolute inset-0 m-auto w-14 h-14 text-purple-600" />
+            <BookOpen className="absolute inset-0 m-auto w-9 h-9 text-purple-600" />
           </div>
-          <div className="space-y-4 relative">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Đang soạn bài đọc...</h2>
-            <p className="text-slate-500 font-bold leading-relaxed">AI đang biên soạn đoạn văn học thuật và câu hỏi chuẩn IELTS cho mục tiêu Band {user?.targetScore || 6.5}.</p>
-          </div>
-          <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden relative border border-slate-200/50">
-            <motion.div 
-              initial={{ x: "-100%" }}
-              animate={{ x: "100%" }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute inset-0 bg-gradient-purple w-1/2"
-            />
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Đang biên soạn đề Reading...</h2>
+            <p className="text-slate-500 text-sm font-medium">Chuẩn hóa đoạn văn học thuật (700–900 từ) và 13 câu hỏi chuẩn Cambridge IELTS cho mục tiêu Band {user?.targetScore || 6.5}.</p>
           </div>
         </div>
       </div>
@@ -129,21 +183,16 @@ export default function ReadingPage() {
 
   if (data?.error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F9FAFB]">
-        <div className="max-w-md w-full p-12 bg-white rounded-[3rem] border border-rose-100 text-center space-y-10 shadow-2xl">
-          <div className="w-24 h-24 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto text-rose-600 border border-rose-100 shadow-xl shadow-rose-500/10">
-            <AlertTriangle className="w-12 h-12" />
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-[#F9FAFB] p-6">
+        <div className="max-w-md w-full p-10 bg-white rounded-3xl border border-rose-100 text-center space-y-6 shadow-xl">
+          <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-600 border border-rose-100">
+            <AlertTriangle className="w-8 h-8" />
           </div>
-          <div className="space-y-4">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Lỗi hệ thống</h2>
-            <p className="text-slate-500 font-bold leading-relaxed">
-              {data.error || "Không thể kết nối với AI để tạo đề bài. Vui lòng thử lại sau giây lát."}
-            </p>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black text-slate-900">Lỗi hệ thống</h2>
+            <p className="text-slate-500 text-sm font-medium">{data.error}</p>
           </div>
-          <button 
-            onClick={generateTask}
-            className="btn-primary w-full py-6 text-sm"
-          >
+          <button onClick={() => generateTask()} className="btn-primary w-full py-4 text-xs">
             Thử lại ngay
           </button>
         </div>
@@ -151,269 +200,425 @@ export default function ReadingPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#F9FAFB] pt-0 flex flex-col">
-      {/* Top Navigation Bar */}
-      <div className="h-24 bg-white/80 backdrop-blur-xl text-slate-900 flex items-center justify-between px-10 sticky top-[80px] z-40 border-b border-slate-100 shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 border border-purple-100 shadow-sm">
-            <BookOpen className="w-7 h-7" />
-          </div>
-          <div className="hidden sm:block">
-            <span className="font-black tracking-widest uppercase text-[10px] block text-purple-600">IELTS Academy</span>
-            <span className="font-black text-xl text-slate-900 tracking-tighter uppercase">Reading Practice</span>
-          </div>
-        </div>
-        
-        {data && (
-          <div className="flex items-center gap-10">
-            <div className={`flex items-center gap-4 px-8 py-4 rounded-2xl transition-all border ${timeLeft < 300 ? 'bg-rose-50 border-rose-200 text-rose-600 animate-pulse' : 'bg-slate-50 text-purple-600 border-slate-200'}`}>
-              <Clock className="w-6 h-6" />
-              <span className="font-mono font-black text-3xl tabular-nums">{formatTime(timeLeft)}</span>
-            </div>
-            {!submitted && (
-              <button 
-                onClick={submitTest}
-                className="btn-primary !px-12 !py-4 text-sm"
-              >
-                NỘP BÀI THI
-              </button>
-            )}
-          </div>
-        )}
-      </div>
+  const answeredCount = data?.questions
+    ? data.questions.filter((q: { id: number }) => userAnswers[q.id]?.trim()).length
+    : 0;
 
+  const passageFontClass =
+    fontScale === "sm" ? "text-[15px] leading-7" : fontScale === "lg" ? "text-[19px] leading-8" : "text-[16.5px] leading-[1.8]";
+
+  return (
+    <div className="bg-[#F9FAFB] flex flex-col">
       {!data ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-500/5 blur-[120px] rounded-full pointer-events-none" />
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-2xl space-y-12 relative"
-          >
-            <div className="w-32 h-32 bg-white rounded-[3rem] flex items-center justify-center mx-auto mb-8 border border-slate-100 shadow-2xl">
-              <BookOpen className="w-16 h-16 text-purple-600" />
+        <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+          <div className="max-w-3xl w-full bg-white rounded-3xl border border-slate-200/80 shadow-xl p-8 md:p-10 space-y-7 relative">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-left border-b border-slate-100 pb-6">
+              <div className="w-16 h-16 bg-purple-50 rounded-2xl flex items-center justify-center border border-purple-100 shrink-0">
+                <BookOpen className="w-8 h-8 text-purple-600" />
+              </div>
+              <div className="space-y-1">
+                <span className="inline-block text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">
+                  IELTS Academic Reading · Đa dạng dạng bài
+                </span>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                  Phòng Thi Reading
+                </h1>
+                <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                  Đầy đủ các dạng câu hỏi chuẩn Cambridge: Matching Headings (i–vii), Matching Researchers, Sentence Endings, Word Bank, Note/Summary Completion, T/F/NG, Y/N/NG & MCQ.
+                </p>
+              </div>
             </div>
-            <div className="space-y-6">
-              <h1 className="text-6xl font-black text-slate-900 tracking-tighter uppercase leading-[0.9]">
-                Luyện Kỹ năng <br />
-                <span className="text-gradient">Đọc</span>
-              </h1>
-              <p className="text-slate-500 text-lg font-bold max-w-md mx-auto leading-relaxed">
-                Trải nghiệm môi trường thi IELTS thực tế với các bài đọc học thuật đa dạng chủ đề được biên soạn bởi AI.
-              </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+              {PASSAGE_MODES.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => setSelectedSection(m.id)}
+                  className={`p-4 rounded-2xl border transition-all space-y-1.5 ${
+                    selectedSection === m.id
+                      ? "bg-purple-50/80 border-purple-600 ring-2 ring-purple-500/20"
+                      : "bg-slate-50/70 border-slate-200 hover:border-purple-200 hover:bg-white"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-black text-slate-900">{m.label}</span>
+                    {selectedSection === m.id && (
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-purple-600 text-white">
+                        Đang chọn
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium leading-relaxed">{m.desc}</p>
+                </button>
+              ))}
             </div>
+
             <button 
-              onClick={generateTask}
-              className="btn-primary !px-16 !py-6 text-lg mx-auto flex items-center gap-4 group"
+              onClick={() => generateTask(selectedSection)}
+              className="btn-primary w-full !py-4 text-sm mx-auto flex items-center justify-center gap-3 group"
             >
-              Bắt đầu làm bài
-              <ChevronRight className="w-7 h-7 group-hover:translate-x-2 transition-transform" />
+              Bắt đầu làm bài ({PASSAGE_MODES.find((m) => m.id === selectedSection)?.label})
+              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-          </motion.div>
+          </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-          {/* Question Navigator - Desktop Only */}
-          <div className="hidden xl:flex fixed left-8 top-1/2 -translate-y-1/2 flex-col gap-3 z-30">
-            {data.questions.map((q: any, idx: number) => (
+        <div className="flex flex-col lg:h-[calc(100vh-4rem)]">
+          {/* Exam Top Bar */}
+          <div className="h-16 bg-white text-slate-900 flex items-center justify-between px-6 border-b border-slate-200 flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-lg bg-purple-600 text-white text-xs font-extrabold uppercase tracking-wider">
+                {data.section || "Reading Passage 1"}
+              </span>
+              <span className="text-sm font-bold text-slate-600 hidden md:inline">
+                Questions 1–{data.questions.length} · Spend about 20 minutes
+              </span>
               <button
-                key={q.id}
-                onClick={() => {
-                  const el = document.getElementById(`q-${q.id}`);
-                  el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }}
-                className={`w-12 h-12 rounded-2xl border-2 flex items-center justify-center font-black text-sm transition-all shadow-sm ${
-                  submitted 
-                    ? (userAnswers[q.id]?.toLowerCase().trim() === data.answers.find((a: any) => a.id === q.id).correct_answer.toLowerCase().trim() ? 'bg-purple-600 border-purple-500 text-white shadow-purple-600/20' : 'bg-rose-500 border-rose-400 text-white shadow-rose-500/20')
-                    : (userAnswers[q.id] ? 'bg-purple-600 border-purple-500 text-white shadow-purple-500/20' : 'bg-white border-slate-200 text-slate-400 hover:border-purple-500/50')
-                }`}
+                onClick={() => generateTask()}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-purple-50 hover:text-purple-700 text-slate-600 text-xs font-bold transition-colors"
+                title="Đổi sang đề và dạng bài khác"
               >
-                {idx + 1}
+                <RotateCcw className="w-3.5 h-3.5" />
+                Đổi đề khác
               </button>
-            ))}
+            </div>
+
+            <div className="flex items-center gap-3">
+              {/* Highlight & Sticky Notes Tool (IDP/BC Computer-Delivered Standard) */}
+              <ExamAnnotationSuite containerRef={examContainerRef} resetKey={data.title} />
+
+              {/* Font size control */}
+              <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                <Type className="w-4 h-4 text-slate-500 ml-2 mr-1" />
+                {(["sm", "md", "lg"] as const).map((sz) => (
+                  <button
+                    key={sz}
+                    onClick={() => setFontScale(sz)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                      fontScale === sz ? "bg-white text-purple-700 shadow-sm" : "text-slate-500 hover:text-slate-800"
+                    }`}
+                  >
+                    {sz === "sm" ? "A-" : sz === "md" ? "A" : "A+"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Timer */}
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-mono font-black text-base tabular-nums ${
+                timeLeft < 180 && !submitted
+                  ? 'bg-rose-50 border-rose-200 text-rose-600 animate-pulse'
+                  : 'bg-slate-50 text-slate-900 border-slate-200'
+              }`}>
+                <Clock className="w-4 h-4 text-purple-600" />
+                <span>{formatTime(timeLeft)}</span>
+              </div>
+
+              {!submitted ? (
+                <button 
+                  onClick={() => submitTest(false)}
+                  disabled={submitting}
+                  className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs uppercase tracking-wider transition-all disabled:opacity-50 shadow-sm"
+                >
+                  {submitting ? 'Đang chấm...' : 'Nộp bài'}
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => setShowResultModal(true)}
+                    className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs uppercase tracking-wider transition-all"
+                  >
+                    Band {data.score?.band} ({data.score?.rawScore}/{data.score?.totalQuestions})
+                  </button>
+                  <button
+                    onClick={() => generateTask()}
+                    className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                    title="Làm đề mới"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Passage Section */}
-          <div className="w-full lg:w-1/2 overflow-y-auto p-12 bg-white border-r border-slate-100">
-            <div className="max-w-3xl mx-auto space-y-12">
-              <div className="flex items-center justify-between">
-                <span className="px-6 py-2 bg-purple-50 text-purple-600 text-[10px] font-black rounded-2xl border border-purple-100 uppercase tracking-widest shadow-sm">
-                  Reading Passage
-                </span>
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
-                    <Target className="w-6 h-6" />
-                  </div>
+          {/* Split-Screen Panes (Left: Passage, Right: Questions) */}
+          <div ref={examContainerRef} className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+            {/* Left Pane: Academic Reading Passage */}
+            <div className="w-full lg:w-1/2 lg:h-full overflow-y-auto p-6 md:p-10 bg-white border-b lg:border-b-0 lg:border-r border-slate-200">
+              <div className="max-w-2xl mx-auto space-y-6">
+                <div className="border-b border-slate-200 pb-5 space-y-2">
+                  <p className="text-xs font-extrabold uppercase tracking-wider text-purple-600">
+                    {data.section || "READING PASSAGE"}
+                  </p>
+                  <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-snug">
+                    {data.title || "Academic Reading Passage"}
+                  </h1>
+                  {data.subtitle && (
+                    <p className="text-slate-500 text-sm italic font-medium">{data.subtitle}</p>
+                  )}
+                </div>
+
+                <div className={`markdown-passage text-slate-800 ${passageFontClass}`}>
+                  <ReactMarkdown>{data.passage || ""}</ReactMarkdown>
                 </div>
               </div>
-              <div className="prose prose-slate max-w-none prose-p:text-slate-900 prose-p:font-bold prose-p:text-xl prose-p:leading-relaxed prose-headings:font-black prose-headings:tracking-tighter prose-headings:uppercase">
-                <ReactMarkdown>
-                  {data.passage}
-                </ReactMarkdown>
+            </div>
+
+            {/* Right Pane: Grouped Questions */}
+            <div className="w-full lg:w-1/2 lg:h-full overflow-y-auto p-6 md:p-10 bg-[#F8FAFC]">
+              <div className="max-w-2xl mx-auto space-y-5 pb-12">
+                {data.questions.map((q: ReadingQuestion, idx: number) => {
+                  const prevGroup = idx > 0 ? data.questions[idx - 1]?.group : null;
+                  const showGroupHeader = Boolean(q.group && q.group !== prevGroup);
+
+                  return (
+                    <div key={q.id} className="space-y-4">
+                      {showGroupHeader && (
+                        <div className="bg-slate-900 text-white p-5 rounded-2xl space-y-3 shadow-sm mt-4">
+                          <h3 className="text-sm font-extrabold uppercase tracking-wider text-purple-300">
+                            {q.group}
+                          </h3>
+                          {q.instruction && (
+                            <p className="text-xs text-slate-200 whitespace-pre-line leading-relaxed font-medium">
+                              {q.instruction}
+                            </p>
+                          )}
+                          {Array.isArray(q.box_items) && q.box_items.length > 0 && (
+                            <div className="bg-slate-800/90 border border-slate-700 rounded-xl p-4 space-y-2 mt-2">
+                              {q.box_title && (
+                                <p className="text-[11px] font-black uppercase tracking-widest text-amber-300">
+                                  {q.box_title}
+                                </p>
+                              )}
+                              <div className="grid grid-cols-1 gap-1.5">
+                                {q.box_items.map((item, bi) => (
+                                  <div key={bi} className="text-xs font-semibold text-slate-100 leading-relaxed">
+                                    {item}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div
+                        id={`q-${q.id}`}
+                        className={`bg-white rounded-2xl p-6 border transition-all ${
+                          submitted
+                            ? isCorrect(q.id)
+                              ? "border-emerald-200 bg-emerald-50/20"
+                              : "border-rose-200 bg-rose-50/20"
+                            : userAnswers[q.id]?.trim()
+                            ? "border-purple-200 shadow-sm"
+                            : "border-slate-200/80 shadow-sm hover:border-slate-300"
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center font-black text-sm ${
+                            submitted
+                              ? isCorrect(q.id)
+                                ? "bg-emerald-600 text-white"
+                                : "bg-rose-600 text-white"
+                              : userAnswers[q.id]?.trim()
+                              ? "bg-purple-600 text-white"
+                              : "bg-slate-100 text-slate-700"
+                          }`}>
+                            {idx + 1}
+                          </span>
+
+                          <div className="flex-1 space-y-4">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="text-slate-900 font-semibold text-base leading-relaxed">
+                                {q.question}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => toggleFlag(q.id)}
+                                title="Đánh dấu xem lại (Review)"
+                                className={`p-1.5 rounded-lg border text-xs transition-colors flex-shrink-0 ${
+                                  flagged[q.id]
+                                    ? "bg-amber-50 border-amber-300 text-amber-600"
+                                    : "border-transparent text-slate-300 hover:text-slate-500"
+                                }`}
+                              >
+                                <Flag className="w-4 h-4 fill-current" />
+                              </button>
+                            </div>
+
+                            {q.word_limit && q.type === "FILL" && (
+                              <span className="inline-block text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
+                                {q.word_limit}
+                              </span>
+                            )}
+
+                            {(q.type === 'MCQ' || q.type === 'HEAD') && Array.isArray(q.options) && q.options.length > 0 ? (
+                              <div className="grid gap-2.5">
+                                {q.options.map((opt: string, i: number) => (
+                                  <label
+                                    key={i}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
+                                      submitted ? "cursor-default" : "cursor-pointer"
+                                    } ${
+                                      userAnswers[q.id] === opt
+                                        ? "bg-purple-50 border-purple-500 text-purple-900 font-bold"
+                                        : "bg-slate-50/70 border-slate-200 text-slate-700 hover:bg-white hover:border-purple-300"
+                                    }`}
+                                  >
+                                    <input 
+                                      type="radio" 
+                                      name={`q-${q.id}`}
+                                      disabled={submitted}
+                                      checked={userAnswers[q.id] === opt}
+                                      onChange={() => handleAnswerChange(q.id, opt)}
+                                      className="w-4 h-4 accent-purple-600"
+                                    />
+                                    <span>{opt}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            ) : q.type === 'TFN' || q.type === 'YNN' ? (
+                              <div className="flex flex-wrap gap-2.5">
+                                {(q.type === 'YNN' ? ['Yes', 'No', 'Not Given'] : ['True', 'False', 'Not Given']).map((opt) => (
+                                  <button
+                                    key={opt}
+                                    type="button"
+                                    disabled={submitted}
+                                    onClick={() => handleAnswerChange(q.id, opt)}
+                                    className={`px-5 py-2.5 rounded-xl border text-xs font-extrabold uppercase tracking-wider transition-all ${
+                                      userAnswers[q.id] === opt 
+                                        ? 'bg-purple-600 border-purple-600 text-white shadow-sm' 
+                                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-purple-300 hover:text-purple-700 hover:bg-white'
+                                    }`}
+                                  >
+                                    {opt}
+                                  </button>
+                                ))}
+                              </div>
+                            ) : (
+                              <input 
+                                type="text"
+                                disabled={submitted}
+                                placeholder="Nhập đáp án từ bài đọc..."
+                                value={userAnswers[q.id] || ''}
+                                onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/15 outline-none transition-all text-sm font-bold text-slate-900 placeholder:text-slate-400"
+                              />
+                            )}
+
+                            {submitted && (
+                              <div className={`mt-3 p-4 rounded-xl border text-sm space-y-2 ${
+                                isCorrect(q.id)
+                                  ? 'bg-emerald-50/70 border-emerald-200'
+                                  : 'bg-rose-50/70 border-rose-200'
+                              }`}>
+                                <div className="flex flex-wrap items-center gap-3 text-xs font-bold">
+                                  {!isCorrect(q.id) && (
+                                    <span className="text-rose-700">
+                                      Bạn chọn: <strong className="underline">{userAnswers[q.id]?.trim() || '(bỏ trống)'}</strong>
+                                    </span>
+                                  )}
+                                  <span className="text-emerald-800">
+                                    Đáp án đúng: <strong className="px-2 py-0.5 rounded bg-white border border-emerald-200">{getAnswer(q.id)?.correct_answer ?? '—'}</strong>
+                                  </span>
+                                </div>
+                                {getAnswer(q.id)?.explanation && (
+                                  <p className="text-slate-600 text-xs leading-relaxed">
+                                    <strong className="text-slate-800">Giải thích:</strong> {getAnswer(q.id)?.explanation}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* Questions Section */}
-          <div className="w-full lg:w-1/2 overflow-y-auto p-12 bg-[#F9FAFB]">
-            <div className="max-w-2xl mx-auto space-y-12 pb-24">
-              <div className="flex items-center justify-between border-b border-slate-200 pb-10">
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest">Questions 1-{data.questions.length}</span>
-                  <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">Trả lời câu hỏi</h2>
-                </div>
-                <div className="px-6 py-3 bg-purple-50 text-purple-600 text-[10px] font-black rounded-2xl border border-purple-100 uppercase tracking-widest shadow-sm">
-                  Target Band {user?.targetScore || 6.5}
-                </div>
-              </div>
-
-              {data.questions.map((q: any, idx: number) => (
-                <div 
-                  key={q.id} 
-                  id={`q-${q.id}`}
-                  className={`bg-white rounded-[3rem] p-10 border border-slate-100 shadow-xl transition-all duration-300 ${submitted ? 'opacity-90' : 'hover:border-purple-200 hover:shadow-2xl hover:shadow-purple-500/5'}`}
-                >
-                  <div className="flex gap-8">
-                    <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black text-base shadow-lg shadow-purple-500/20">
-                      {idx + 1}
-                    </span>
-                    <div className="flex-1 space-y-8">
-                      <p className="text-slate-900 font-bold text-2xl leading-relaxed italic">"{q.question}"</p>
-                      
-                      {q.type === 'MCQ' ? (
-                        <div className="grid gap-4">
-                          {q.options.map((opt: string, i: number) => (
-                            <label key={i} className={`flex items-center gap-5 p-6 rounded-[2rem] border-2 transition-all cursor-pointer group ${userAnswers[q.id] === opt ? 'bg-purple-50 border-purple-500 text-purple-600 shadow-lg shadow-purple-500/10' : 'bg-slate-50 border-slate-100 text-slate-500 hover:bg-white hover:border-purple-200'}`}>
-                              <input 
-                                type="radio" 
-                                name={`q-${q.id}`}
-                                disabled={submitted}
-                                checked={userAnswers[q.id] === opt}
-                                onChange={() => handleAnswerChange(q.id, opt)}
-                                className="w-6 h-6 text-purple-600 focus:ring-purple-500 border-slate-300 bg-white"
-                              />
-                              <span className="text-lg font-black group-hover:text-slate-900 transition-colors uppercase tracking-tight">{opt}</span>
-                            </label>
-                          ))}
-                        </div>
-                      ) : q.type === 'TFN' ? (
-                        <div className="flex flex-wrap gap-4">
-                          {['True', 'False', 'Not Given'].map((opt) => (
-                            <button
-                              key={opt}
-                              disabled={submitted}
-                              onClick={() => handleAnswerChange(q.id, opt)}
-                              className={`px-10 py-5 rounded-[2rem] border-2 text-sm font-black transition-all uppercase tracking-widest ${
-                                userAnswers[q.id] === opt 
-                                ? 'bg-purple-600 border-purple-500 text-white shadow-xl shadow-purple-500/30' 
-                                : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-purple-300 hover:text-purple-600 hover:bg-white'
-                            }`}
-                            >
-                              {opt}
-                            </button>
-                          ))}
-                        </div>
-                      ) : (
-                        <input 
-                          type="text"
-                          disabled={submitted}
-                          placeholder="Bắt đầu nhập câu trả lời..."
-                          value={userAnswers[q.id] || ''}
-                          onChange={(e) => handleAnswerChange(q.id, e.target.value)}
-                          className="w-full p-8 rounded-[2.5rem] border-2 border-slate-100 bg-slate-50 focus:ring-8 focus:ring-purple-500/5 focus:border-purple-500/20 focus:bg-white outline-none transition-all shadow-inner text-xl font-black text-slate-900 placeholder:text-slate-300"
-                        />
-                      )}
-
-                      {submitted && (
-                        <motion.div 
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className={`mt-10 p-10 rounded-[2.5rem] border-2 relative overflow-hidden ${
-                            userAnswers[q.id]?.toLowerCase().trim() === data.answers.find((a: any) => a.id === q.id).correct_answer.toLowerCase().trim()
-                            ? 'bg-purple-50 border-purple-100'
-                            : 'bg-rose-50 border-rose-100'
-                          }`}
-                        >
-                          <div className="flex items-start gap-6 relative">
-                            <div className={`mt-1 p-2 rounded-xl shadow-lg ${
-                              userAnswers[q.id]?.toLowerCase().trim() === data.answers.find((a: any) => a.id === q.id).correct_answer.toLowerCase().trim()
-                              ? 'bg-purple-600 text-white'
-                              : 'bg-rose-500 text-white'
-                            }`}>
-                              <CheckCircle className="w-6 h-6" />
-                            </div>
-                            <div className="space-y-6">
-                              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                Đáp án đúng: <span className="text-purple-600 ml-4 bg-purple-100 px-4 py-1.5 rounded-lg shadow-sm">{data.answers.find((a: any) => a.id === q.id).correct_answer}</span>
-                              </p>
-                              <div className="space-y-3">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-purple-600 block">Phân tích chuyên sâu:</span>
-                                <p className="text-slate-600 text-lg font-bold leading-relaxed italic">
-                                  {data.answers.find((a: any) => a.id === q.id).explanation}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {/* Bottom Question Palette Bar (Chuẩn IELTS on Computer) */}
+          <div className="h-14 bg-white border-t border-slate-200 px-6 flex items-center justify-between gap-4 flex-shrink-0 overflow-x-auto">
+            <div className="flex items-center gap-1.5">
+              {data.questions.map((q: { id: number }, idx: number) => {
+                const answered = Boolean(userAnswers[q.id]?.trim());
+                const isFlag = Boolean(flagged[q.id]);
+                return (
+                  <button
+                    key={q.id}
+                    onClick={() => {
+                      const el = document.getElementById(`q-${q.id}`);
+                      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                    className={`relative w-8 h-8 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center border ${
+                      submitted
+                        ? isCorrect(q.id)
+                          ? "bg-emerald-600 border-emerald-600 text-white"
+                          : "bg-rose-600 border-rose-600 text-white"
+                        : answered
+                        ? "bg-purple-600 border-purple-600 text-white"
+                        : "bg-slate-50 border-slate-200 text-slate-600 hover:border-purple-400"
+                    }`}
+                  >
+                    {idx + 1}
+                    {isFlag && (
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 ring-2 ring-white" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="text-xs font-bold text-slate-500 whitespace-nowrap">
+              Đã làm: <span className="text-purple-600 font-black">{answeredCount}/{data.questions.length}</span>
             </div>
           </div>
         </div>
       )}
 
       {/* Result Modal */}
-      {submitted && data.score && (
+      {submitted && showResultModal && data.score && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-md">
           <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-[3rem] max-w-xl w-full overflow-hidden border border-slate-100 shadow-2xl"
+            className="bg-white rounded-3xl max-w-lg w-full overflow-hidden border border-slate-100 shadow-2xl"
           >
-            <div className="bg-gradient-purple p-12 text-center relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
-              <div className="relative">
-                <div className="w-24 h-24 bg-white/20 rounded-[2.5rem] flex items-center justify-center mx-auto mb-6 backdrop-blur-md border border-white/20">
-                  <Trophy className="w-12 h-12 text-white" />
-                </div>
-                <h3 className="text-4xl font-black text-white tracking-tight">Kết quả luyện tập</h3>
-                <p className="text-purple-100 font-medium text-lg mt-2 opacity-80">Reading Academic Practice</p>
+            <div className="bg-gradient-purple p-8 text-center text-white">
+              <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20">
+                <Trophy className="w-8 h-8 text-white" />
               </div>
+              <h3 className="text-2xl font-black tracking-tight">Kết quả Reading Academic</h3>
+              <p className="text-purple-100 text-sm mt-1">{data.title}</p>
             </div>
             
-            <div className="p-12 space-y-10">
-              <div className="grid grid-cols-2 gap-8">
-                <div className="flex flex-col items-center justify-center p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-inner group">
-                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-3 group-hover:text-purple-600 transition-colors">Độ chính xác</p>
-                  <div className="text-6xl font-black text-slate-900 tracking-tighter tabular-nums">
-                    {data.score.rawScore}<span className="text-slate-200 mx-2 text-4xl">/</span>{data.score.totalQuestions}
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col items-center justify-center p-6 bg-slate-50 rounded-2xl border border-slate-200">
+                  <p className="text-slate-400 text-[11px] font-extrabold uppercase tracking-wider mb-1">Số câu đúng</p>
+                  <div className="text-4xl font-black text-slate-900 tabular-nums">
+                    {data.score.rawScore}<span className="text-slate-300 mx-1 text-2xl">/</span>{data.score.totalQuestions}
                   </div>
                 </div>
-                <div className="flex flex-col items-center justify-center p-10 bg-purple-600 rounded-[2.5rem] border border-purple-500/20 shadow-2xl group relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-purple opacity-90" />
-                  <div className="relative text-center">
-                    <p className="text-purple-100 text-[10px] font-black uppercase tracking-[0.2em] mb-3">Estimated Band</p>
-                    <div className="text-7xl font-black text-white tracking-tighter tabular-nums drop-shadow-2xl">{data.score.band}</div>
-                  </div>
+                <div className="flex flex-col items-center justify-center p-6 bg-purple-600 rounded-2xl text-white">
+                  <p className="text-purple-100 text-[11px] font-extrabold uppercase tracking-wider mb-1">Estimated Band</p>
+                  <div className="text-4xl font-black tabular-nums">{data.score.band.toFixed(1)}</div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button 
-                  onClick={() => setSubmitted(false)}
-                  className="py-5 bg-white hover:bg-slate-50 text-slate-900 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-sm border border-slate-200"
+                  onClick={() => setShowResultModal(false)}
+                  className="py-3.5 bg-white hover:bg-slate-50 text-slate-900 rounded-xl font-extrabold uppercase tracking-wider text-xs transition-all border border-slate-200"
                 >
-                  Xem lại đáp án
+                  Xem giải thích chi tiết
                 </button>
                 <button 
-                  onClick={() => window.location.reload()}
-                  className="btn-primary py-5 text-xs"
+                  onClick={() => generateTask()}
+                  className="btn-primary !py-3.5 !rounded-xl text-xs"
                 >
-                  Làm bài thi mới
+                  Làm Passage tiếp theo
                 </button>
               </div>
             </div>
@@ -422,11 +627,9 @@ export default function ReadingPage() {
       )}
 
       <style jsx global>{`
-        .markdown-passage h1 { font-size: 3.5rem; font-weight: 900; margin-bottom: 2.5rem; color: #0f172a; letter-spacing: -0.04em; line-height: 1; }
-        .markdown-passage h2 { font-size: 2rem; font-weight: 800; margin-top: 3.5rem; margin-bottom: 1.5rem; color: #0f172a; letter-spacing: -0.02em; border-left: 4px solid #9333ea; padding-left: 1.5rem; }
-        .markdown-passage p { font-size: 1.25rem; line-height: 1.8; margin-bottom: 2rem; color: #475569; font-weight: 500; }
-        .markdown-passage strong { color: #0f172a; font-weight: 800; }
-        .markdown-passage em { color: #9333ea; font-style: normal; font-weight: 600; }
+        .markdown-passage h2 { font-size: 1.05rem; font-weight: 800; margin-top: 1.75rem; margin-bottom: 0.5rem; color: #6d28d9; text-transform: uppercase; letter-spacing: 0.04em; }
+        .markdown-passage p { margin-bottom: 1.25rem; color: #1e293b; text-align: justify; }
+        .markdown-passage strong { color: #0f172a; font-weight: 700; }
       `}</style>
     </div>
   );

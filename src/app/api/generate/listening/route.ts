@@ -1,95 +1,130 @@
-import { getGeminiModel } from "@/lib/gemini";
+import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
+import { aiErrorResponse, parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { getFallbackListeningTask } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
+
+interface RawQuestion {
+  id?: number | string;
+  type?: string;
+  word_limit?: string;
+  question?: string;
+  options?: string[];
+}
+interface RawAnswer {
+  id?: number | string;
+  correct_answer?: string;
+  explanation?: string;
+}
+
+const LISTENING_FORMATS = [
+  "Form / Note Completion (ONE WORD AND/OR A NUMBER) + Multiple Choice (A, B, C)",
+  "Map / Floor Plan Labelling (Rooms A–F described in box_items) + Multiple Choice",
+  "Matching Features / Opinions (Options A–E in box_items) + Flow-chart / Summary Completion",
+  "Table / Lecture Note Completion (ONE WORD ONLY)",
+];
 
 export async function POST(req: Request) {
   try {
-    const { targetScore = 6.5 } = await req.json();
+    const { targetScore = 6.5, part } = await readJsonBody<{ targetScore: number; part?: number }>(req);
+    if (!hasGeminiApiKey()) {
+      return NextResponse.json(getFallbackListeningTask(targetScore, part));
+    }
     const model = getGeminiModel();
-    const prompt = `You are an IELTS Listening test designer. Generate a high-quality, authentic IELTS Listening Section (Part 1, 2, 3, or 4) with exactly 10 questions.
-    
-    Section Requirements:
-    - Part 1: Conversation between two people set in an everyday social context (e.g., booking a hotel, enquiring about a course).
-    - Part 2: Monologue set in an everyday social context (e.g., a speech about local facilities, a guide for a tour).
-    - Part 3: Conversation between up to four people set in an educational or training context (e.g., a university tutor and a student discussing an assignment).
-    - Part 4: Monologue on an academic subject (e.g., a university lecture).
-    - Difficulty: Appropriate for someone aiming for a Band ${targetScore}.
-    
-    Return ONLY a JSON object in this format:
+    const chosenPart = part && part >= 1 && part <= 4 ? part : Math.floor(Math.random() * 4) + 1;
+    const formatHint = LISTENING_FORMATS[(chosenPart - 1) % LISTENING_FORMATS.length];
+
+    const prompt = `You are a Senior Cambridge IELTS Listening test writer. Generate an authentic IELTS Listening Part ${chosenPart} with 10 questions using this format: ${formatHint}.
+
+Section Rules:
+- Part 1: Everyday social dialogue between 2 speakers (e.g., insurance claim, course booking, car rental). Include spelling of a surname and a distractor/self-correction.
+- Part 2: Social monologue (e.g., library floor plan tour, heritage park orientation). Include a Floor Plan / Map box if appropriate.
+- Part 3: Academic discussion between 2 students and/or tutor (e.g., psychology experiment, environmental dissertation). Include Matching Features (A–E) + Completion.
+- Part 4: University lecture monologue on an academic topic (e.g., acoustics, botany, archaeology).
+- Transcript MUST have each speaker turn on its own line ("Speaker: text") separated by a blank line.
+
+Return ONLY valid JSON:
+{
+  "section_type": "Part ${chosenPart}",
+  "context": "string",
+  "instruction": "string (Official Cambridge instruction)",
+  "box_title": "string (optional, for Map/Floor Plan or Matching Box A–E)",
+  "box_items": ["string (optional list of rooms/features A–F)"],
+  "transcript": "string",
+  "difficulty_estimate_band": ${targetScore},
+  "questions": [
     {
-      "section_type": "Part 1" | "Part 2" | "Part 3" | "Part 4",
-      "context": "string (Briefly describe the context)",
-      "transcript": "string (The full script with speaker names, formatted in markdown)",
-      "difficulty_estimate_band": ${targetScore},
-      "questions": [
-        {
-          "id": number,
-          "type": "FILL" | "MCQ" | "MATCH" | "MAP",
-          "question": "string (Question text, e.g., 'Name: [1]______')",
-          "options": ["string"] // Required ONLY for MCQ and MATCH
-        }
-      ],
-      "answers": [
-        { 
-          "id": number, 
-          "correct_answer": "string", 
-          "explanation": "string (Include the exact sentence from the transcript that contains the answer)" 
-        }
-      ]
-    }`;
+      "id": 1,
+      "type": "FILL" | "MCQ",
+      "word_limit": "ONE WORD AND/OR A NUMBER",
+      "question": "string",
+      "options": ["string"]
+    }
+  ],
+  "answers": [
+    {
+      "id": 1,
+      "correct_answer": "string",
+      "explanation": "string"
+    }
+  ]
+}`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    let text = response.text().trim();
-    
-    // Tiền xử lý text để loại bỏ markdown code blocks nếu có
-    if (text.startsWith('```json')) {
-      text = text.replace(/^```json\n?/, '').replace(/\n?```$/, '');
-    } else if (text.startsWith('```')) {
-      text = text.replace(/^```\n?/, '').replace(/\n?```$/, '');
-    }
-    
-    // Tìm vị trí của JSON trong phản hồi
-    const jsonStart = text.indexOf('{');
-    const jsonEnd = text.lastIndexOf('}') + 1;
-    
-    if (jsonStart === -1 || jsonEnd === 0) {
-      console.error("No JSON found in response:", text);
-      throw new Error("AI response does not contain valid JSON");
-    }
-    
-    const jsonString = text.substring(jsonStart, jsonEnd);
-    
-    try {
-      const data = JSON.parse(jsonString);
-      return NextResponse.json(data);
-    } catch (parseError) {
-      console.error("JSON parse error for text:", jsonString);
-      return NextResponse.json({ 
-        error: "Lỗi định dạng dữ liệu từ AI",
-        details: "Không thể phân giải JSON từ phản hồi của AI",
-        raw: text.substring(0, 100) + "..."
-      }, { status: 500 });
-    }
-  } catch (error: any) {
-    console.error("Error generating listening task:", error);
-    
-    // Xử lý lỗi thiếu API Key cụ thể
-    if (error.code === "MISSING_API_KEY" || error.message?.includes("GEMINI_API_KEY")) {
-      return NextResponse.json({ 
-        error: "Cấu hình API Key bị thiếu. Vui lòng thêm GEMINI_API_KEY vào biến môi trường trên Vercel.",
-        code: "MISSING_API_KEY"
-      }, { status: 500 });
+    const data = parseAIJson<{
+      section_type?: string;
+      context?: string;
+      instruction?: string;
+      box_title?: string;
+      box_items?: string[];
+      transcript?: string;
+      difficulty_estimate_band?: number;
+      questions?: RawQuestion[];
+      answers?: RawAnswer[];
+    }>(response.text());
+
+    if (!data.transcript || !Array.isArray(data.questions) || !Array.isArray(data.answers) || data.questions.length === 0) {
+      return NextResponse.json(getFallbackListeningTask(targetScore, part));
     }
 
-    if (error.message?.includes("leaked") || error.message?.includes("403 Forbidden")) {
-      return NextResponse.json({ 
-        error: "API Key của bạn đã bị lộ (leaked) và bị Google vô hiệu hóa. Vui lòng tạo API Key mới tại Google AI Studio và cập nhật lại trên Vercel.",
-        code: "LEAKED_API_KEY"
-      }, { status: 403 });
+    const answerMap = new Map<number, RawAnswer>();
+    data.answers.forEach((a, i) => answerMap.set(Number(a.id ?? i + 1), a));
+
+    const questions: { id: number; type: string; word_limit?: string; question: string; options?: string[] }[] = [];
+    const answers: { id: number; correct_answer: string; explanation: string }[] = [];
+
+    data.questions.forEach((q, i) => {
+      const id = Number(q.id ?? i + 1);
+      const ans = answerMap.get(id);
+      if (!q.question || !ans || ans.correct_answer === undefined || ans.correct_answer === null) return;
+      const options = Array.isArray(q.options) ? q.options.filter(Boolean).map(String) : [];
+      const type = options.length >= 2 && String(q.type).toUpperCase() !== "FILL" ? "MCQ" : "FILL";
+      questions.push({
+        id,
+        type,
+        question: q.question,
+        ...(q.word_limit ? { word_limit: q.word_limit } : {}),
+        ...(type === "MCQ" ? { options } : {}),
+      });
+      answers.push({ id, correct_answer: String(ans.correct_answer), explanation: ans.explanation || "" });
+    });
+
+    if (questions.length === 0) {
+      return NextResponse.json(getFallbackListeningTask(targetScore, part));
     }
 
-    return NextResponse.json({ 
-      error: error.message || "Không thể kết nối với AI để tạo đề bài" 
-    }, { status: 500 });
+    return NextResponse.json({
+      section_type: data.section_type || `Part ${chosenPart}`,
+      context: data.context || "Bài nghe IELTS",
+      instruction: data.instruction || "Complete the questions below.",
+      ...(data.box_title ? { box_title: data.box_title } : {}),
+      ...(Array.isArray(data.box_items) && data.box_items.length > 0 ? { box_items: data.box_items } : {}),
+      transcript: data.transcript,
+      difficulty_estimate_band: data.difficulty_estimate_band ?? targetScore,
+      questions,
+      answers,
+    });
+  } catch (error) {
+    return aiErrorResponse(error, "Không thể tạo đề Listening");
   }
 }

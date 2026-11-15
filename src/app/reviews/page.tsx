@@ -1,8 +1,20 @@
 "use client";
 
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { Star, Quote, ChevronRight, MessageSquare, Award, Users, Target, TrendingUp, Sparkles, Filter, FilterX, BookOpen, Headphones, PenTool, Mic } from "lucide-react";
+import {
+  Star,
+  Award,
+  Users,
+  Target,
+  TrendingUp,
+  BookOpen,
+  Headphones,
+  PenTool,
+  Mic,
+  ArrowRight,
+  FilterX,
+} from "lucide-react";
 import { useState, useMemo } from "react";
+import Link from "next/link";
 
 const reviews = [
   {
@@ -10,11 +22,12 @@ const reviews = [
     name: "Ộ I i",
     score: "Band 8.0",
     skill: "Writing",
-    comment: "Cảm ơn vũ vì giới thiệu anh tới ielts skibidi. Một nền tảng học tập cực kỳ thông minh, giúp mình tiết kiệm được rất nhiều thời gian ôn luyện.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbwOaIfBgo681SnQ9tXxsYxs7XP6IRLfDmUw&s",
+    comment:
+      "Cảm ơn vũ vì giới thiệu anh tới ielts skibidi. Một nền tảng học tập cực kỳ thông minh, giúp mình tiết kiệm được rất nhiều thời gian ôn luyện.",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbwOaIfBgo681SnQ9tXxsYxs7XP6IRLfDmUw&s",
     date: "15/12/2025",
     size: "wide",
-    accent: "from-purple-500/20"
   },
   {
     id: 2,
@@ -22,10 +35,10 @@ const reviews = [
     score: "Band 7.5",
     skill: "Reading",
     comment: "Chiếc cúp thứ 7 là dành cho Ielts Skibidi. Trải nghiệm học tập tuyệt vời.",
-    image: "https://cdn2.tuoitre.vn/thumb_w/480/471584752817336320/2025/11/20/0b89fcc0-92c9-4458-addd-1f4b13bbf00b-17636300163231290204390.jpg",
+    image:
+      "https://cdn2.tuoitre.vn/thumb_w/480/471584752817336320/2025/11/20/0b89fcc0-92c9-4458-addd-1f4b13bbf00b-17636300163231290204390.jpg",
     date: "10/12/2025",
     size: "small",
-    accent: "from-purple-500/20"
   },
   {
     id: 3,
@@ -33,21 +46,22 @@ const reviews = [
     score: "Band 7.0",
     skill: "Speaking",
     comment: "7.0 ielts easy! Skibidi giúp mình tự tin hơn khi giao tiếp tiếng Anh.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREK5zSrwzVYwXVoazwMynFv4szRnlLA1MAFQ&s",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREK5zSrwzVYwXVoazwMynFv4szRnlLA1MAFQ&s",
     date: "05/12/2025",
     size: "small",
-    accent: "from-purple-500/20"
   },
   {
     id: 4,
     name: "Sơn Tùng MTP",
     score: "Band 8.5",
     skill: "Listening",
-    comment: "FLOP QUÁ THÌ GHI TÊN ANH VÀO!!! Ielts Skibidi thực sự là một cú hích lớn cho kỹ năng Listening của mình, giúp mình nghe rõ từng từ.",
-    image: "https://yt3.googleusercontent.com/c-Z7mIlntSpG6VyQ5ZqaPggqkZRhaySr-H5ZEazFN2iR1pP4eD1UGekwu0y--c4CSVhJJ1A4QT8=s900-c-k-c0x00ffffff-no-rj",
+    comment:
+      "FLOP QUÁ THÌ GHI TÊN ANH VÀO!!! Ielts Skibidi thực sự là một cú hích lớn cho kỹ năng Listening của mình, giúp mình nghe rõ từng từ.",
+    image:
+      "https://yt3.googleusercontent.com/c-Z7mIlntSpG6VyQ5ZqaPggqkZRhaySr-H5ZEazFN2iR1pP4eD1UGekwu0y--c4CSVhJJ1A4QT8=s900-c-k-c0x00ffffff-no-rj",
     date: "01/12/2025",
     size: "wide",
-    accent: "from-purple-500/20"
   },
   {
     id: 5,
@@ -55,21 +69,22 @@ const reviews = [
     score: "Band 7.5",
     skill: "Writing",
     comment: "AI sửa lỗi cực kỳ chi tiết, giúp mình tiến bộ từng ngày.",
-    image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop",
     date: "20/12/2025",
     size: "small",
-    accent: "from-purple-500/20"
   },
   {
     id: 6,
     name: "Vinh Râu",
     score: "Band 6.5",
     skill: "Speaking",
-    comment: "Tự học ở nhà mà cảm giác như có giáo viên kèm 1-1 vậy, đỉnh thực sự! Mình đã tự tin hơn rất nhiều khi đối diện với giám khảo.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSq7tW8t6O7Y2_J5n9_v8Z7y-U5Z6L-n5p8_Q&s",
+    comment:
+      "Tự học ở nhà mà cảm giác như có giáo viên kèm 1-1 vậy, đỉnh thực sự! Mình đã tự tin hơn rất nhiều khi đối diện với giám khảo.",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSq7tW8t6O7Y2_J5n9_v8Z7y-U5Z6L-n5p8_Q&s",
     date: "25/12/2025",
     size: "wide",
-    accent: "from-purple-500/20"
   },
   {
     id: 7,
@@ -77,21 +92,22 @@ const reviews = [
     score: "Band 8.0",
     skill: "Listening",
     comment: "Nghe Skibidi xong đi thi nghe như nghe nhạc rap, dễ hiểu vô cùng.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0Y6M8p8vW9Z8Y_mYp8_z_z_z_z_z_z_z_z_z&s",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0Y6M8p8vW9Z8Y_mYp8_z_z_z_z_z_z_z_z_z&s",
     date: "28/12/2025",
     size: "small",
-    accent: "from-purple-500/20"
   },
   {
     id: 8,
     name: "Linh Ngọc Đàm",
     score: "Band 7.5",
     skill: "Reading",
-    comment: "Giao diện đẹp xỉu, học mà cứ ngỡ đang lướt Pinterest luôn á! Rất cảm hứng để học mỗi ngày mà không thấy chán.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSW8y1p_79fN2_Xm9r8Tz_Z_z_z_z_z_z_z_z_z&s",
+    comment:
+      "Giao diện đẹp xỉu, học mà cứ ngỡ đang lướt Pinterest luôn á! Rất cảm hứng để học mỗi ngày mà không thấy chán.",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSW8y1p_79fN2_Xm9r8Tz_Z_z_z_z_z_z_z_z_z&s",
     date: "30/12/2025",
     size: "wide",
-    accent: "from-purple-500/20"
   },
   {
     id: 9,
@@ -99,21 +115,22 @@ const reviews = [
     score: "Band 7.0",
     skill: "Speaking",
     comment: "Hợp lý! Học Ielts ở đây thấy giải trí mà vẫn hiệu quả. Anh em nên thử nhé.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr3n_W7rL_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRr3n_W7rL_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "02/01/2026",
     size: "small",
-    accent: "from-purple-500/20"
   },
   {
     id: 10,
     name: "PewPew",
     score: "Band 8.0",
     skill: "Writing",
-    comment: "Bạn có thể không giỏi, nhưng bạn phải cố gắng. Ielts Skibidi là công cụ tuyệt vời để bạn hiện thực hóa điều đó.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7y_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    comment:
+      "Bạn có thể không giỏi, nhưng bạn phải cố gắng. Ielts Skibidi là công cụ tuyệt vời để bạn hiện thực hóa điều đó.",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7y_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "03/01/2026",
     size: "wide",
-    accent: "from-purple-500/20"
   },
   {
     id: 11,
@@ -121,10 +138,10 @@ const reviews = [
     score: "Band 7.5",
     skill: "Reading",
     comment: "Thích nhất phần Reading, bài đọc phong phú và giải thích cực kỳ dễ hiểu.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "04/01/2026",
     size: "small",
-    accent: "from-purple-500/20"
   },
   {
     id: 12,
@@ -132,10 +149,10 @@ const reviews = [
     score: "Band 7.0",
     skill: "Listening",
     comment: "Đúng chất Skibidi! Học hiệu quả mà không bị gò bó. 10 điểm cho chất lượng!",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "05/01/2026",
     size: "small",
-    accent: "from-purple-500/20"
   },
   {
     id: 13,
@@ -143,21 +160,22 @@ const reviews = [
     score: "Band 7.5",
     skill: "Speaking",
     comment: "Vừa học vừa nhảy cũng ra được 7.5 Speaking nè. Skibidi đỉnh thật sự!",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "06/01/2026",
     size: "small",
-    accent: "from-purple-500/20"
   },
   {
     id: 14,
     name: "Quang Hải",
     score: "Band 6.5",
     skill: "Reading",
-    comment: "Đọc hiểu chiến thuật trên sân cỏ hay trong bài thi Ielts đều cần sự tập trung. Skibidi đã giúp tôi điều đó.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    comment:
+      "Đọc hiểu chiến thuật trên sân cỏ hay trong bài thi Ielts đều cần sự tập trung. Skibidi đã giúp tôi điều đó.",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "07/01/2026",
     size: "wide",
-    accent: "from-purple-500/20"
   },
   {
     id: 15,
@@ -165,255 +183,202 @@ const reviews = [
     score: "Band 7.0",
     skill: "Writing",
     comment: "Viết lách không còn là nỗi sợ nhờ AI của Skibidi. Cảm ơn team rất nhiều!",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "08/01/2026",
     size: "small",
-    accent: "from-purple-500/20"
   },
   {
     id: 16,
     name: "Trấn Thành",
     score: "Band 8.0",
     skill: "Speaking",
-    comment: "Ielts Skibidi là một bước ngoặt lớn. Ngôn ngữ không chỉ là công cụ, nó là nghệ thuật.",
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
+    comment:
+      "Ielts Skibidi là một bước ngoặt lớn. Ngôn ngữ không chỉ là công cụ, nó là nghệ thuật.",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_z_z_z_z_z_z_z_z_z_z_z_z_z_z_z&s",
     date: "10/01/2026",
     size: "small",
-    accent: "from-purple-500/20"
-  }
+  },
 ];
 
 const stats = [
-  { label: "Học viên", value: "5,000+", icon: Users, color: "text-purple-600" },
-  { label: "Band cao nhất", value: "8.5", icon: Award, color: "text-purple-600" },
-  { label: "Mục tiêu đạt được", value: "92%", icon: Target, color: "text-purple-600" },
-  { label: "Bài làm mỗi ngày", value: "1,200+", icon: TrendingUp, color: "text-purple-600" },
+  { label: "Học viên", value: "5,000+", icon: Users },
+  { label: "Band cao nhất", value: "8.5", icon: Award },
+  { label: "Mục tiêu đạt được", value: "92%", icon: Target },
+  { label: "Bài làm mỗi ngày", value: "1,200+", icon: TrendingUp },
 ];
 
 const categories = [
-  { id: 'all', label: 'Tất cả', icon: FilterX },
-  { id: 'Reading', label: 'Reading', icon: BookOpen },
-  { id: 'Listening', label: 'Listening', icon: Headphones },
-  { id: 'Writing', label: 'Writing', icon: PenTool },
-  { id: 'Speaking', label: 'Speaking', icon: Mic },
+  { id: "all", label: "Tất cả", icon: FilterX },
+  { id: "Reading", label: "Reading", icon: BookOpen },
+  { id: "Listening", label: "Listening", icon: Headphones },
+  { id: "Writing", label: "Writing", icon: PenTool },
+  { id: "Speaking", label: "Speaking", icon: Mic },
 ];
 
-function ReviewCard({ review, index }: { review: any; index: number }) {
+function ReviewCard({ review }: { review: (typeof reviews)[number] }) {
+  const [imgError, setImgError] = useState(false);
   const sizeClasses = {
-    small: "col-span-1 row-span-1",
-    wide: "col-span-1 md:col-span-2 row-span-1",
+    small: "col-span-1",
+    wide: "col-span-1 md:col-span-2",
   };
-
-  const skillIcons = {
-    Reading: BookOpen,
-    Listening: Headphones,
-    Writing: PenTool,
-    Speaking: Mic,
-  };
-
-  const Icon = skillIcons[review.skill as keyof typeof skillIcons];
+  const isInvalidUrl = !review.image || review.image.includes("_z_z_z");
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ 
-        duration: 0.4,
-        delay: index * 0.02,
-        layout: { duration: 0.3 }
-      }}
-      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} group h-full min-h-[340px] bg-white rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 p-8 relative overflow-hidden`}
+    <div
+      className={`${sizeClasses[review.size as keyof typeof sizeClasses]} bg-white rounded-xl border border-slate-200 p-6 shadow-sm hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between`}
     >
-      <div className="absolute top-6 right-8 text-8xl font-serif text-purple-500/5 select-none pointer-events-none">"</div>
-
-      <div className="flex flex-col h-full relative z-10">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 rounded-2xl overflow-hidden ring-4 ring-slate-50 shadow-inner">
-            <img src={review.image} alt={review.name} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" />
-          </div>
-          <div className="space-y-1">
-            <h4 className="text-lg font-black text-slate-900 tracking-tight">{review.name}</h4>
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-lg bg-purple-50 text-purple-600 text-[10px] font-black uppercase tracking-wider">{review.score}</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">• {review.skill}</span>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-900 flex items-center justify-center text-white text-base font-bold shrink-0">
+              {!imgError && !isInvalidUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={review.image}
+                  alt={review.name}
+                  onError={() => setImgError(true)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{review.name.charAt(0).toUpperCase()}</span>
+              )}
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900">{review.name}</h3>
+              <p className="text-xs font-medium text-slate-500 mt-0.5">
+                Kỹ năng: <span className="text-slate-700 font-semibold">{review.skill}</span>
+              </p>
             </div>
           </div>
+
+          <span className="px-3 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold font-mono shrink-0">
+            {review.score}
+          </span>
         </div>
 
-        <div className="flex-1">
-          <p className="text-slate-600 font-medium leading-relaxed italic">
-            "{review.comment}"
-          </p>
-        </div>
-
-        <div className="pt-6 mt-6 border-t border-slate-50 flex items-center justify-between">
-          <div className="flex gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            ))}
-          </div>
-          <div className="text-[10px] font-black text-purple-500 uppercase tracking-widest bg-purple-50/50 px-3 py-1 rounded-full">
-            {review.date}
-          </div>
-        </div>
+        <p className="text-slate-600 text-sm leading-relaxed">&ldquo;{review.comment}&rdquo;</p>
       </div>
-    </motion.div>
+
+      <div className="pt-4 mt-6 border-t border-slate-100 flex items-center justify-between text-xs">
+        <div className="flex gap-0.5">
+          {[...Array(5)].map((_, i) => (
+            <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+          ))}
+        </div>
+        <span className="text-slate-400 font-mono">{review.date}</span>
+      </div>
+    </div>
   );
 }
 
 export default function ReviewsPage() {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
 
   const filteredReviews = useMemo(() => {
-    if (filter === 'all') return reviews;
-    return reviews.filter(r => r.skill === filter);
+    if (filter === "all") return reviews;
+    return reviews.filter((r) => r.skill === filter);
   }, [filter]);
 
   return (
-    <div className="bg-slate-50/50 min-h-screen pt-32 pb-24 relative overflow-hidden">
-      {/* Background Orbs */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-purple-200/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-rose-200/20 rounded-full blur-[120px]" />
-      </div>
+    <div className="bg-[#F8FAFC] min-h-screen pt-10 pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-10">
+        {/* Header */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 sm:p-10 shadow-sm">
+          <div className="max-w-3xl space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold uppercase tracking-wider">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="IELTS SKIBIDI" className="w-4 h-4 rounded-xs object-cover" />
+              IELTS SKIBIDI • Kết quả học viên
+            </div>
 
-      <div className="max-w-7xl mx-auto px-6 space-y-24 relative">
-        {/* Hero Section */}
-        <div className="text-center space-y-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white border border-slate-100 text-purple-600 text-[10px] font-black uppercase tracking-[0.3em] shadow-sm"
-          >
-            <Sparkles className="w-4 h-4" />
-            Community Wall of Fame
-          </motion.div>
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+              Bảng vàng thành tích học viên IELTS SKIBIDI
+            </h1>
 
-          <motion.h1
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-7xl md:text-9xl font-black text-slate-900 tracking-tighter leading-[0.9] uppercase"
-          >
-            THE <span className="text-purple-600">SUCCESS</span><br />CHRONICLES
-          </motion.h1>
+            <p className="text-slate-600 text-base leading-relaxed">
+              Nơi lưu giữ những cột mốc đáng nhớ của cộng đồng học viên IELTS SKIBIDI trên hành
+              trình chinh phục Band điểm mục tiêu.
+            </p>
+          </div>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-slate-500 text-xl max-w-2xl mx-auto font-medium leading-relaxed"
-          >
-            Nơi lưu giữ những cột mốc đáng nhớ của cộng đồng Skibidians trên hành trình vươn tới mục tiêu Band điểm mơ ước.
-          </motion.p>
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8 pt-8 border-t border-slate-100">
+            {stats.map((stat, i) => (
+              <div
+                key={i}
+                className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-4"
+              >
+                <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
+                  <stat.icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-slate-900 font-mono">{stat.value}</div>
+                  <div className="text-xs font-medium text-slate-500">{stat.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap justify-center gap-4">
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setFilter(cat.id)}
-              className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 border-2 ${
-                filter === cat.id 
-                ? 'bg-purple-600 border-purple-600 text-white shadow-2xl shadow-purple-500/30 -translate-y-1' 
-                : 'bg-white border-transparent text-slate-400 hover:border-slate-200 hover:text-slate-600 hover:bg-slate-50 shadow-sm'
-              }`}
-            >
-              <cat.icon className={`w-4 h-4 ${filter === cat.id ? 'text-purple-400' : ''}`} />
-              {cat.label}
-            </button>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setFilter(cat.id)}
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all border ${
+                  filter === cat.id
+                    ? "bg-slate-900 border-slate-900 text-white shadow-sm"
+                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <cat.icon className="w-3.5 h-3.5" />
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="text-xs font-medium text-slate-500">
+            Hiển thị <span className="font-bold text-slate-900">{filteredReviews.length}</span> đánh
+            giá từ học viên
+          </div>
+        </div>
+
+        {/* Reviews Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 grid-flow-dense">
+          {filteredReviews.map((review) => (
+            <ReviewCard key={review.id} review={review} />
           ))}
         </div>
 
-        {/* Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 + i * 0.1 }}
-              className="bg-white p-10 rounded-[3rem] text-center space-y-6 border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-700 group relative overflow-hidden"
-            >
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-500/20 to-transparent scale-x-0 group-hover:scale-x-100 transition-transform duration-700" />
-              <div className={`w-16 h-16 rounded-[2rem] bg-slate-50 flex items-center justify-center mx-auto ${stat.color} shadow-inner group-hover:scale-110 transition-transform duration-500`}>
-                <stat.icon className="w-8 h-8" />
-              </div>
-              <div className="space-y-1">
-                <div className="text-4xl font-black text-slate-900 tracking-tighter tabular-nums">{stat.value}</div>
-                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{stat.label}</div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Bento Grid with Layout Transitions */}
-        <LayoutGroup>
-          <motion.div 
-            layout 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 auto-rows-[340px] gap-8 grid-flow-dense"
-          >
-            <AnimatePresence mode="popLayout">
-              {filteredReviews.map((review, index) => (
-                <ReviewCard key={review.id} review={review} index={index} />
-              ))}
-            </AnimatePresence>
-
-            {/* Special CTA Card - Integrated into grid */}
-            <motion.div
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              className="col-span-1 md:col-span-2 row-span-1 bg-purple-600 p-12 flex flex-col justify-between group cursor-pointer shadow-2xl shadow-purple-500/30 rounded-[3rem] min-h-[340px] relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-white/20 transition-colors duration-700" />
-              
-              <div className="space-y-8 relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md ring-1 ring-white/30">
-                  <Sparkles className="w-10 h-10 text-white" />
-                </div>
-                <div className="space-y-3">
-                  <h2 className="text-4xl font-black text-white tracking-tighter leading-tight uppercase">CÂU CHUYỆN<br />CỦA BẠN?</h2>
-                  <p className="text-purple-100 text-lg font-medium leading-relaxed max-w-[280px]">
-                    Hãy bắt đầu hành trình ngay hôm nay để ghi tên mình lên bảng vàng Skibidi.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 text-white font-black uppercase tracking-[0.2em] text-[10px] pt-8 border-t border-white/10 relative z-10">
-                Bắt đầu luyện tập <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-500" />
-              </div>
-            </motion.div>
-          </motion.div>
-        </LayoutGroup>
-
-        {/* Footer CTA */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          className="py-32 text-center space-y-16 border-t border-slate-100 relative"
-        >
-          <div className="absolute top-[-1px] left-1/2 -translate-x-1/2 w-32 h-[2px] bg-gradient-to-r from-transparent via-purple-500 to-transparent" />
-          
-          <div className="space-y-4">
-            <h2 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter uppercase">
-              BẠN ĐÃ SẴN SÀNG<br />CHƯA?
+        {/* Bottom CTA */}
+        <div className="bg-slate-900 rounded-2xl p-8 sm:p-10 text-white flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="text-xs font-semibold uppercase tracking-wider text-blue-400">
+              IELTS SKIBIDI • Computer-Delivered Practice
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Sẵn sàng ghi tên mình lên bảng thành tích IELTS SKIBIDI?
             </h2>
-            <p className="text-slate-500 text-xl font-medium">Hành trình 8.0+ bắt đầu từ một click chuột.</p>
+            <p className="text-slate-300 text-sm leading-relaxed">
+              Luyện thi đầy đủ 4 kỹ năng với bộ đề chuẩn Cambridge và nhận phân tích chi tiết theo
+              từng tiêu chí chấm điểm.
+            </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-8">
-            <button className="group px-12 py-6 bg-purple-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-xs hover:bg-purple-700 transition-all duration-500 flex items-center gap-4 shadow-2xl shadow-purple-500/40 hover:-translate-y-1">
-              Bắt đầu học ngay
-              <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="px-12 py-6 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-[0.2em] text-xs border-2 border-slate-100 hover:border-slate-900 transition-all duration-500 hover:-translate-y-1 shadow-sm">
-              Tư vấn lộ trình
-            </button>
+          <div className="flex flex-wrap gap-3 shrink-0">
+            <Link
+              href="/dashboard"
+              className="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold text-sm transition-colors inline-flex items-center gap-2"
+            >
+              Bắt đầu luyện tập
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

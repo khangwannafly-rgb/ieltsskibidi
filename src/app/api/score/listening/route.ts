@@ -1,24 +1,35 @@
 import { convertRawToBand } from "@/lib/band-conversion";
+import { isAnswerCorrect } from "@/lib/answers";
+import { readJsonBody } from "@/lib/ai-response";
 import { NextResponse } from "next/server";
+
+interface CorrectAnswer {
+  id: number;
+  correct_answer: string;
+  explanation?: string;
+}
 
 export async function POST(req: Request) {
   try {
-    const { userAnswers, correctAnswers } = await req.json();
+    const { userAnswers, correctAnswers } = await readJsonBody<{
+      userAnswers: string[];
+      correctAnswers: CorrectAnswer[];
+    }>(req);
 
-    if (!userAnswers || !correctAnswers) {
+    if (!Array.isArray(userAnswers) || !Array.isArray(correctAnswers) || correctAnswers.length === 0) {
       return NextResponse.json({ error: "Answers are required" }, { status: 400 });
     }
 
     let rawScore = 0;
-    const results = correctAnswers.map((correct: any, index: number) => {
-      const isCorrect = userAnswers[index]?.toLowerCase() === correct.correct_answer.toLowerCase();
+    const results = correctAnswers.map((correct, index) => {
+      const isCorrect = isAnswerCorrect(userAnswers[index], correct?.correct_answer);
       if (isCorrect) rawScore++;
       return {
-        id: correct.id,
-        userAnswer: userAnswers[index],
-        correctAnswer: correct.correct_answer,
+        id: correct?.id,
+        userAnswer: userAnswers[index] ?? "",
+        correctAnswer: correct?.correct_answer ?? "",
         isCorrect,
-        explanation: correct.explanation
+        explanation: correct?.explanation ?? ""
       };
     });
 

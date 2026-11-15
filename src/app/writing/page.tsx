@@ -1,47 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PenTool, Send, RefreshCw, BarChart2, CheckCircle, AlertTriangle, ChevronRight, BookOpen, Clock, TrendingUp, Sparkles, Timer, Trophy } from "lucide-react";
+import { PenTool, Send, RefreshCw, BarChart2, CheckCircle, AlertTriangle, ChevronRight, BookOpen, Clock, Sparkles, Timer, Trophy, Eye, FileText } from "lucide-react";
 import WritingTask1Chart from "@/components/WritingTask1Chart";
+import WritingInteractiveDiff from "@/components/WritingInteractiveDiff";
 import { useUser } from "@/context/UserContext";
+
+const TASK1_SUBTYPES = [
+  { id: "all", label: "Ngẫu nhiên (Mọi dạng)" },
+  { id: "line", label: "Line Graph (Đường)" },
+  { id: "bar", label: "Bar Chart (Cột)" },
+  { id: "pie", label: "Pie Chart (Tròn)" },
+  { id: "table", label: "Table (Bảng số liệu)" },
+  { id: "process", label: "Process (Quy trình)" },
+  { id: "map", label: "Map (Bản đồ)" },
+  { id: "multiple", label: "Mixed (Kết hợp 2 biểu đồ)" },
+];
+
+const TASK2_SUBTYPES = [
+  { id: "all", label: "Ngẫu nhiên (Mọi dạng)" },
+  { id: "discussion", label: "Discuss Both Views" },
+  { id: "opinion", label: "Agree / Disagree" },
+  { id: "advantages", label: "Advantages / Disadvantages" },
+  { id: "problem_solution", label: "Causes & Solutions" },
+  { id: "two_part", label: "Two-Part Question" },
+];
 
 export default function WritingPage() {
   const { user, addSubmission } = useUser();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [question, setQuestion] = useState<any>(null);
   const [essay, setEssay] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null);
+  const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [taskType, setTaskType] = useState<string>("task2");
+  const [scoreError, setScoreError] = useState<string | null>(null);
+  const [taskType, setTaskType] = useState<"task1" | "task2">("task2");
+  const [task1Sub, setTask1Sub] = useState<string>("all");
+  const [task2Sub, setTask2Sub] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<"structure" | "vocab" | "sample">("structure");
+  const [timeLeft, setTimeLeft] = useState(0);
 
-  const generateTask = async (type: string) => {
+  useEffect(() => {
+    if (!question || question.error || result) return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [question, result]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const generateTask = async (type: "task1" | "task2", subTypeOverride?: string) => {
+    const subToUse = subTypeOverride !== undefined ? subTypeOverride : type === "task1" ? task1Sub : task2Sub;
     setLoading(true);
+    setQuestion(null);
     setResult(null);
+    setShowResult(false);
+    setScoreError(null);
     setEssay("");
     setTaskType(type);
+    setActiveTab("structure");
+    setTimeLeft(type === "task1" ? 20 * 60 : 40 * 60);
     try {
       const res = await fetch("/api/generate/writing", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           type,
+          subType: subToUse,
           targetScore: user?.targetScore || 6.5
         }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({ error: "Phản hồi từ máy chủ không hợp lệ" }));
+      if (!res.ok && !data.error) data.error = "Không thể tạo đề bài";
       setQuestion(data);
     } catch (error) {
       console.error(error);
-      setQuestion({ error: "Failed to generate task" });
+      setQuestion({ error: "Không thể kết nối tới máy chủ. Vui lòng kiểm tra mạng và thử lại." });
     } finally {
       setLoading(false);
     }
   };
 
+  const wordCount = essay.trim() ? essay.trim().split(/\s+/).length : 0;
+  const paragraphCount = essay.trim() ? essay.trim().split(/\n\s*\n/).filter(Boolean).length : 0;
+  const minWords = question?.min_words || (taskType === "task1" ? 150 : 250);
+
   const submitEssay = async () => {
+    if (loading || result) return;
     setLoading(true);
+    setScoreError(null);
     try {
       const res = await fetch("/api/score/writing", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           question: question.question, 
           essay,
@@ -49,62 +108,54 @@ export default function WritingPage() {
         }),
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Failed to score writing task");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Failed to score writing task");
       }
 
-      const data = await res.json();
       setResult(data);
+      setShowResult(true);
 
-      // Save submission
       addSubmission({
         skill: 'writing',
         band: data.overall_band,
         details: {
           taskType,
+          prompt: question.question,
+          essay,
           criteria_scores: data.criteria_scores,
+          criteria_feedback: data.criteria_feedback,
+          strengths: data.strengths,
+          key_improvements: data.key_improvements,
+          revisions: data.revisions,
+          lexical_upgrades: data.lexical_upgrades,
+          sample_answer: question.sample_answer,
           wordCount
         }
       });
     } catch (error) {
       console.error(error);
+      setScoreError(error instanceof Error ? error.message : "Không thể chấm bài. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
   };
 
-  const wordCount = essay.trim() ? essay.trim().split(/\s+/).length : 0;
-
   if (loading && !question) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F9FAFB]">
-        <div className="w-full max-w-md p-12 bg-white rounded-[3rem] border border-slate-100 shadow-2xl text-center space-y-8 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-purple opacity-5 blur-3xl rounded-full" />
-          <div className="relative w-32 h-32 mx-auto">
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-[#F9FAFB] p-6">
+        <div className="w-full max-w-md p-10 bg-white rounded-3xl border border-slate-200 shadow-xl text-center space-y-6">
+          <div className="relative w-20 h-20 mx-auto">
             <motion.div 
               animate={{ rotate: 360 }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               className="absolute inset-0 border-b-4 border-purple-600 rounded-full"
             />
-            <motion.div 
-              animate={{ rotate: -360 }}
-              transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-4 border-t-4 border-purple-200 rounded-full"
-            />
-            <PenTool className="absolute inset-0 m-auto w-14 h-14 text-purple-600" />
+            <PenTool className="absolute inset-0 m-auto w-9 h-9 text-purple-600" />
           </div>
-          <div className="space-y-4 relative">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Đang soạn đề bài...</h2>
-            <p className="text-slate-500 font-bold leading-relaxed">AI đang biên soạn đề bài Writing phù hợp với mục tiêu Band {user?.targetScore || 6.5} của bạn.</p>
-          </div>
-          <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden relative border border-slate-200/50">
-            <motion.div 
-              initial={{ x: "-100%" }}
-              animate={{ x: "100%" }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute inset-0 bg-gradient-purple w-1/2"
-            />
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black text-slate-900">Đang biên soạn đề Writing...</h2>
+            <p className="text-slate-500 text-sm font-medium">AI đang chuẩn bị đề thi {taskType === "task1" ? "Academic Task 1 (kèm biểu đồ & bài mẫu)" : "Academic Task 2"} cho mục tiêu Band {user?.targetScore || 6.5}.</p>
           </div>
         </div>
       </div>
@@ -113,21 +164,16 @@ export default function WritingPage() {
 
   if (question?.error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#F9FAFB]">
-        <div className="max-w-md w-full p-12 bg-white rounded-[3rem] border border-rose-100 text-center space-y-10 shadow-2xl">
-          <div className="w-24 h-24 bg-rose-50 rounded-3xl flex items-center justify-center mx-auto text-rose-600 border border-rose-100 shadow-xl shadow-rose-500/10">
-            <AlertTriangle className="w-12 h-12" />
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-[#F9FAFB] p-6">
+        <div className="max-w-md w-full p-10 bg-white rounded-3xl border border-rose-100 text-center space-y-6 shadow-xl">
+          <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-600 border border-rose-100">
+            <AlertTriangle className="w-8 h-8" />
           </div>
-          <div className="space-y-4">
-            <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Lỗi hệ thống</h2>
-            <p className="text-slate-500 font-bold leading-relaxed">
-              {question.error || "Không thể kết nối với AI để tạo đề bài. Vui lòng thử lại sau giây lát."}
-            </p>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black text-slate-900">Lỗi hệ thống</h2>
+            <p className="text-slate-500 text-sm font-medium">{question.error}</p>
           </div>
-          <button 
-            onClick={() => generateTask(taskType)}
-            className="btn-primary w-full py-6 text-sm"
-          >
+          <button onClick={() => generateTask(taskType)} className="btn-primary w-full py-4 text-xs">
             Thử lại ngay
           </button>
         </div>
@@ -135,423 +181,509 @@ export default function WritingPage() {
     );
   }
 
+  const structureLabelMap: Record<string, string> = {
+    introduction: "1. Introduction (Mở bài)",
+    overview: "2. Overview (Tổng quan — Bắt buộc ở Task 1)",
+    body_paragraph_1: "3. Body Paragraph 1 (Thân bài 1)",
+    body_paragraph_2: "4. Body Paragraph 2 (Thân bài 2)",
+    body_1: "2. Body Paragraph 1 (Luận điểm 1)",
+    body_2: "3. Body Paragraph 2 (Luận điểm 2)",
+    conclusion: "4. Conclusion (Kết bài)",
+  };
+
   return (
-    <div className="min-h-screen bg-[#F9FAFB] pt-32 pb-24">
-      <div className="max-w-[1600px] mx-auto px-6 space-y-12">
-        {/* Header Section */}
-        {!question && (
-          <div className="flex flex-col lg:flex-row justify-between items-end gap-12 border-b border-slate-200 pb-12">
-            <div className="space-y-6 flex-1">
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white border border-slate-100 text-purple-600 text-[10px] font-black uppercase tracking-widest shadow-sm"
+    <div className="min-h-[calc(100vh-4rem)] bg-[#F9FAFB] pb-16">
+      {!question ? (
+        <div className="max-w-5xl mx-auto px-6 pt-8 space-y-10">
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 border border-purple-100 text-purple-700 text-xs font-extrabold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" />
+              IELTS Academic Writing · Official Band Descriptors (TA/TR · CC · LR · GRA)
+            </span>
+            <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
+              Phòng Thi <span className="text-gradient">Writing</span>
+            </h1>
+            <p className="text-slate-600 text-base font-medium max-w-2xl">
+              Luyện viết theo chuẩn thi máy (IELTS on Computer) với đề bài chuẩn Cambridge, biểu đồ trực quan, bài mẫu Band 8.5 và chấm điểm chi tiết theo 4 tiêu chí.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-3xl p-8 text-left transition-all border border-slate-200/80 shadow-md hover:shadow-xl hover:border-purple-300 flex flex-col justify-between space-y-6">
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 border border-purple-100">
+                    <BarChart2 className="w-7 h-7" />
+                  </div>
+                  <span className="px-3 py-1 rounded-lg bg-slate-100 text-slate-700 text-xs font-extrabold">20 phút · 150+ từ · 7 dạng biểu đồ</span>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black text-slate-900">Academic Writing Task 1</h3>
+                  <p className="text-slate-600 text-sm font-medium leading-relaxed">
+                    Chọn dạng biểu đồ bạn muốn luyện hoặc để hệ thống chọn ngẫu nhiên:
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {TASK1_SUBTYPES.map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setTask1Sub(st.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        task1Sub === st.id
+                          ? "bg-purple-600 border-purple-600 text-white shadow-sm"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:border-purple-300"
+                      }`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={() => generateTask("task1", task1Sub)}
+                className="btn-primary w-full !py-4 text-xs flex items-center justify-center gap-2 group"
               >
-                <Sparkles className="w-4 h-4" />
-                AI-Powered Learning
-              </motion.div>
-              <h1 className="text-6xl md:text-8xl font-black text-slate-900 tracking-tighter leading-[0.9]">
-                Writing <span className="text-gradient">Mastery</span>
-              </h1>
-              <p className="text-slate-600 font-bold text-xl leading-relaxed max-w-2xl">
-                Luyện tập viết luận Task 1 & 2 với phản hồi chi tiết từ AI dựa trên các tiêu chí chấm điểm IELTS chính thức.
-              </p>
-            </div>
-            
-            <div className="flex bg-white p-3 rounded-[2.5rem] border border-slate-100 shadow-xl">
-              <button 
-                onClick={() => setTaskType("task1")}
-                className={`px-12 py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${
-                  taskType === 'task1' ? 'bg-gradient-purple text-white shadow-lg shadow-purple-500/30' : 'text-slate-400 hover:text-slate-600'
-                }`}
-              >
-                Academic Task 1
+                <span>Bắt đầu làm Task 1 ({TASK1_SUBTYPES.find((s) => s.id === task1Sub)?.label})</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button 
-                onClick={() => setTaskType("task2")}
-                className={`px-12 py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest transition-all duration-300 ${
-                  taskType === 'task2' ? 'bg-gradient-purple text-white shadow-lg shadow-purple-500/30' : 'text-slate-400 hover:text-slate-600'
-                }`}
+            </div>
+
+            <div className="bg-white rounded-3xl p-8 text-left transition-all border border-slate-200/80 shadow-md hover:shadow-xl hover:border-purple-300 flex flex-col justify-between space-y-6">
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 border border-purple-100">
+                    <PenTool className="w-7 h-7" />
+                  </div>
+                  <span className="px-3 py-1 rounded-lg bg-purple-50 text-purple-700 text-xs font-extrabold">40 phút · 250+ từ · 5 dạng bài luận</span>
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-black text-slate-900">Academic Writing Task 2</h3>
+                  <p className="text-slate-600 text-sm font-medium leading-relaxed">
+                    Chọn dạng câu hỏi nghị luận bạn muốn luyện hoặc xoay vòng ngẫu nhiên:
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {TASK2_SUBTYPES.map((st) => (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setTask2Sub(st.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                        task2Sub === st.id
+                          ? "bg-purple-600 border-purple-600 text-white shadow-sm"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:border-purple-300"
+                      }`}
+                    >
+                      {st.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={() => generateTask("task2", task2Sub)}
+                className="btn-primary w-full !py-4 text-xs flex items-center justify-center gap-2 group"
               >
-                Academic Task 2
+                <span>Bắt đầu làm Task 2 ({TASK2_SUBTYPES.find((s) => s.id === task2Sub)?.label})</span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
-        )}
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto px-6 pt-4 space-y-6">
+          {/* Exam Top Bar */}
+          <div className="bg-white px-6 py-3.5 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => {
+                  if (essay.trim() && !result && !window.confirm("Bài viết hiện tại sẽ bị mất. Bạn có chắc muốn quay lại?")) return;
+                  setQuestion(null);
+                  setResult(null);
+                  setShowResult(false);
+                  setScoreError(null);
+                  setEssay("");
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-purple-50 hover:text-purple-700 transition-all font-bold text-xs"
+              >
+                <ChevronRight className="w-4 h-4 rotate-180" /> Đổi Task
+              </button>
+              <span className="px-3 py-1 rounded-lg bg-purple-600 text-white text-xs font-extrabold uppercase tracking-wider">
+                Writing {taskType === "task1" ? "Task 1" : "Task 2"}
+              </span>
+              <span className="text-xs font-bold text-slate-500 hidden sm:inline">
+                You should spend about {taskType === "task1" ? "20" : "40"} minutes on this task · Write at least {minWords} words
+              </span>
+            </div>
 
-        {/* Question Header when active */}
-        {question && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-xl"
-          >
-            <button 
-              onClick={() => setQuestion(null)}
-              className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-slate-50 text-slate-500 hover:text-purple-600 hover:bg-purple-50 transition-all font-black uppercase tracking-widest text-[10px] border border-slate-100"
-            >
-              <ChevronRight className="w-4 h-4 rotate-180" /> Quay lại
-            </button>
-            <div className="flex items-center gap-6 px-6">
-              <div className="flex flex-col items-end">
-                <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest">Đang luyện tập</span>
-                <span className="text-lg font-black text-slate-900 uppercase tracking-tighter">Writing {taskType === 'task1' ? 'Task 1' : 'Task 2'}</span>
-              </div>
-              <div className="w-px h-10 bg-slate-100" />
-              <div className="flex items-center gap-3">
-                <Timer className="w-6 h-6 text-purple-600" />
-                <span className="text-2xl font-black text-slate-900 tabular-nums tracking-tighter">{taskType === 'task1' ? '20:00' : '40:00'}</span>
+            <div className="flex items-center gap-3">
+              <select
+                value={taskType === "task1" ? task1Sub : task2Sub}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (taskType === "task1") setTask1Sub(val);
+                  else setTask2Sub(val);
+                  generateTask(taskType, val);
+                }}
+                aria-label="Chọn dạng bài Writing"
+                className="px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 outline-none focus:border-purple-400 cursor-pointer"
+              >
+                {(taskType === "task1" ? TASK1_SUBTYPES : TASK2_SUBTYPES).map((st) => (
+                  <option key={st.id} value={st.id}>
+                    {st.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => generateTask(taskType, "all")}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 text-slate-600 hover:text-purple-600 hover:border-purple-200 text-xs font-bold transition-all"
+                title="Đổi sang dạng đề ngẫu nhiên khác"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Đề ngẫu nhiên khác
+              </button>
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border font-mono font-black text-base tabular-nums ${
+                timeLeft < 180 && !result ? "bg-rose-50 border-rose-200 text-rose-600" : "bg-slate-50 border-slate-200 text-slate-900"
+              }`}>
+                <Timer className="w-4 h-4 text-purple-600" />
+                <span>{formatTime(timeLeft)}</span>
               </div>
             </div>
-          </motion.div>
-        )}
-
-        {!question ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-6xl mx-auto pt-4">
-            <motion.button 
-              whileHover={{ y: -16 }}
-              onClick={() => generateTask("task1")}
-              className="bg-white rounded-[3rem] p-12 text-left group transition-all duration-500 border border-slate-100 shadow-xl hover:shadow-2xl hover:border-purple-500/20 relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-purple-500/10 transition-colors" />
-              <div className="w-24 h-24 bg-purple-50 rounded-3xl flex items-center justify-center text-purple-600 mb-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-purple-100 shadow-lg shadow-purple-500/5">
-                <BarChart2 className="w-12 h-12" />
-              </div>
-              <h3 className="text-4xl font-black text-slate-900 mb-4 group-hover:text-purple-600 transition-all tracking-tighter uppercase">Academic Task 1</h3>
-              <p className="text-slate-500 font-bold leading-relaxed mb-10 text-lg">
-                Mô tả và giải thích dữ liệu từ biểu đồ đường, cột, tròn hoặc quy trình sản xuất. Rèn luyện kỹ năng phân tích số liệu chính xác.
-              </p>
-              <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-purple-600 group-hover:translate-x-3 transition-transform">
-                Bắt đầu ngay <ChevronRight className="w-5 h-5" />
-              </div>
-            </motion.button>
-
-            <motion.button 
-              whileHover={{ y: -16 }}
-              onClick={() => generateTask("task2")}
-              className="bg-white rounded-[3rem] p-12 text-left group transition-all duration-500 border border-slate-100 shadow-xl hover:shadow-2xl hover:border-purple-500/20 relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl -mr-32 -mt-32 group-hover:bg-purple-500/10 transition-colors" />
-              <div className="w-24 h-24 bg-purple-50 rounded-3xl flex items-center justify-center text-purple-600 mb-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border border-purple-100 shadow-lg shadow-purple-500/5">
-                <PenTool className="w-12 h-12" />
-              </div>
-              <h3 className="text-4xl font-black text-slate-900 mb-4 group-hover:text-purple-600 transition-all tracking-tighter uppercase">Academic Task 2</h3>
-              <p className="text-slate-500 font-bold leading-relaxed mb-10 text-lg">
-                Viết bài luận nghị luận về các chủ đề xã hội, giáo dục hoặc môi trường. Tập trung vào tư duy phản biện và cấu trúc bài viết.
-              </p>
-              <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-purple-600 group-hover:translate-x-3 transition-transform">
-                Bắt đầu ngay <ChevronRight className="w-5 h-5" />
-              </div>
-            </motion.button>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr_0.8fr] gap-10 items-start">
-            {/* Left Side: Question & Data */}
-            <div className="space-y-10">
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-[3rem] p-10 space-y-8 relative overflow-hidden border border-slate-100 shadow-xl"
-              >
-                <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl -mr-32 -mt-32" />
-                
-                <div className="flex justify-between items-start relative">
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black text-purple-600 uppercase tracking-widest">Practice Content</span>
-                    <h2 className="text-3xl font-black text-slate-900 tracking-tighter uppercase">Đề bài chi tiết</h2>
+
+          {/* 2-Column Split Screen (Left: Prompt + Chart + Tabs, Right: Exam Editor) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column (6 cols) */}
+            <div className="lg:col-span-6 space-y-6">
+              {/* Official Cambridge Prompt Box */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-5">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <div>
+                    <span className="text-[11px] font-extrabold text-purple-600 uppercase tracking-wider">
+                      IELTS Academic Writing · {taskType === "task1" ? "Task 1" : "Task 2"}
+                    </span>
+                    <h2 className="text-lg font-black text-slate-900">
+                      You should spend about {taskType === "task1" ? "20" : "40"} minutes on this task.
+                    </h2>
                   </div>
-                  <div className="px-6 py-3 bg-purple-50 text-purple-600 text-[10px] font-black rounded-2xl border border-purple-100 uppercase tracking-widest shadow-sm">
-                    Mục tiêu Band {question.difficulty_estimate_band}
-                  </div>
+                  <span className="px-3 py-1 rounded-lg bg-purple-50 text-purple-700 text-xs font-extrabold border border-purple-100">
+                    Band {question.difficulty_estimate_band}
+                  </span>
                 </div>
 
-                <div className="p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100 relative group">
-                  <p className="text-slate-900 font-bold text-2xl leading-relaxed italic">
-                    "{question.question}"
+                <div className="p-5 bg-slate-50 rounded-2xl border-l-4 border-purple-600 space-y-3">
+                  <p className="text-slate-900 font-bold text-base leading-relaxed">
+                    {question.question}
+                  </p>
+                  <p className="text-slate-600 text-sm font-medium italic">
+                    {question.instructions || (taskType === "task1"
+                      ? "Summarise the information by selecting and reporting the main features, and make comparisons where relevant."
+                      : "Give reasons for your answer and include any relevant examples from your own knowledge or experience.")}
+                  </p>
+                  <p className="text-slate-800 text-xs font-extrabold uppercase tracking-wider">
+                    Write at least {minWords} words.
                   </p>
                 </div>
 
                 {taskType === 'task1' && question.chart_data && (
-                  <div className="bg-white rounded-[2.5rem] p-10 border border-slate-100 min-h-[450px] shadow-inner">
+                  <div className="bg-white rounded-2xl p-5 border border-slate-200 h-[360px]">
                     <WritingTask1Chart data={question.chart_data} />
                   </div>
                 )}
+              </div>
 
-                <div className="flex flex-wrap gap-10 pt-10 border-t border-slate-100">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center border border-purple-100 shadow-sm">
-                      <Clock className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Thời gian</span>
-                      <span className="text-base font-black text-slate-900 uppercase tracking-tighter">{taskType === 'task1' ? '20' : '40'} Phút</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center border border-purple-100 shadow-sm">
-                      <BookOpen className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Yêu cầu</span>
-                      <span className="text-base font-black text-slate-900 uppercase tracking-tighter">Tối thiểu {question.min_words} từ</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* Middle: Editor */}
-            <div className="space-y-10 lg:sticky lg:top-32">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-[3rem] overflow-hidden shadow-2xl border border-slate-100"
-              >
-                <div className="bg-slate-50 px-10 py-8 flex justify-between items-center border-b border-slate-100">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-4 h-4 rounded-full animate-pulse shadow-lg ${loading ? 'bg-purple-500 shadow-purple-500/20' : 'bg-purple-600 shadow-purple-600/20'}`} />
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${loading ? 'text-purple-600' : 'text-slate-900'}`}>
-                      {loading ? 'Đang phân tích bài viết...' : 'Editor Mode'}
-                    </span>
-                  </div>
-                  <div className={`text-[10px] font-black uppercase tracking-widest px-6 py-3 rounded-2xl border transition-all duration-500 shadow-sm ${wordCount < (question.min_words || 150) ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-purple-50 text-purple-600 border-purple-100'}`}>
-                    {wordCount} Words
-                  </div>
-                </div>
-                <textarea 
-                  className="w-full h-[650px] p-12 outline-none bg-transparent text-slate-900 font-bold text-xl leading-relaxed resize-none transition-colors placeholder:text-slate-300 selection:bg-purple-100"
-                  placeholder="Bắt đầu viết bài luận của bạn tại đây..."
-                  value={essay}
-                  onChange={(e) => setEssay(e.target.value)}
-                  disabled={loading || !!result}
-                />
-                <div className="p-10 bg-slate-50 border-t border-slate-100 flex justify-end gap-6">
-                  {!result ? (
-                    <button 
-                      onClick={submitEssay}
-                      disabled={loading || wordCount < 50}
-                      className="btn-primary flex items-center gap-4 py-5 px-10 disabled:opacity-30 disabled:grayscale group"
+              {/* Tabbed Support Panel: Structure / Vocabulary / Sample Band 8.5 */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-5">
+                <div className="flex gap-2 bg-slate-100 p-1.5 rounded-2xl">
+                  <button
+                    onClick={() => setActiveTab("structure")}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold transition-all ${
+                      activeTab === "structure" ? "bg-white text-purple-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Dàn ý chuẩn
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("vocab")}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold transition-all ${
+                      activeTab === "vocab" ? "bg-white text-purple-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  >
+                    Từ vựng Band 7.5+
+                  </button>
+                  {question.sample_answer && (
+                    <button
+                      onClick={() => setActiveTab("sample")}
+                      className={`flex-1 py-2 px-3 rounded-xl text-xs font-extrabold transition-all ${
+                        activeTab === "sample" ? "bg-white text-purple-700 shadow-sm" : "text-slate-600 hover:text-slate-900"
+                      }`}
                     >
-                      {loading ? <RefreshCw className="w-6 h-6 animate-spin" /> : <Send className="w-6 h-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
-                      <span className="text-base font-black uppercase tracking-widest">Chấm điểm ngay</span>
-                    </button>
-                  ) : (
-                    <button 
-                      onClick={() => generateTask(taskType)}
-                      className="btn-secondary flex items-center gap-4 py-5 px-10 border border-slate-200"
-                    >
-                      <RefreshCw className="w-6 h-6" />
-                      <span className="text-base font-black uppercase tracking-widest">Luyện đề mới</span>
+                      Bài mẫu Band 8.5
                     </button>
                   )}
                 </div>
-              </motion.div>
-            </div>
 
-            {/* Right Side: Structural Guide & Vocabulary */}
-            <div className="space-y-10 lg:sticky lg:top-32">
-              {/* Structural Guide */}
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-white rounded-[3rem] p-10 space-y-8 border border-slate-100 shadow-xl"
-              >
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="w-10 h-10 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 border border-purple-100 shadow-sm">
-                    <Trophy className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Cấu trúc chuẩn</h3>
-                </div>
-
-                {question.structure_tips && (
-                  <div className="space-y-8">
-                    {Object.entries(question.structure_tips).map(([key, tip]: [string, any]) => {
-                      const labelMap: Record<string, { title: string, icon: any }> = {
-                        'introduction': { title: 'Mở bài', icon: <PenTool className="w-4 h-4" /> },
-                        'overview': { title: 'Tổng quan', icon: <TrendingUp className="w-4 h-4" /> },
-                        'body_paragraph_1': { title: 'Thân bài 1', icon: <ChevronRight className="w-4 h-4" /> },
-                        'body_paragraph_2': { title: 'Thân bài 2', icon: <ChevronRight className="w-4 h-4" /> },
-                        'body_1': { title: 'Thân bài 1', icon: <ChevronRight className="w-4 h-4" /> },
-                        'body_2': { title: 'Thân bài 2', icon: <ChevronRight className="w-4 h-4" /> },
-                        'conclusion': { title: 'Kết bài', icon: <CheckCircle className="w-4 h-4" /> }
-                      };
-                      const config = labelMap[key] || { title: key.replace('_', ' '), icon: <ChevronRight className="w-4 h-4" /> };
-                      
-                      return (
-                        <div key={key} className="space-y-4 group">
-                          <div className="flex items-center gap-4">
-                            <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100 group-hover:bg-purple-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-purple-500/20 transition-all duration-300">
-                              {config.icon}
-                            </div>
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-purple-600 transition-colors">{config.title}</span>
-                          </div>
-                          <div className="pl-12 relative">
-                            <div className="absolute left-4 top-0 bottom-0 w-px bg-slate-100 group-hover:bg-purple-200 transition-colors" />
-                            <p className="text-sm text-slate-500 leading-relaxed font-bold">
-                              {tip}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </motion.div>
-
-              {/* Vocabulary Hints */}
-              <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0, transition: { delay: 0.2 } }}
-                className="bg-white rounded-[3rem] p-10 space-y-8 shadow-xl border border-slate-100 relative overflow-hidden"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-[60px] rounded-full" />
-                <div className="relative z-10">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="w-10 h-10 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 border border-purple-100 shadow-sm">
-                      <Sparkles className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Từ vựng gợi ý</h3>
-                  </div>
-
-                  <div className="space-y-6">
-                    {question.vocabulary_hints?.map((hint: any, idx: number) => (
-                      <div key={idx} className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 hover:border-purple-200 hover:bg-white hover:shadow-xl transition-all group">
-                        <div className="flex justify-between items-start mb-3">
-                          <span className="text-base font-black text-purple-600 group-hover:scale-105 transition-transform">{hint.word}</span>
-                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-white px-3 py-1 rounded-lg border border-slate-100 shadow-sm">{hint.meaning}</span>
-                        </div>
-                        <p className="text-xs text-slate-500 italic font-bold leading-relaxed">
-                          "{hint.usage}"
+                {activeTab === "structure" && question.structure_tips && (
+                  <div className="space-y-3">
+                    {Object.entries(question.structure_tips).map(([key, tip]: [string, unknown]) => (
+                      <div key={key} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1">
+                        <p className="text-xs font-extrabold text-purple-700 uppercase tracking-wider">
+                          {structureLabelMap[key] || key.replace(/_/g, " ")}
+                        </p>
+                        <p className="text-sm text-slate-600 font-medium leading-relaxed">
+                          {String(tip)}
                         </p>
                       </div>
                     ))}
-                    {!question.vocabulary_hints && (
-                      <p className="text-xs text-slate-400 italic font-bold">Đang phân tích từ vựng phù hợp...</p>
+                  </div>
+                )}
+
+                {activeTab === "vocab" && (
+                  <div className="space-y-3">
+                    {question.vocabulary_hints?.map((hint: { word: string; meaning: string; usage: string }, idx: number) => (
+                      <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-sm font-black text-purple-700">{hint.word}</span>
+                          <span className="text-xs font-bold text-slate-600 bg-white px-2.5 py-0.5 rounded-lg border border-slate-200">{hint.meaning}</span>
+                        </div>
+                        <p className="text-xs text-slate-500 italic">&ldquo;{hint.usage}&rdquo;</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {activeTab === "sample" && question.sample_answer && (
+                  <div className="p-5 rounded-2xl bg-purple-50/40 border border-purple-100 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-extrabold text-purple-700 uppercase tracking-wider flex items-center gap-1.5">
+                        <FileText className="w-4 h-4" /> Bài mẫu tham khảo Band 8.5
+                      </span>
+                      <span className="text-xs font-bold text-slate-500">
+                        {String(question.sample_answer).trim().split(/\s+/).length} words
+                      </span>
+                    </div>
+                    <div className="space-y-3 text-sm text-slate-700 leading-relaxed font-medium whitespace-pre-line">
+                      {question.sample_answer}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column: Official Exam Editor (6 cols) */}
+            <div className="lg:col-span-6 lg:sticky lg:top-28">
+              <div className="bg-white rounded-3xl overflow-hidden shadow-md border border-slate-200 flex flex-col">
+                <div className="bg-slate-50 px-6 py-4 flex flex-wrap justify-between items-center gap-3 border-b border-slate-200">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-2.5 h-2.5 rounded-full ${loading ? 'bg-purple-500 animate-ping' : 'bg-emerald-500'}`} />
+                    <span className="text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                      {loading ? 'Giám khảo AI đang chấm bài...' : 'Answer Sheet'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-bold">
+                    <span className="px-3 py-1 rounded-lg bg-white border border-slate-200 text-slate-600">
+                      {paragraphCount} đoạn
+                    </span>
+                    <span className={`px-3 py-1 rounded-lg border font-extrabold ${
+                      wordCount < minWords
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    }`}>
+                      {wordCount} / {minWords} words
+                    </span>
+                  </div>
+                </div>
+
+                <textarea 
+                  className="w-full h-[500px] p-6 md:p-8 outline-none bg-white text-slate-900 font-medium text-base leading-relaxed resize-none placeholder:text-slate-400 selection:bg-purple-100"
+                  placeholder={`Viết bài ${taskType === "task1" ? "Task 1 (tối thiểu 150 từ, nên chia 3–4 đoạn: Introduction, Overview, Body 1, Body 2)" : "Task 2 (tối thiểu 250 từ, nên chia 4 đoạn: Introduction, Body 1, Body 2, Conclusion)"} tại đây...`}
+                  value={essay}
+                  onChange={(e) => setEssay(e.target.value)}
+                  disabled={loading || !!result}
+                  spellCheck={false}
+                />
+
+                <div className="p-6 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                  {scoreError && (
+                    <div className="w-full flex items-start gap-2.5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold">
+                      <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span>{scoreError}</span>
+                    </div>
+                  )}
+                  <div className="text-xs font-medium text-slate-500 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-slate-400" />
+                    {wordCount < 50
+                      ? `Cần viết thêm ít nhất ${50 - wordCount} từ để nộp bài chấm điểm`
+                      : wordCount < minWords
+                      ? `Còn thiếu ${minWords - wordCount} từ để đạt chuẩn ${minWords} từ của IELTS`
+                      : "Đã đạt yêu cầu độ dài chuẩn IELTS"}
+                  </div>
+                  <div className="flex items-center gap-3 ml-auto">
+                    {!result ? (
+                      <button 
+                        onClick={submitEssay}
+                        disabled={loading || wordCount < 50}
+                        className="btn-primary !py-3.5 !px-7 flex items-center gap-2.5 disabled:opacity-40 disabled:pointer-events-none"
+                      >
+                        {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        <span>{scoreError ? 'Thử lại' : 'Nộp & Chấm điểm'}</span>
+                      </button>
+                    ) : (
+                      <>
+                        <button 
+                          onClick={() => setShowResult(true)}
+                          className="btn-primary !py-3.5 !px-6 flex items-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          <span>Xem kết quả (Band {result.overall_band})</span>
+                        </button>
+                        <button 
+                          onClick={() => generateTask(taskType)}
+                          className="btn-secondary !py-3.5 !px-6 flex items-center gap-2"
+                        >
+                          <RefreshCw className="w-4 h-4" />
+                          <span>Đề mới</span>
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Results Modal */}
-        <AnimatePresence>
-          {result && (
+      {/* Results Modal */}
+      <AnimatePresence>
+        {result && showResult && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4 md:p-6"
+          >
             <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-6"
+              initial={{ scale: 0.95, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: 20, opacity: 0 }}
+              className="bg-white max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col rounded-3xl border border-slate-200 shadow-2xl"
             >
-              <motion.div 
-                initial={{ scale: 0.9, y: 40, opacity: 0 }}
-                animate={{ scale: 1, y: 0, opacity: 1 }}
-                exit={{ scale: 0.9, y: 40, opacity: 0 }}
-                className="bg-white max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col rounded-[3rem] border border-slate-100 shadow-2xl"
-              >
-                {/* Modal Header */}
-                <div className="p-10 border-b border-slate-100 bg-slate-50 flex flex-col md:flex-row justify-between items-center gap-8">
-                  <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 bg-gradient-purple rounded-3xl flex items-center justify-center shadow-xl shadow-purple-500/30">
-                      <Trophy className="w-10 h-10 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase">Kết quả Writing</h2>
-                      <p className="text-slate-500 font-bold text-lg">Phân tích chi tiết từ Giám khảo AI</p>
-                    </div>
+              {/* Modal Header */}
+              <div className="p-6 md:p-8 border-b border-slate-200 bg-slate-50 flex flex-wrap justify-between items-center gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-gradient-purple rounded-2xl flex items-center justify-center shadow-lg">
+                    <Trophy className="w-7 h-7 text-white" />
                   </div>
-                  <div className="bg-white px-10 py-6 rounded-3xl border border-slate-200 text-center shadow-lg">
-                    <div className="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1">Overall Band</div>
-                    <div className="text-5xl font-black text-slate-900 tracking-tighter">{result.overall_band}</div>
+                  <div>
+                    <h2 className="text-2xl font-black text-slate-900">Báo cáo Chấm điểm Writing</h2>
+                    <p className="text-slate-500 font-medium text-sm">Đánh giá theo 4 tiêu chí IELTS Writing Band Descriptors ({result.word_count || wordCount} words)</p>
                   </div>
                 </div>
+                <div className="bg-purple-600 text-white px-6 py-3 rounded-2xl text-center">
+                  <div className="text-[10px] font-extrabold uppercase tracking-wider text-purple-100">Overall Band</div>
+                  <div className="text-3xl font-black">{Number(result.overall_band).toFixed(1)}</div>
+                </div>
+              </div>
 
-                <div className="p-10 overflow-y-auto space-y-12">
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {Object.entries(result.criteria_scores).map(([key, score]: [string, any], i) => {
-                      const criteriaMap: Record<string, string> = {
-                        'task_achievement': 'Task Achievement',
-                        'task_response': 'Task Response',
-                        'coherence_and_cohesion': 'Coherence & Cohesion',
-                        'lexical_resource': 'Lexical Resource',
-                        'grammatical_range_and_accuracy': 'Grammar & Accuracy'
-                      };
-                      return (
-                        <motion.div 
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          key={key} 
-                          className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 text-center space-y-4 shadow-sm"
-                        >
-                          <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest h-10 flex items-center justify-center leading-tight">
-                            {criteriaMap[key] || key}
-                          </div>
-                          <div className="text-4xl font-black text-slate-900">{score}</div>
-                          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden border border-slate-200/50">
-                            <motion.div 
-                              initial={{ width: 0 }}
-                              animate={{ width: `${(score/9)*100}%` }}
-                              className="h-full bg-gradient-purple"
-                            />
-                          </div>
-                        </motion.div>
-                      );
-                    })}
+              <div className="p-6 md:p-8 overflow-y-auto space-y-8">
+                {/* 4 Criteria Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  {Object.entries(result.criteria_scores || {}).map(([key, score]: [string, unknown]) => {
+                    const criteriaMap: Record<string, string> = {
+                      'task_achievement': 'Task Achievement (TA)',
+                      'task_response': 'Task Response (TR)',
+                      'coherence_and_cohesion': 'Coherence & Cohesion (CC)',
+                      'lexical_resource': 'Lexical Resource (LR)',
+                      'grammatical_range_and_accuracy': 'Grammar & Accuracy (GRA)'
+                    };
+                    return (
+                      <div key={key} className="bg-slate-50 p-5 rounded-2xl border border-slate-200 text-center space-y-2">
+                        <div className="text-xs font-extrabold text-slate-500 h-8 flex items-center justify-center leading-tight">
+                          {criteriaMap[key] || key}
+                        </div>
+                        <div className="text-3xl font-black text-slate-900">{Number(score).toFixed(1)}</div>
+                        <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-purple" style={{ width: `${(Number(score) / 9) * 100}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Word count warning */}
+                {typeof result.word_count === 'number' && result.word_count < (result.min_words || 0) && (
+                  <div className="flex items-start gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium">
+                    <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <span>Bài viết có {result.word_count} từ, chưa đạt yêu cầu tối thiểu {result.min_words} từ — tiêu chí {taskType === 'task1' ? 'Task Achievement' : 'Task Response'} bị trừ điểm.</span>
                   </div>
+                )}
 
-                  {/* AI Insights */}
-                  <div className="space-y-8">
-                    <h3 className="text-2xl font-black text-slate-900 flex items-center gap-4 uppercase tracking-tighter">
-                      <Sparkles className="w-8 h-8 text-purple-600" />
-                      Chiến thuật cải thiện
+                {/* Criteria feedback */}
+                {result.criteria_feedback && Object.keys(result.criteria_feedback).length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-base font-black text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                      <BookOpen className="w-5 h-5 text-purple-600" />
+                      Nhận xét chi tiết từng tiêu chí
                     </h3>
-                    <div className="grid gap-6">
-                      {result.key_improvements.map((improvement: string, i: number) => (
-                        <motion.div 
-                          key={i} 
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.1 * i }}
-                          className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 flex items-start gap-6 hover:bg-white hover:shadow-xl hover:border-purple-100 transition-all duration-300 group"
-                        >
-                          <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center flex-shrink-0 border border-purple-100 group-hover:bg-purple-600 group-hover:text-white transition-all">
-                            <CheckCircle className="w-6 h-6 text-purple-600 group-hover:text-white" />
+                    <div className="grid gap-3">
+                      {Object.entries(result.criteria_feedback).map(([key, fb]: [string, unknown]) => fb ? (
+                        <div key={key} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-1">
+                          <div className="text-xs font-extrabold text-purple-700 uppercase tracking-wider">
+                            {({ task_achievement: 'Task Achievement', task_response: 'Task Response', coherence_and_cohesion: 'Coherence & Cohesion', lexical_resource: 'Lexical Resource', grammatical_range_and_accuracy: 'Grammar & Accuracy' } as Record<string, string>)[key] || key}
                           </div>
-                          <p className="text-slate-600 font-bold leading-relaxed text-lg">{improvement}</p>
-                        </motion.div>
-                      ))}
+                          <p className="text-slate-700 text-sm font-medium leading-relaxed">{String(fb)}</p>
+                        </div>
+                      ) : null)}
                     </div>
+                  </div>
+                )}
+
+                {/* Key Improvements */}
+                <div className="space-y-3">
+                  <h3 className="text-base font-black text-slate-900 flex items-center gap-2 uppercase tracking-wider">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    Hướng dẫn nâng Band
+                  </h3>
+                  <div className="grid gap-3">
+                    {(result.key_improvements || []).map((improvement: string, i: number) => (
+                      <div key={i} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 flex items-start gap-3">
+                        <CheckCircle className="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-slate-700 text-sm font-medium leading-relaxed">{improvement}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Modal Footer */}
-                <div className="p-10 border-t border-slate-100 bg-slate-50 flex flex-col sm:flex-row gap-6">
-                  <button 
-                    onClick={() => {
-                      setResult(null);
-                      setQuestion(null);
-                      setEssay("");
-                    }}
-                    className="flex-1 py-6 bg-white hover:bg-slate-50 text-slate-900 font-black text-sm uppercase tracking-widest rounded-[2rem] transition-all border border-slate-200 shadow-sm"
-                  >
-                    Luyện tập bài mới
-                  </button>
-                  <button 
-                    onClick={() => setResult(null)}
-                    className="flex-1 py-6 bg-gradient-purple text-white font-black text-sm uppercase tracking-widest rounded-[2rem] transition-all shadow-xl shadow-purple-500/20 hover:scale-[1.02] active:scale-95"
-                  >
-                    Xem lại bài viết
-                  </button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                {/* Interactive Essay Diff & C1/C2 Upgrades */}
+                <WritingInteractiveDiff
+                  essay={essay}
+                  revisions={result.revisions || []}
+                  lexicalUpgrades={result.lexical_upgrades || []}
+                />
+              </div>
 
-      </div>
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row gap-3">
+                <button 
+                  onClick={() => {
+                    setShowResult(false);
+                    if (question.sample_answer) setActiveTab("sample");
+                  }}
+                  className="flex-1 py-3.5 bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all border border-slate-200"
+                >
+                  Đóng & Xem bài mẫu Band 8.5
+                </button>
+                <button 
+                  onClick={() => generateTask(taskType)}
+                  className="flex-1 py-3.5 bg-gradient-purple text-white font-extrabold text-xs uppercase tracking-wider rounded-xl transition-all shadow-md"
+                >
+                  Luyện đề mới
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

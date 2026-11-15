@@ -17,8 +17,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IELTS SKIBIDI - Professional Platform",
-  description: "Master IELTS with AI-powered feedback",
+  title: "IELTS SKIBIDI — Cambridge Computer-Delivered Test Prep",
+  description: "Hệ thống luyện thi và chấm điểm IELTS SKIBIDI chuẩn hóa theo khung khảo thí Cambridge.",
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

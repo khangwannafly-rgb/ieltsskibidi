@@ -1,16 +1,19 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
-interface Submission {
+export type Skill = 'reading' | 'listening' | 'writing' | 'speaking';
+
+export interface Submission {
   id: string;
-  skill: 'reading' | 'listening' | 'writing' | 'speaking';
+  skill: Skill;
   band: number;
   date: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   details?: any;
 }
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -32,7 +35,76 @@ interface UserContextType {
   addSubmission: (submission: Omit<Submission, 'id' | 'date'>) => void;
 }
 
+const STORAGE_KEY = 'ielts_user';
+const DAY_MS = 1000 * 60 * 60 * 24;
+
 const UserContext = createContext<UserContextType | undefined>(undefined);
+
+function persistUser(user: User | null) {
+  try {
+    if (user) localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+    else localStorage.removeItem(STORAGE_KEY);
+  } catch (error) {
+    // localStorage có thể bị đầy hoặc bị chặn (chế độ ẩn danh) – không để app bị crash
+    console.error('Không thể lưu dữ liệu người dùng:', error);
+  }
+}
+
+function startOfDay(date: Date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/** Tính số ngày học liên tiếp tính đến hôm nay (hoặc hôm qua nếu hôm nay chưa học). */
+export function calculateStreak(submissions: Submission[]): number {
+  if (submissions.length === 0) return 0;
+
+  const uniqueDays = Array.from(
+    new Set(
+      submissions
+        .map(s => new Date(s.date))
+        .filter(d => !isNaN(d.getTime()))
+        .map(d => startOfDay(d).getTime())
+    )
+  ).sort((a, b) => b - a); // Mới nhất trước
+
+  if (uniqueDays.length === 0) return 0;
+
+  const today = startOfDay(new Date()).getTime();
+  const diffDays = Math.round((today - uniqueDays[0]) / DAY_MS);
+  if (diffDays > 1) return 0; // Chuỗi đã bị đứt
+
+  let streak = 1;
+  for (let i = 1; i < uniqueDays.length; i++) {
+    const gap = Math.round((uniqueDays[i - 1] - uniqueDays[i]) / DAY_MS);
+    if (gap === 1) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function sanitizeUser(raw: unknown): User | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const u = raw as Partial<User>;
+  if (!u.name || !u.email) return null;
+  const submissions = Array.isArray(u.submissions)
+    ? u.submissions.filter(s => s && typeof s.band === 'number' && !isNaN(s.band) && s.skill && s.date)
+    : [];
+  return {
+    id: u.id || 'user_' + Math.random().toString(36).slice(2, 11),
+    name: String(u.name),
+    email: String(u.email),
+    targetScore: typeof u.targetScore === 'number' ? u.targetScore : 6.5,
+    currentLevel: u.currentLevel || 'Intermediate',
+    submissions,
+    badges: Array.isArray(u.badges) ? u.badges : [],
+    // Tính lại streak khi tải trang để chuỗi bị đứt được cập nhật đúng
+    streak: calculateStreak(submissions),
+    xp: typeof u.xp === 'number' ? u.xp : 0,
+    lastActiveDate: u.lastActiveDate,
+  };
+}
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -40,27 +112,30 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Load user from localStorage on mount
-    const savedUser = localStorage.getItem('ielts_user');
-    if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      // Ensure submissions array exists
-      if (!parsedUser.submissions) {
-        parsedUser.submissions = [];
+    try {
+      const savedUser = localStorage.getItem(STORAGE_KEY);
+      if (savedUser) {
+        const parsed = sanitizeUser(JSON.parse(savedUser));
+        if (parsed) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setUser(parsed);
+        } else {
+          localStorage.removeItem(STORAGE_KEY);
+        }
       }
-      if (parsedUser.streak === undefined) parsedUser.streak = 0;
-      if (parsedUser.xp === undefined) parsedUser.xp = 0;
-      if (!parsedUser.badges) parsedUser.badges = [];
-      
-      setUser(parsedUser);
+    } catch (error) {
+      // Dữ liệu hỏng => xoá để tránh crash toàn bộ ứng dụng
+      console.error('Dữ liệu người dùng bị lỗi, đang khởi tạo lại:', error);
+      try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
     }
     setLoading(false);
   }, []);
 
-  const login = async (email: string, name: string, targetScore: number = 6.5) => {
+  const login = useCallback(async (email: string, name: string, targetScore: number = 6.5) => {
     const newUser: User = {
-      id: 'user_' + Math.random().toString(36).substr(2, 9),
-      email,
-      name,
+      id: 'user_' + Math.random().toString(36).slice(2, 11),
+      email: email.trim(),
+      name: name.trim(),
       targetScore,
       currentLevel: 'Intermediate',
       submissions: [],
@@ -69,81 +144,51 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       badges: [],
     };
     setUser(newUser);
-    localStorage.setItem('ielts_user', JSON.stringify(newUser));
-  };
+    persistUser(newUser);
+  }, []);
 
-  const calculateStreak = (submissions: Submission[]) => {
-    if (submissions.length === 0) return 0;
-    
-    const dates = submissions
-      .map(s => new Date(s.date).toDateString())
-      .filter((v, i, a) => a.indexOf(v) === i); // Unique dates
-
-    let streak = 0;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    let currentDate = new Date(today);
-    
-    // Check if the user has practiced today or yesterday to continue streak
-    const lastPracticeDate = new Date(dates[0]);
-    lastPracticeDate.setHours(0, 0, 0, 0);
-    
-    const diffDays = Math.floor((today.getTime() - lastPracticeDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    if (diffDays > 1) return 0; // Streak broken
-
-    for (let i = 0; i < dates.length; i++) {
-      const practiceDate = new Date(dates[i]);
-      practiceDate.setHours(0, 0, 0, 0);
-      
-      if (practiceDate.getTime() === currentDate.getTime()) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else if (practiceDate.getTime() < currentDate.getTime()) {
-        break;
-      }
-    }
-    
-    return streak;
-  };
-
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
-    localStorage.removeItem('ielts_user');
-  };
+    persistUser(null);
+  }, []);
 
-  const addSubmission = (submission: Omit<Submission, 'id' | 'date'>) => {
-    if (!user) return;
-    
-    const newSubmission: Submission = {
-      ...submission,
-      id: 'sub_' + Date.now(),
-      date: new Date().toISOString(),
-    };
+  const addSubmission = useCallback((submission: Omit<Submission, 'id' | 'date'>) => {
+    const band = Number(submission.band);
+    if (!Number.isFinite(band)) {
+      console.warn('Bỏ qua bài làm không có band hợp lệ:', submission);
+      return;
+    }
 
-    const newSubmissions = [newSubmission, ...user.submissions];
-    const newStreak = calculateStreak(newSubmissions);
-    const newXP = user.xp + 100; // 100 XP per submission
+    // Dùng functional update để tránh mất dữ liệu do state cũ (stale closure)
+    setUser(prev => {
+      if (!prev) return prev;
+      const newSubmission: Submission = {
+        ...submission,
+        band,
+        id: 'sub_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+        date: new Date().toISOString(),
+      };
+      const newSubmissions = [newSubmission, ...prev.submissions];
+      const updatedUser: User = {
+        ...prev,
+        submissions: newSubmissions,
+        streak: calculateStreak(newSubmissions),
+        xp: prev.xp + 100, // 100 XP per submission
+        lastActiveDate: newSubmission.date,
+      };
+      persistUser(updatedUser);
+      return updatedUser;
+    });
+  }, []);
 
-    const updatedUser: User = {
-      ...user,
-      submissions: newSubmissions,
-      streak: newStreak,
-      xp: newXP,
-      lastActiveDate: new Date().toISOString(),
-    };
-
-    setUser(updatedUser);
-    localStorage.setItem('ielts_user', JSON.stringify(updatedUser));
-  };
-
-  const updateUser = async (data: Partial<User>) => {
-    if (!user) return;
-    const updatedUser = { ...user, ...data };
-    setUser(updatedUser);
-    localStorage.setItem('ielts_user', JSON.stringify(updatedUser));
-  };
+  const updateUser = useCallback(async (data: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return prev;
+      const updatedUser = { ...prev, ...data };
+      persistUser(updatedUser);
+      return updatedUser;
+    });
+  }, []);
 
   return (
     <UserContext.Provider value={{ user, loading, updateUser, login, logout, addSubmission }}>

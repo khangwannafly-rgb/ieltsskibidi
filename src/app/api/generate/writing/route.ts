@@ -1,12 +1,28 @@
-import { getGeminiModel } from "@/lib/gemini";
+import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
+import { aiErrorResponse, parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { getFallbackWritingTask } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { type = "task2", targetScore = 6.5 } = await req.json();
+    const body = await readJsonBody<{ type: string; targetScore: number; subType?: string }>(req);
+    const type = body.type === "task1" ? "task1" : "task2";
+    const targetScore = body.targetScore ?? 6.5;
+    const subType = body.subType;
+    if (!hasGeminiApiKey()) {
+      return NextResponse.json(getFallbackWritingTask(type, targetScore, subType));
+    }
     const model = getGeminiModel();
+    const task1Types = ["line", "bar", "pie", "table", "process", "map", "multiple"];
+    const task2Types = ["discussion", "opinion", "advantages", "problem_solution", "two_part"];
+    const chosenSubType =
+      subType && subType !== "all"
+        ? subType
+        : type === "task1"
+        ? task1Types[Math.floor(Math.random() * task1Types.length)]
+        : task2Types[Math.floor(Math.random() * task2Types.length)];
 
-    const prompt = `You are an official IELTS test designer. Generate a high-quality, authentic IELTS Writing ${type} question.
+    const prompt = `You are an official IELTS test designer. Generate a high-quality, authentic IELTS Writing ${type} question specifically using the subtype "${chosenSubType}".
     
     Guidelines:
     - Use formal, academic English.
@@ -47,6 +63,7 @@ export async function POST(req: Request) {
       "vocabulary_hints": [
         {"word": "word/phrase", "meaning": "vietnamese meaning", "usage": "example sentence (related to the topic)"}
       ],
+      "sample_answer": "string (A complete Band 8.5 model report of ~175 words with 4 clear paragraphs separated by \\n\\n)",
       "chart_data": {
         "type": "bar" | "line" | "pie" | "table" | "map" | "process" | "multiple",
         "title": "string (Main title)",
@@ -83,48 +100,23 @@ export async function POST(req: Request) {
       },
       "vocabulary_hints": [
         {"word": "word/phrase", "meaning": "vietnamese meaning", "usage": "example sentence"}
-      ]
+      ],
+      "sample_answer": "string (A complete Band 8.5 model essay of ~280 words with 4 clear paragraphs separated by \\n\\n)"
     }
     `}`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text().trim();
-    
-    // Tìm kiếm JSON trong phản hồi (tránh các ký tự thừa hoặc markdown)
-    const jsonStart = text.indexOf('{');
-    const jsonEnd = text.lastIndexOf('}') + 1;
-    
-    if (jsonStart === -1 || jsonEnd === 0) {
-      throw new Error("AI response does not contain valid JSON");
-    }
-    
-    const jsonString = text.substring(jsonStart, jsonEnd);
-    
-    try {
-      const data = JSON.parse(jsonString);
-      return NextResponse.json(data);
-    } catch (parseError) {
-      console.error("Failed to parse AI JSON:", jsonString);
-      throw new Error("Failed to parse AI response as JSON");
-    }
-  } catch (error: any) {
-    console.error("Error generating writing task:", error);
-    
-    if (error.code === "MISSING_API_KEY" || error.message?.includes("GEMINI_API_KEY")) {
-      return NextResponse.json({ 
-        error: "Cấu hình API Key bị thiếu. Vui lòng thêm GEMINI_API_KEY vào biến môi trường trên Vercel.",
-        code: "MISSING_API_KEY"
-      }, { status: 500 });
-    }
+    const data = parseAIJson<Record<string, unknown>>(response.text());
 
-    if (error.message?.includes("leaked") || error.message?.includes("403 Forbidden")) {
-      return NextResponse.json({ 
-        error: "API Key của bạn đã bị lộ (leaked) và bị Google vô hiệu hóa. Vui lòng tạo API Key mới tại Google AI Studio và cập nhật lại trên Vercel.",
-        code: "LEAKED_API_KEY"
-      }, { status: 403 });
+    if (!data.question || typeof data.question !== "string") {
+      throw new Error("AI trả về đề bài không đầy đủ");
     }
-    
-    return NextResponse.json({ error: "Failed to generate writing task: " + (error.message || "Unknown error") }, { status: 500 });
+    if (!data.min_words) data.min_words = type === "task1" ? 150 : 250;
+    if (!data.difficulty_estimate_band) data.difficulty_estimate_band = targetScore;
+
+    return NextResponse.json({ ...data, task_type: type });
+  } catch (error) {
+    return aiErrorResponse(error, "Không thể tạo đề Writing");
   }
 }

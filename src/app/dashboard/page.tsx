@@ -1,245 +1,333 @@
 "use client";
 
-import { 
-  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend
-} from 'recharts';
-import { 
-  BookOpen, Headphones, PenTool, Mic, ArrowRight, Zap, Target, TrendingUp, Star, Award, Shield, Flame, CheckCircle
-} from 'lucide-react';
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from "recharts";
+import {
+  BookOpen,
+  Headphones,
+  PenTool,
+  Mic,
+  TrendingUp,
+  ArrowUpRight,
+  Target,
+  BarChart3,
+  Clock,
+  FileCheck2,
+  BookMarked,
+  Eye,
+  X,
+  CheckCircle2,
+} from "lucide-react";
 import BadgeSection from "@/components/BadgeSection";
 import DailyStreak from "@/components/DailyStreak";
 import StudyPlan from "@/components/StudyPlan";
+import WritingInteractiveDiff from "@/components/WritingInteractiveDiff";
 import Link from "next/link";
-import { useUser } from "@/context/UserContext";
-import { motion } from "framer-motion";
+import { useUser, Submission } from "@/context/UserContext";
+import { isAnswerCorrect } from "@/lib/answers";
 import { useState, useEffect } from "react";
 
 const mockDescriptorData = [
-  { subject: 'TR / FC', A: 7.5, fullMark: 9 },
-  { subject: 'CC', A: 6.5, fullMark: 9 },
-  { subject: 'LR', A: 8.0, fullMark: 9 },
-  { subject: 'GRA', A: 6.0, fullMark: 9 },
-  { subject: 'PR', A: 7.0, fullMark: 9 },
+  { subject: "TR / FC", A: 7.5, fullMark: 9 },
+  { subject: "CC", A: 6.5, fullMark: 9 },
+  { subject: "LR", A: 8.0, fullMark: 9 },
+  { subject: "GRA", A: 6.5, fullMark: 9 },
+  { subject: "PR", A: 7.0, fullMark: 9 },
 ];
 
 const mockProgressData = [
-  { name: 'Tuần 1', band: 6.0 },
-  { name: 'Tuần 2', band: 6.5 },
-  { name: 'Tuần 3', band: 6.5 },
-  { name: 'Tuần 4', band: 7.0 },
-  { name: 'Tuần 5', band: 7.2 },
+  { name: "Đề 1", band: 6.0 },
+  { name: "Đề 2", band: 6.5 },
+  { name: "Đề 3", band: 6.5 },
+  { name: "Đề 4", band: 7.0 },
+  { name: "Đề 5", band: 7.5 },
 ];
 
 const skills = [
-  { 
-    name: 'Kỹ năng Đọc', 
-    icon: BookOpen, 
-    color: 'text-purple-600', 
-    bgColor: 'bg-purple-50',
-    borderColor: 'group-hover:border-purple-500/30',
-    href: '/reading',
-    desc: 'Luyện tập với các đoạn văn học thuật và các dạng câu hỏi thực tế.'
+  {
+    name: "Academic Reading",
+    vnName: "Kỹ năng Đọc",
+    spec: "60 phút • Highlight & Note",
+    icon: BookOpen,
+    href: "/reading",
+    desc: "Luyện đọc văn bản học thuật chuyên sâu với công cụ Highlight, Ghi chú trực tiếp và lưu từ vựng C1–C2.",
   },
-  { 
-    name: 'Kỹ năng Nghe', 
-    icon: Headphones, 
-    color: 'text-purple-600', 
-    bgColor: 'bg-purple-50',
-    borderColor: 'group-hover:border-purple-500/30',
-    href: '/listening',
-    desc: 'Cải thiện kỹ năng nghe với nhiều giọng đọc và tốc độ khác nhau.'
+  {
+    name: "Academic Listening",
+    vnName: "Kỹ năng Nghe",
+    spec: "30 phút • Parts 1–4",
+    icon: Headphones,
+    href: "/listening",
+    desc: "Luyện nghe hội thoại và bài giảng đại học với các dạng Form, Map Labelling, Flow-chart & MCQ.",
   },
-  { 
-    name: 'Kỹ năng Viết', 
-    icon: PenTool, 
-    color: 'text-purple-600', 
-    bgColor: 'bg-purple-50',
-    borderColor: 'group-hover:border-purple-500/30',
-    href: '/writing',
-    desc: 'Hoàn thiện cấu trúc bài viết Task 1 & 2 với sự hỗ trợ từ AI.'
+  {
+    name: "Academic Writing",
+    vnName: "Kỹ năng Viết",
+    spec: "60 phút • In-line C1/C2 Diff",
+    icon: PenTool,
+    href: "/writing",
+    desc: "Phân tích biểu đồ/quy trình/bản đồ và viết luận học thuật, chấm sửa từng câu chuẩn C1/C2 theo 4 tiêu chí.",
   },
-  { 
-    name: 'Kỹ năng Nói', 
-    icon: Mic, 
-    color: 'text-purple-600', 
-    bgColor: 'bg-purple-50',
-    borderColor: 'group-hover:border-purple-500/30',
-    href: '/speaking',
-    desc: 'Mô phỏng phỏng vấn và cải thiện độ trôi chảy khi nói.'
+  {
+    name: "Academic Speaking",
+    vnName: "Kỹ năng Nói",
+    spec: "11–14 phút • 3 Parts",
+    icon: Mic,
+    href: "/speaking",
+    desc: "Phỏng vấn trực tiếp cùng Giám khảo AI qua 3 phần thi với bấm giờ chuẩn và bài mẫu Band 8.0+.",
   },
 ];
 
 export default function Dashboard() {
   const { user } = useUser();
   const [isMounted, setIsMounted] = useState(false);
+  const [selectedSub, setSelectedSub] = useState<Submission | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
   }, []);
-  
-  // Calculate real progress from submissions
+
   const submissions = user?.submissions || [];
-  
-  // Current Band: average of last 5 submissions (or all if < 5)
+
   const lastSubmissions = submissions.slice(0, 5).reverse();
-  const currentBand = submissions.length > 0 
-    ? submissions.reduce((acc, sub) => acc + sub.band, 0) / submissions.length
-    : 0;
-  
-  const targetBand = user?.targetScore || 6.5;
-  const progressPercent = targetBand > 0 ? Math.min(100, Math.max(0, (currentBand / targetBand) * 100)) : 0;
+  const currentBand =
+    submissions.length > 0
+      ? submissions.reduce((acc, sub) => acc + sub.band, 0) / submissions.length
+      : 0;
 
-  // Real Progress Data for Line Chart
-  const progressData = lastSubmissions.length > 0
-    ? lastSubmissions.map((sub, idx) => ({
-        name: `Bài ${idx + 1}`,
-        band: sub.band,
-        skill: sub.skill.charAt(0).toUpperCase() + sub.skill.slice(1)
-      }))
-    : mockProgressData;
+  const targetBand = user?.targetScore || 7.0;
+  const progressPercent =
+    targetBand > 0 ? Math.min(100, Math.max(0, (currentBand / targetBand) * 100)) : 0;
 
-  // Real Descriptor Data for Radar Chart (using latest Writing/Speaking if available)
-  const latestDetailedSub = submissions.find(sub => sub.skill === 'writing' || sub.skill === 'speaking');
-  const descriptorData = latestDetailedSub ? [
-    { 
-      subject: 'TR / FC', 
-      A: latestDetailedSub.skill === 'writing' 
-        ? latestDetailedSub.details.criteria_scores.task_achievement 
-        : latestDetailedSub.details.criteria.fluency_and_coherence.score, 
-      fullMark: 9 
-    },
-    { 
-      subject: 'CC / LR', 
-      A: latestDetailedSub.skill === 'writing' 
-        ? latestDetailedSub.details.criteria_scores.coherence_and_cohesion 
-        : latestDetailedSub.details.criteria.lexical_resource.score, 
-      fullMark: 9 
-    },
-    { 
-      subject: 'LR / GRA', 
-      A: latestDetailedSub.skill === 'writing' 
-        ? latestDetailedSub.details.criteria_scores.lexical_resource 
-        : latestDetailedSub.details.criteria.grammatical_range_and_accuracy.score, 
-      fullMark: 9 
-    },
-    { 
-      subject: 'GRA / PR', 
-      A: latestDetailedSub.skill === 'writing' 
-        ? latestDetailedSub.details.criteria_scores.grammatical_range_and_accuracy 
-        : latestDetailedSub.details.criteria.pronunciation.score, 
-      fullMark: 9 
-    },
-    { 
-      subject: 'Overall', 
-      A: latestDetailedSub.band, 
-      fullMark: 9 
-    },
-  ] : mockDescriptorData;
+  const progressData =
+    lastSubmissions.length > 0
+      ? lastSubmissions.map((sub, idx) => ({
+          name: `Lần ${idx + 1}`,
+          band: sub.band,
+          skill: sub.skill.charAt(0).toUpperCase() + sub.skill.slice(1),
+        }))
+      : mockProgressData;
+
+  const latestDetailedSub = submissions.find(
+    (sub) => sub.skill === "writing" || sub.skill === "speaking"
+  );
+  const writingScores = latestDetailedSub?.details?.criteria_scores;
+  const speakingCriteria = latestDetailedSub?.details?.criteria;
+  const descriptorData =
+    latestDetailedSub && (writingScores || speakingCriteria)
+      ? [
+          {
+            subject: "TR / FC",
+            A:
+              latestDetailedSub.skill === "writing"
+                ? (writingScores?.task_achievement ??
+                  writingScores?.task_response ??
+                  latestDetailedSub.band)
+                : (speakingCriteria?.fluency_and_coherence?.score ??
+                  speakingCriteria?.fluency?.band ??
+                  latestDetailedSub.band),
+            fullMark: 9,
+          },
+          {
+            subject: "CC / LR",
+            A:
+              latestDetailedSub.skill === "writing"
+                ? (writingScores?.coherence_and_cohesion ?? latestDetailedSub.band)
+                : (speakingCriteria?.lexical_resource?.score ??
+                  speakingCriteria?.vocabulary?.band ??
+                  latestDetailedSub.band),
+            fullMark: 9,
+          },
+          {
+            subject: "LR / GRA",
+            A:
+              latestDetailedSub.skill === "writing"
+                ? (writingScores?.lexical_resource ?? latestDetailedSub.band)
+                : (speakingCriteria?.grammatical_range_and_accuracy?.score ??
+                  speakingCriteria?.grammar?.band ??
+                  latestDetailedSub.band),
+            fullMark: 9,
+          },
+          {
+            subject: "GRA / PR",
+            A:
+              latestDetailedSub.skill === "writing"
+                ? (writingScores?.grammatical_range_and_accuracy ?? latestDetailedSub.band)
+                : (speakingCriteria?.pronunciation?.score ??
+                  speakingCriteria?.pronunciation?.band ??
+                  latestDetailedSub.band),
+            fullMark: 9,
+          },
+          {
+            subject: "Overall",
+            A: latestDetailedSub.band,
+            fullMark: 9,
+          },
+        ]
+      : mockDescriptorData;
 
   const getStrengthsText = () => {
-    if (submissions.length === 0) return "Hãy làm bài kiểm tra đầu tiên để AI phân tích kỹ năng của bạn.";
-    
-    // Simple logic to find best skill
-    const skillAverages = ['reading', 'listening', 'writing', 'speaking'].map(s => {
-      const skillSubs = submissions.filter(sub => sub.skill === s);
+    if (submissions.length === 0)
+      return "Chưa có dữ liệu bài thi. Hãy hoàn thành bài kiểm tra đầu tiên để hệ thống phân tích năng lực theo thang điểm IELTS.";
+
+    const skillAverages = ["reading", "listening", "writing", "speaking"].map((s) => {
+      const skillSubs = submissions.filter((sub) => sub.skill === s);
       return {
         skill: s,
-        avg: skillSubs.length > 0 ? skillSubs.reduce((a, b) => a + b.band, 0) / skillSubs.length : 0
+        avg:
+          skillSubs.length > 0
+            ? skillSubs.reduce((a, b) => a + b.band, 0) / skillSubs.length
+            : 0,
       };
     });
-    
-    const bestSkill = skillAverages.reduce((a, b) => a.avg > b.avg ? a : b);
-    if (bestSkill.avg === 0) return "Đang phân tích điểm mạnh của bạn...";
-    
-    const skillNames: any = { reading: 'Đọc', listening: 'Nghe', writing: 'Viết', speaking: 'Nói' };
-    return `Kỹ năng ${skillNames[bestSkill.skill]} hiện là điểm mạnh nhất của bạn.`;
+
+    const bestSkill = skillAverages.reduce((a, b) => (a.avg > b.avg ? a : b));
+    if (bestSkill.avg === 0) return "Đang tổng hợp dữ liệu phân tích năng lực...";
+
+    const skillNames: Record<string, string> = {
+      reading: "Academic Reading",
+      listening: "Academic Listening",
+      writing: "Academic Writing",
+      speaking: "Academic Speaking",
+    };
+    return `Năng lực nổi bật hiện tại: ${skillNames[bestSkill.skill]} (Trung bình Band ${bestSkill.avg.toFixed(1)}).`;
   };
 
   return (
-    <div className="bg-[#F9FAFB] min-h-screen pt-32 pb-24 px-6">
-      <div className="max-w-7xl mx-auto space-y-16">
-        {/* Welcome Header */}
-        {user && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col md:flex-row md:items-center justify-between gap-8"
-          >
-            <div className="flex items-center gap-6">
-              <div className="h-16 w-16 rounded-3xl bg-gradient-purple flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-purple-500/20">
-                {user.name.charAt(0)}
+    <div className="bg-[#F8FAFC] min-h-screen pt-8 pb-20 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Candidate Executive Header */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-8 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="flex items-start sm:items-center gap-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt="IELTS SKIBIDI"
+              className="h-14 w-14 rounded-xl object-cover border border-slate-200 shrink-0"
+            />
+            <div>
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-md">
+                  Hồ sơ Thí sinh
+                </span>
+                <span className="text-xs text-slate-400">•</span>
+                <span className="text-xs font-medium text-slate-500">
+                  IELTS SKIBIDI Academic Prep
+                </span>
               </div>
-              <div>
-                <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Chào mừng trở lại, {user.name}! 👋</h2>
-                <p className="text-slate-500 font-medium text-lg">Hôm nay bạn muốn bứt phá kỹ năng nào?</p>
-              </div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mt-1">
+                {user ? user.name : "Thí sinh IELTS SKIBIDI"}
+              </h1>
+              <p className="text-slate-500 text-sm mt-0.5">
+                Theo dõi biểu đồ tiến độ Band điểm, tra cứu Sổ tay Từ vựng C1–C2 và xem lại chi tiết
+                từng bài thi.
+              </p>
             </div>
-            
-            <div className="flex items-center gap-4 bg-white p-2 rounded-3xl border border-slate-100 shadow-sm">
-              <div className="px-6 py-3 bg-purple-50 rounded-2xl border border-purple-100">
-                <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">Mục tiêu</p>
-                <p className="text-2xl font-black text-purple-600">{targetBand.toFixed(1)}</p>
-              </div>
-              <div className="px-6 py-3 bg-purple-50 rounded-2xl border border-purple-100">
-                <p className="text-[10px] font-black uppercase tracking-widest text-purple-400">Hiện tại</p>
-                <p className="text-2xl font-black text-purple-600">{currentBand.toFixed(1)}</p>
-              </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-100">
+            <div className="px-4 py-3 bg-slate-50 rounded-lg border border-slate-200/80">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Mục tiêu
+              </p>
+              <p className="text-2xl font-bold text-slate-900 font-mono mt-0.5">
+                {targetBand.toFixed(1)}
+              </p>
             </div>
-          </motion.div>
-        )}
+            <div className="px-4 py-3 bg-blue-50/70 rounded-lg border border-blue-200/80">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-700">
+                Trung bình
+              </p>
+              <p className="text-2xl font-bold text-blue-700 font-mono mt-0.5">
+                {currentBand > 0 ? currentBand.toFixed(1) : "—"}
+              </p>
+            </div>
+            <div className="px-4 py-3 bg-slate-50 rounded-lg border border-slate-200/80">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Bài đã làm
+              </p>
+              <p className="text-2xl font-bold text-slate-900 font-mono mt-0.5">
+                {submissions.length}
+              </p>
+            </div>
+          </div>
+        </div>
 
         <DailyStreak />
 
-        {/* Hero Dashboard Section */}
+        {/* Main Analytics Grid */}
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Chart Section */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="lg:col-span-2 space-y-8"
-          >
-            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl space-y-8">
-              <div className="flex items-center justify-between">
+          {/* Left 2 Columns */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Band Trajectory Chart */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Tiến trình học tập</h3>
-                  <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Phân tích 5 bài gần nhất</p>
+                  <div className="text-xs font-semibold text-blue-700 uppercase tracking-wider mb-1">
+                    Performance Trajectory
+                  </div>
+                  <h2 className="text-lg font-bold text-slate-900">
+                    Biểu đồ Tiến trình Band điểm (5 bài gần nhất)
+                  </h2>
                 </div>
-                <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200">
+                  <TrendingUp className="w-5 h-5" />
                 </div>
               </div>
-              
-              <div className="h-[300px] w-full">
+
+              <div className="h-[280px] w-full">
                 {isMounted && (
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={progressData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis 
-                        dataKey="name" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#64748B", fontSize: 12, fontWeight: 600 }}
                         dy={10}
                       />
-                      <YAxis 
-                        domain={[0, 9]} 
-                        axisLine={false} 
+                      <YAxis
+                        domain={[0, 9]}
+                        axisLine={false}
                         tickLine={false}
-                        tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 700 }}
+                        tick={{ fill: "#64748B", fontSize: 12, fontWeight: 600 }}
                       />
-                      <Tooltip 
-                        contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', padding: '15px' }}
-                        itemStyle={{ fontWeight: 800, textTransform: 'uppercase', fontSize: '10px' }}
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: "10px",
+                          border: "1px solid #E2E8F0",
+                          boxShadow: "0 10px 25px -5px rgba(15, 23, 42, 0.12)",
+                          padding: "10px 14px",
+                          backgroundColor: "#FFFFFF",
+                        }}
+                        itemStyle={{
+                          fontWeight: 700,
+                          fontSize: "12px",
+                          color: "#1D4ED8",
+                        }}
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="band" 
-                        stroke="#8B5CF6" 
-                        strokeWidth={5} 
-                        dot={{ r: 8, fill: '#8B5CF6', strokeWidth: 4, stroke: '#fff' }}
-                        activeDot={{ r: 10, fill: '#EC4899', strokeWidth: 4, stroke: '#fff' }}
+                      <Line
+                        type="monotone"
+                        dataKey="band"
+                        name="Band Score"
+                        stroke="#1D4ED8"
+                        strokeWidth={3}
+                        dot={{ r: 5, fill: "#0F172A", strokeWidth: 2, stroke: "#fff" }}
+                        activeDot={{ r: 7, fill: "#1D4ED8", strokeWidth: 2, stroke: "#fff" }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -247,120 +335,470 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick Skills Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {skills.map((skill, i) => (
-                <Link key={i} href={skill.href} className="group">
-                  <motion.div 
-                    whileHover={{ y: -8 }}
-                    className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-lg hover:shadow-2xl transition-all duration-500 text-center space-y-4"
-                  >
-                    <div className={`w-16 h-16 mx-auto rounded-2xl bg-gradient-purple text-white flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform`}>
-                      <skill.icon className="w-8 h-8" />
-                    </div>
-                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 group-hover:text-purple-600 transition-colors">{skill.name}</div>
-                  </motion.div>
-                </Link>
-              ))}
-            </div>
-
-            {/* Badges Section */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl"
-            >
-              <BadgeSection />
-            </motion.div>
-          </motion.div>
-
-          {/* Sidebar Analysis Section */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-8"
-          >
-            {/* Radar Chart */}
-            <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl space-y-8">
-              <div className="text-center space-y-2">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Phân tích kỹ năng</h3>
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Điểm mạnh & Điểm yếu</p>
+            {/* 4 Modules Grid */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-900">
+                  Học phần Luyện thi (IELTS Academic Modules)
+                </h2>
+                <span className="text-xs font-medium text-slate-500">
+                  Chọn kỹ năng để bắt đầu làm đề
+                </span>
               </div>
 
-              <div className="h-[250px] w-full">
+              <div className="grid sm:grid-cols-2 gap-4">
+                {skills.map((skill, i) => (
+                  <Link
+                    key={i}
+                    href={skill.href}
+                    className="group bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:border-blue-600 hover:shadow-md transition-all flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-3 mb-4">
+                        <div className="w-11 h-11 rounded-lg bg-slate-900 text-white flex items-center justify-center group-hover:bg-blue-700 transition-colors">
+                          <skill.icon className="w-5 h-5" />
+                        </div>
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
+                          <Clock className="w-3 h-3 text-slate-400" />
+                          {skill.spec}
+                        </span>
+                      </div>
+
+                      <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
+                        {skill.name}
+                      </h3>
+                      <p className="text-xs font-semibold text-slate-500 mb-2">{skill.vnName}</p>
+                      <p className="text-xs text-slate-600 leading-relaxed">{skill.desc}</p>
+                    </div>
+
+                    <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-blue-700">
+                      <span>Vào phòng thi mô phỏng</span>
+                      <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Recent Submissions History with Detailed Review Modal */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <FileCheck2 className="w-5 h-5 text-blue-700" />
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">
+                      Lịch sử Bài thi & Xem lại Chi tiết
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Bấm vào bất kỳ bài thi nào để xem lại bài làm, nhận xét 4 tiêu chí và câu sửa
+                      C1/C2
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs text-slate-500 font-medium">
+                  Tổng cộng {submissions.length} bài
+                </span>
+              </div>
+
+              {submissions.length === 0 ? (
+                <div className="py-8 text-center text-xs text-slate-500">
+                  Chưa có bài làm nào được lưu. Hãy hoàn thành một đề Reading, Listening, Writing
+                  hoặc Speaking để xem phân tích chi tiết tại đây.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {submissions.slice(0, 8).map((sub) => {
+                    const customTitle =
+                      sub.details?.title ||
+                      sub.details?.topic ||
+                      (sub.details?.taskType
+                        ? `Academic Writing ${sub.details.taskType.toUpperCase()}`
+                        : `Bài thi mô phỏng Academic ${
+                            sub.skill.charAt(0).toUpperCase() + sub.skill.slice(1)
+                          }`);
+                    return (
+                      <div
+                        key={sub.id}
+                        onClick={() => setSelectedSub(sub)}
+                        className="py-3.5 px-2 -mx-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors flex items-center justify-between gap-4 text-sm group"
+                      >
+                        <div className="min-w-0">
+                          <span className="font-semibold text-slate-900 uppercase tracking-wide text-xs bg-slate-100 px-2.5 py-1 rounded mr-2.5">
+                            {sub.skill}
+                          </span>
+                          <span className="text-slate-700 font-semibold group-hover:text-blue-700 transition-colors">
+                            {customTitle}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <span className="text-xs text-slate-400 hidden sm:inline">
+                            {new Date(sub.date).toLocaleDateString("vi-VN")}
+                          </span>
+                          <span className="px-3 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-800 font-mono font-bold text-xs">
+                            Band {sub.band.toFixed(1)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedSub(sub);
+                            }}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-900 text-white text-xs font-semibold hover:bg-blue-700 transition-colors"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span className="hidden md:inline">Chi tiết</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Academic Milestones */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-sm">
+              <BadgeSection />
+            </div>
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="space-y-8">
+            {/* Vocabulary Vault Banner Card */}
+            <div className="bg-slate-900 text-white p-6 rounded-xl shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[11px] font-semibold uppercase tracking-wider">
+                  Lexical Resource C1–C2
+                </span>
+                <BookMarked className="w-5 h-5 text-blue-400" />
+              </div>
+              <div className="space-y-1.5">
+                <h3 className="text-base font-bold">Sổ tay Từ vựng & Flashcard</h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Ôn tập 24+ cụm Academic Collocations C1–C2 và các từ vựng bạn đã đánh dấu trực
+                  tiếp từ đề thi Reading, Listening & Writing.
+                </p>
+              </div>
+              <Link
+                href="/vocabulary"
+                className="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold inline-flex items-center justify-center gap-2 transition-colors"
+              >
+                <span>Mở Sổ tay & Lật thẻ Flashcard</span>
+                <ArrowUpRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Criteria Radar Chart */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-sm space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div>
+                  <div className="text-xs font-semibold text-blue-700 uppercase tracking-wider mb-0.5">
+                    Assessment Criteria
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Biểu đồ Tiêu chí Chấm điểm
+                  </h3>
+                </div>
+                <BarChart3 className="w-5 h-5 text-slate-500" />
+              </div>
+
+              <div className="h-[240px] w-full">
                 {isMounted && (
                   <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={descriptorData}>
-                      <PolarGrid stroke="#f1f5f9" />
-                      <PolarAngleAxis 
-                        dataKey="subject" 
-                        tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 800 }} 
+                    <RadarChart cx="50%" cy="50%" outerRadius="78%" data={descriptorData}>
+                      <PolarGrid stroke="#E2E8F0" />
+                      <PolarAngleAxis
+                        dataKey="subject"
+                        tick={{ fill: "#475569", fontSize: 11, fontWeight: 700 }}
                       />
+                      <PolarRadiusAxis domain={[0, 9]} tick={false} axisLine={false} />
                       <Radar
-                        name="Kỹ năng"
+                        name="Band Score"
                         dataKey="A"
-                        stroke="#8B5CF6"
-                        fill="#8B5CF6"
-                        fillOpacity={0.15}
-                        strokeWidth={4}
+                        stroke="#1D4ED8"
+                        fill="#1D4ED8"
+                        fillOpacity={0.18}
+                        strokeWidth={2.5}
                       />
                     </RadarChart>
                   </ResponsiveContainer>
                 )}
               </div>
 
-              <div className="bg-purple-50 p-6 rounded-3xl border border-purple-100">
-                <div className="flex items-center gap-3 mb-2">
-                  <Zap className="w-5 h-5 text-purple-600" />
-                  <span className="text-xs font-black text-purple-600 uppercase tracking-widest">AI Nhận xét</span>
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <div className="text-xs font-semibold text-slate-900 uppercase tracking-wider mb-1">
+                  Nhận xét Chuyên môn
                 </div>
-                <p className="text-slate-600 text-sm font-bold leading-relaxed">
-                  {getStrengthsText()}
-                </p>
+                <p className="text-slate-600 text-xs leading-relaxed">{getStrengthsText()}</p>
               </div>
             </div>
-            
+
             <StudyPlan />
 
-            {/* Target Progress */}
-            <div className="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100 space-y-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-[60px] rounded-full" />
-              <div className="relative z-10 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight uppercase">Mục tiêu Band {targetBand.toFixed(1)}</h3>
-                  <div className="text-purple-600 font-black text-2xl">{Math.round(progressPercent)}%</div>
+            {/* Target Progress Card */}
+            <div className="bg-white p-6 sm:p-8 rounded-xl border border-slate-200 shadow-sm space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center">
+                    <Target className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">
+                      Tiến độ Mục tiêu Band {targetBand.toFixed(1)}
+                    </h3>
+                    <p className="text-xs text-slate-500">So với điểm trung bình hiện tại</p>
+                  </div>
                 </div>
-                
-                <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progressPercent}%` }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                    className="h-full bg-gradient-purple shadow-[0_0_15px_rgba(147,51,234,0.3)]"
-                  />
+                <div className="text-blue-700 font-bold text-xl font-mono">
+                  {Math.round(progressPercent)}%
                 </div>
-                
-                <p className="text-slate-500 text-xs font-bold leading-relaxed">
-                  Bạn chỉ còn cách mục tiêu <span className="text-purple-600 font-black">{(targetBand - currentBand).toFixed(1)} band</span> nữa thôi. Cố lên, no cap! 🚀
-                </p>
               </div>
+
+              <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  style={{ width: `${progressPercent}%` }}
+                  className="h-full bg-blue-700 rounded-full transition-all duration-700"
+                />
+              </div>
+
+              <p className="text-slate-600 text-xs leading-relaxed">
+                {currentBand >= targetBand && submissions.length > 0 ? (
+                  <>
+                    Bạn đã đạt mục tiêu{" "}
+                    <span className="text-blue-700 font-semibold">
+                      Band {targetBand.toFixed(1)}
+                    </span>
+                    . Hãy tiếp tục duy trì phong độ qua các đề thi mô phỏng nâng cao.
+                  </>
+                ) : (
+                  <>
+                    Khoảng cách hiện tại tới mục tiêu là{" "}
+                    <span className="text-slate-900 font-semibold">
+                      {Math.max(0, targetBand - currentBand).toFixed(1)} band
+                    </span>
+                    . Hãy ưu tiên hoàn thành lộ trình học tập mỗi ngày.
+                  </>
+                )}
+              </p>
             </div>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Footer */}
-        <footer className="pt-20 border-t border-slate-100 text-center space-y-6">
-          <Link href="/" className="logo text-3xl font-black inline-flex items-center gap-3">
-            <span className="text-4xl">🚀</span>
-            <span className="text-gradient">IELTS SKIBIDI</span>
+        {/* Institutional Footer */}
+        <footer className="pt-12 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+          <Link href="/" className="inline-flex items-center gap-2.5 font-bold text-slate-900">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.png"
+              alt="IELTS SKIBIDI"
+              className="w-7 h-7 rounded-md object-cover border border-slate-200"
+            />
+            <span>IELTS SKIBIDI • CAMBRIDGE TEST PREP</span>
           </Link>
-          <p className="text-slate-400 text-xs font-black uppercase tracking-widest">
-            © 2026 IELTS SKIBIDI. All rights reserved. No cap, just band.
-          </p>
+          <p>© 2026 IELTS SKIBIDI. Chuẩn hóa theo khung khảo thí quốc tế.</p>
         </footer>
       </div>
+
+      {/* Detailed Submission Review Modal */}
+      {selectedSub && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded bg-slate-900 text-white text-xs font-bold uppercase">
+                    {selectedSub.skill}
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    Ngày làm bài: {new Date(selectedSub.date).toLocaleString("vi-VN")}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mt-1">
+                  {selectedSub.details?.title ||
+                    selectedSub.details?.topic ||
+                    `Báo cáo chi tiết bài thi ${selectedSub.skill.toUpperCase()}`}
+                </h3>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="px-4 py-2 rounded-xl bg-blue-600 text-white text-center">
+                  <div className="text-[10px] font-semibold uppercase">Band Score</div>
+                  <div className="text-xl font-bold font-mono">{selectedSub.band.toFixed(1)}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSub(null)}
+                  className="p-2 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-6">
+              {/* WRITING SUBMISSION DETAILS */}
+              {selectedSub.skill === "writing" && (
+                <>
+                  {selectedSub.details?.criteria_scores && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {Object.entries(selectedSub.details.criteria_scores).map(([k, v]) => (
+                        <div
+                          key={k}
+                          className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-center"
+                        >
+                          <div className="text-[11px] font-semibold text-slate-500 uppercase">
+                            {k.replace(/_/g, " ")}
+                          </div>
+                          <div className="text-xl font-bold text-slate-900 font-mono mt-1">
+                            {Number(v).toFixed(1)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedSub.details?.prompt && (
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
+                      <div className="text-xs font-bold uppercase text-blue-700">Đề bài</div>
+                      <p className="text-sm text-slate-800 font-medium leading-relaxed">
+                        {selectedSub.details.prompt}
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedSub.details?.essay ? (
+                    <WritingInteractiveDiff
+                      essay={selectedSub.details.essay}
+                      revisions={selectedSub.details.revisions || []}
+                      lexicalUpgrades={selectedSub.details.lexical_upgrades || []}
+                    />
+                  ) : (
+                    <p className="text-xs text-slate-500 italic">
+                      Bài thi này được lưu trước khi cập nhật tính năng lưu toàn văn bài viết. Các
+                      bài thi Writing mới sẽ hiển thị đầy đủ bài viết và bản sửa từng câu C1/C2 tại
+                      đây.
+                    </p>
+                  )}
+                </>
+              )}
+
+              {/* SPEAKING SUBMISSION DETAILS */}
+              {selectedSub.skill === "speaking" && (
+                <div className="space-y-4">
+                  {selectedSub.details?.criteria && (
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {Object.entries(selectedSub.details.criteria).map(
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        ([key, val]: [string, any]) => (
+                          <div
+                            key={key}
+                            className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold uppercase text-slate-700">
+                                {key.replace(/_/g, " ")}
+                              </span>
+                              <span className="text-sm font-bold font-mono text-blue-700">
+                                Band {val?.score ?? val?.band ?? selectedSub.band}
+                              </span>
+                            </div>
+                            {val?.feedback && (
+                              <p className="text-xs text-slate-600 leading-relaxed">
+                                {val.feedback}
+                              </p>
+                            )}
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+
+                  {selectedSub.details?.transcript && (
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                      <div className="text-xs font-bold uppercase text-blue-700">
+                        Bản ghi lời nói (Transcript)
+                      </div>
+                      <p className="text-xs text-slate-700 whitespace-pre-line leading-relaxed">
+                        {selectedSub.details.transcript}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* READING & LISTENING SUBMISSION DETAILS */}
+              {(selectedSub.skill === "reading" || selectedSub.skill === "listening") && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+                    <div>
+                      <div className="text-xs text-slate-500">Số câu đúng</div>
+                      <div className="text-xl font-bold text-slate-900 font-mono">
+                        {selectedSub.details?.rawScore ?? "—"} /{" "}
+                        {selectedSub.details?.totalQuestions ?? "—"}
+                      </div>
+                    </div>
+                  </div>
+
+                  {Array.isArray(selectedSub.details?.answers) && (
+                    <div className="space-y-2.5">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+                        Bảng đối chiếu đáp án chi tiết
+                      </h4>
+                      {selectedSub.details.answers.map(
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        (ans: any) => {
+                          const uAns = selectedSub.details?.userAnswers?.[ans.id] || "";
+                          const ok = isAnswerCorrect(uAns, ans.correct_answer);
+                          return (
+                            <div
+                              key={ans.id}
+                              className={`p-3.5 rounded-xl border text-xs space-y-1 ${
+                                ok
+                                  ? "bg-emerald-50/50 border-emerald-200"
+                                  : "bg-rose-50/50 border-rose-200"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between font-bold">
+                                <span className="text-slate-900">Câu #{ans.id}</span>
+                                <span className={ok ? "text-emerald-700" : "text-rose-700"}>
+                                  {ok ? "✓ Chính xác" : "✗ Chưa chính xác"}
+                                </span>
+                              </div>
+                              <div className="flex flex-wrap gap-4 text-slate-700">
+                                <span>
+                                  Bạn chọn: <strong>{uAns || "(Bỏ trống)"}</strong>
+                                </span>
+                                <span>
+                                  Đáp án chuẩn:{" "}
+                                  <strong className="text-emerald-800">{ans.correct_answer}</strong>
+                                </span>
+                              </div>
+                              {ans.explanation && (
+                                <p className="text-slate-600 pt-1">{ans.explanation}</p>
+                              )}
+                            </div>
+                          );
+                        }
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setSelectedSub(null)}
+                className="px-5 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold inline-flex items-center gap-1.5"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                Đóng báo cáo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

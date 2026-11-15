@@ -1,100 +1,157 @@
-import { getGeminiModel } from "@/lib/gemini";
+import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
+import { aiErrorResponse, parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { getFallbackReadingTask } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
+
+interface RawQuestion {
+  id?: number | string;
+  type?: string;
+  group?: string;
+  instruction?: string;
+  box_title?: string;
+  box_items?: string[];
+  word_limit?: string;
+  question?: string;
+  options?: string[];
+}
+interface RawAnswer {
+  id?: number | string;
+  correct_answer?: string;
+  explanation?: string;
+}
+
+const BLUEPRINTS = [
+  "Blueprint A (Passage 1 style): Questions 1–5 Sentence/Note Completion (type: FILL, ONE WORD AND/OR A NUMBER), Questions 6–10 True/False/Not Given (type: TFN), Questions 11–13 Matching Paragraph Information & Multiple Choice (type: HEAD / MCQ).",
+  "Blueprint B (Passage 2 style): Questions 1–4 Matching Researchers/Experts (type: HEAD with box_title 'List of Researchers' and box_items A–D), Questions 5–9 Yes/No/Not Given (type: YNN), Questions 10–13 Summary Completion (type: FILL, NO MORE THAN TWO WORDS).",
+  "Blueprint C (Passage 3 style): Questions 1–6 Matching Headings (type: HEAD with box_title 'List of Headings' and Roman numerals i–vii in box_items), Questions 7–10 Summary Completion with Word Bank (type: HEAD with box_title 'Word Bank A–F' and box_items), Questions 11–13 Yes/No/Not Given (type: YNN).",
+  "Blueprint D (Passage 2/3 style): Questions 1–4 Matching Sentence Endings (type: HEAD with box_title 'List of Sentence Endings A–F' and box_items), Questions 5–9 Note/Table Completion (type: FILL), Questions 10–13 Multiple Choice A–D (type: MCQ).",
+];
+
+const TOPICS = [
+  "Urban Vertical Farming & Food Security",
+  "Cognitive Neuroscience of Decision Fatigue",
+  "Deciphering Ancient Undeciphered Scripts",
+  "Deep-Sea Hydrothermal Vents & Astrobiology",
+  "The History of Marine Chronometers & Navigation",
+  "Bio-inspired Architecture & Termite Mound Cooling",
+  "Behavioural Economics of Scarcity",
+  "Pleistocene Megafauna Extinction Debates",
+  "Quantum Cryptography & Information Security",
+  "The Ecological Role of Mycorrhizal Fungal Networks",
+];
 
 export async function POST(req: Request) {
   try {
-    const { targetScore = 6.5 } = await req.json();
+    const { targetScore = 6.5, section } = await readJsonBody<{ targetScore: number; section?: string }>(req);
+    if (!hasGeminiApiKey()) {
+      return NextResponse.json(getFallbackReadingTask(targetScore, section));
+    }
     const model = getGeminiModel();
-    const prompt = `You are an IELTS Reading test creator for Cambridge. Generate a high-quality, authentic IELTS Academic Reading passage (Section 1, 2, or 3) with exactly 13-14 questions.
-    
-    Passage Requirements:
-    - Length: 700-900 words.
-    - Tone: Academic, formal, sophisticated.
-    - Topic: Choose from Science, History, Sociology, Environment, or Psychology.
-    - Structure: Use multiple paragraphs with clear thematic progression.
-    - Difficulty: Appropriate for someone aiming for a Band ${targetScore}.
-    
-    Question Requirements (Mixed types):
-    - True/False/Not Given (TFN)
-    - Multiple Choice (MCQ)
-    - Matching Information/Headings (HEAD)
-    - Summary Completion (FILL)
-    
-    Return ONLY a JSON object in this format:
+    const randomBlueprint = BLUEPRINTS[Math.floor(Math.random() * BLUEPRINTS.length)];
+    const randomTopic = TOPICS[Math.floor(Math.random() * TOPICS.length)];
+
+    const prompt = `You are a Senior Cambridge IELTS Reading test writer. Generate an authentic IELTS Academic Reading passage (${section && section !== "all" ? section : "Reading Passage 1, 2, or 3"}) on the topic "${randomTopic}" with exactly 13 questions.
+
+Follow this exact Question Group Blueprint so the test format is diverse:
+${randomBlueprint}
+
+Passage Requirements:
+- Length: 650–800 words, divided into 6 or 7 labelled paragraphs: "## Paragraph A", "## Paragraph B", etc.
+- Tone: Authentic Cambridge Academic journal style, Band ${targetScore}+.
+
+Question Type Rules:
+- "TFN": True / False / Not Given. correct_answer MUST be "True", "False", or "Not Given".
+- "YNN": Yes / No / Not Given (writer's claims). correct_answer MUST be "Yes", "No", or "Not Given".
+- "HEAD": Matching Headings (i–vii), Matching Information (Paragraph A–F), Matching Researchers (A–D), Matching Sentence Endings (A–F), or Summary Word Bank (A–F). Provide "options" array and, on the first question of the group, include "box_title" and "box_items" if a reference box is used.
+- "FILL": Sentence / Note / Summary Completion. Include "word_limit" (e.g. "NO MORE THAN TWO WORDS" or "ONE WORD ONLY").
+- "MCQ": 4 options A–D.
+
+Return ONLY valid JSON:
+{
+  "section": "Reading Passage 1" | "Reading Passage 2" | "Reading Passage 3",
+  "title": "string",
+  "subtitle": "string",
+  "passage": "string (with ## Paragraph A, ## Paragraph B...)",
+  "difficulty_estimate_band": ${targetScore},
+  "questions": [
     {
-      "title": "string (Passage Title)",
-      "passage": "string (markdown formatted, use ## for subheadings if necessary)",
-      "difficulty_estimate_band": ${targetScore},
-      "questions": [
-        {
-          "id": number,
-          "type": "TFN" | "HEAD" | "MCQ" | "FILL",
-          "question": "string (The actual question text)",
-          "options": ["string"] // Required ONLY for MCQ and Matching Headings
-        }
-      ],
-      "answers": [
-        { 
-          "id": number, 
-          "correct_answer": "string", 
-          "explanation": "string (Explain WHERE in the text the answer is found and WHY it's correct)" 
-        }
-      ]
-    }`;
+      "id": 1,
+      "type": "TFN" | "YNN" | "HEAD" | "FILL" | "MCQ",
+      "group": "string (e.g. 'Questions 1–5: Matching Headings')",
+      "instruction": "string (Official Cambridge instruction on the first question of each group)",
+      "box_title": "string (optional, e.g. 'List of Headings' or 'List of Researchers')",
+      "box_items": ["string (optional list of items in the reference box)"],
+      "word_limit": "string (optional, for FILL)",
+      "question": "string",
+      "options": ["string"]
+    }
+  ],
+  "answers": [
+    {
+      "id": 1,
+      "correct_answer": "string",
+      "explanation": "string (Quote the exact sentence in the passage and explain in Vietnamese)"
+    }
+  ]
+}`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    let text = response.text().trim();
-    
-    // Tiền xử lý text để loại bỏ markdown code blocks nếu có
-    if (text.startsWith('```json')) {
-      text = text.replace(/^```json\n?/, '').replace(/\n?```$/, '');
-    } else if (text.startsWith('```')) {
-      text = text.replace(/^```\n?/, '').replace(/\n?```$/, '');
-    }
-    
-    // Tìm vị trí của JSON trong phản hồi (đôi khi model trả về kèm text giải thích)
-    const jsonStart = text.indexOf('{');
-    const jsonEnd = text.lastIndexOf('}') + 1;
-    
-    if (jsonStart === -1 || jsonEnd === 0) {
-      console.error("No JSON found in response:", text);
-      throw new Error("AI response does not contain valid JSON");
-    }
-    
-    const jsonString = text.substring(jsonStart, jsonEnd);
-    
-    try {
-      const data = JSON.parse(jsonString);
-      return NextResponse.json(data);
-    } catch (parseError) {
-      console.error("JSON parse error for text:", jsonString);
-      return NextResponse.json({ 
-        error: "Lỗi định dạng dữ liệu từ AI",
-        details: "Không thể phân giải JSON từ phản hồi của AI",
-        raw: text.substring(0, 100) + "..."
-      }, { status: 500 });
-    }
-  } catch (error: any) {
-    console.error("Error generating reading task:", error);
-    
-    // Xử lý lỗi thiếu API Key cụ thể
-    if (error.code === "MISSING_API_KEY" || error.message?.includes("GEMINI_API_KEY")) {
-      return NextResponse.json({ 
-        error: "Cấu hình API Key bị thiếu. Vui lòng thêm GEMINI_API_KEY vào biến môi trường trên Vercel.",
-        code: "MISSING_API_KEY"
-      }, { status: 500 });
+    const data = parseAIJson<{
+      section?: string;
+      title?: string;
+      subtitle?: string;
+      passage?: string;
+      difficulty_estimate_band?: number;
+      questions?: RawQuestion[];
+      answers?: RawAnswer[];
+    }>(response.text());
+
+    if (!data.passage || !Array.isArray(data.questions) || !Array.isArray(data.answers) || data.questions.length === 0) {
+      return NextResponse.json(getFallbackReadingTask(targetScore, section));
     }
 
-    if (error.message?.includes("leaked") || error.message?.includes("403 Forbidden")) {
-      return NextResponse.json({ 
-        error: "API Key của bạn đã bị lộ (leaked) và bị Google vô hiệu hóa. Vui lòng tạo API Key mới tại Google AI Studio và cập nhật lại trên Vercel.",
-        code: "LEAKED_API_KEY"
-      }, { status: 403 });
+    const answerMap = new Map<number, RawAnswer>();
+    data.answers.forEach((a, i) => answerMap.set(Number(a.id ?? i + 1), a));
+
+    const questions: RawQuestion[] = [];
+    const answers: { id: number; correct_answer: string; explanation: string }[] = [];
+
+    data.questions.forEach((q, i) => {
+      const id = Number(q.id ?? i + 1);
+      const ans = answerMap.get(id);
+      if (!q.question || !ans || ans.correct_answer === undefined || ans.correct_answer === null) return;
+      let type = String(q.type || "FILL").toUpperCase();
+      const options = Array.isArray(q.options) ? q.options.filter(Boolean).map(String) : [];
+      if ((type === "MCQ" || type === "HEAD") && options.length < 2) type = "FILL";
+      questions.push({
+        id,
+        type,
+        question: q.question,
+        ...(q.group ? { group: q.group } : {}),
+        ...(q.instruction ? { instruction: q.instruction } : {}),
+        ...(q.box_title ? { box_title: q.box_title } : {}),
+        ...(Array.isArray(q.box_items) && q.box_items.length > 0 ? { box_items: q.box_items } : {}),
+        ...(q.word_limit ? { word_limit: q.word_limit } : {}),
+        ...(options.length >= 2 && type !== "TFN" && type !== "YNN" && type !== "FILL" ? { options } : {}),
+      });
+      answers.push({ id, correct_answer: String(ans.correct_answer), explanation: ans.explanation || "" });
+    });
+
+    if (questions.length === 0) {
+      return NextResponse.json(getFallbackReadingTask(targetScore, section));
     }
 
-    return NextResponse.json({ 
-      error: error.message || "Không thể kết nối với AI để tạo đề bài" 
-    }, { status: 500 });
+    return NextResponse.json({
+      section: data.section || "Reading Passage 1",
+      title: data.title || "Reading Passage",
+      subtitle: data.subtitle || "",
+      passage: data.passage,
+      difficulty_estimate_band: data.difficulty_estimate_band ?? targetScore,
+      questions,
+      answers,
+    });
+  } catch (error) {
+    return aiErrorResponse(error, "Không thể tạo đề Reading");
   }
 }

@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Target, User, Mail, ChevronRight, Check } from 'lucide-react';
-import { useUser } from '@/context/UserContext';
+import React, { useState } from "react";
+import { Target, User, Mail, ChevronRight, Check } from "lucide-react";
+import { useUser } from "@/context/UserContext";
 
 export default function Onboarding() {
   const { login, user, loading } = useUser();
   const [step, setStep] = useState(1);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [target, setTarget] = useState(6.5);
 
   if (loading || user) return null;
@@ -17,117 +16,105 @@ export default function Onboarding() {
   const handleNext = () => {
     if (step < 2) setStep(step + 1);
     else {
-      login(email, name, target).then(() => {
-        // After login, we can also update the target score
-        // but the login mock already sets it. In a real app we'd do more.
-      });
+      login(email.trim(), name.trim(), target);
     }
   };
 
-  const targets = [5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0];
+  const targets = [5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-md p-4 transition-colors">
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="glass-card max-w-md w-full p-8 space-y-8 bg-white border-slate-200"
-      >
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-black text-slate-900">Chào mừng bạn!</h2>
-          <p className="text-slate-600">Hãy cá nhân hóa trải nghiệm học tập của bạn</p>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+      <div className="max-w-md w-full p-6 sm:p-8 space-y-6 bg-white border border-slate-200 rounded-2xl shadow-xl">
+        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.png"
+            alt="IELTS SKIBIDI"
+            className="w-10 h-10 rounded-lg object-cover border border-slate-200"
+          />
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">Hồ sơ thí sinh — IELTS SKIBIDI</h2>
+            <p className="text-xs text-slate-500">Thiết lập mục tiêu để hệ thống điều chỉnh độ khó đề thi</p>
+          </div>
         </div>
 
-        <div className="flex justify-center space-x-2">
-          {[1, 2].map((i) => (
-            <div 
-              key={i} 
-              className={`h-1.5 w-8 rounded-full transition-all duration-300 ${
-                step >= i ? 'bg-purple-600' : 'bg-slate-200'
-              }`}
-            />
-          ))}
-        </div>
+        {step === 1 ? (
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 block">Họ và tên thí sinh</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Nguyễn Văn A"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 focus:border-blue-600 outline-none"
+                />
+              </div>
+            </div>
 
-        <AnimatePresence mode="wait">
-          {step === 1 ? (
-            <motion.div
-              key="step1"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
-            >
-              <div className="space-y-4">
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Tên của bạn"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
-                  />
-                </div>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="email"
-                    placeholder="Địa chỉ Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:ring-2 focus:ring-purple-500 outline-none transition-all"
-                  />
-                </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-slate-700 block">Địa chỉ Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input
+                  type="email"
+                  placeholder="candidate@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 focus:border-blue-600 outline-none"
+                />
               </div>
-              <button
-                onClick={handleNext}
-                disabled={!name || !email}
-                className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-white rounded-xl font-bold disabled:opacity-50 transition-all"
-              >
-                Tiếp tục <ChevronRight className="w-5 h-5" />
-              </button>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="step2"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-6"
-            >
-              <div className="text-center">
-                <Target className="w-12 h-12 text-purple-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-slate-900">Chọn Band điểm mục tiêu</h3>
-                <p className="text-slate-600 text-sm">Chúng tôi sẽ điều chỉnh theo dõi tiến độ theo mục tiêu này</p>
-              </div>
-              
-              <div className="grid grid-cols-3 gap-3">
-                {targets.map((val) => (
-                  <button
-                    key={val}
-                    onClick={() => setTarget(val)}
-                    className={`py-3 rounded-xl font-bold transition-all border ${
-                      target === val 
-                        ? 'bg-purple-600 text-white border-purple-600 shadow-lg shadow-purple-200' 
-                        : 'bg-white text-slate-600 border-slate-100 hover:border-purple-200'
-                    }`}
-                  >
-                    {val.toFixed(1)}
-                  </button>
-                ))}
-              </div>
+            </div>
 
-              <button
-                onClick={handleNext}
-                className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-white rounded-xl font-bold transition-all"
-              >
-                Bắt đầu học ngay <Check className="w-5 h-5" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+            <button
+              onClick={handleNext}
+              disabled={!name.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())}
+              className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-40"
+            >
+              <span>Tiếp tục</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <Target className="w-4 h-4 text-blue-700" />
+                <span>Chọn Band điểm mục tiêu (Target Overall Band)</span>
+              </label>
+              <p className="text-xs text-slate-500">
+                Độ phức tạp từ vựng và tiêu chí chấm bài sẽ được cá nhân hóa theo mức điểm này.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-4 gap-2">
+              {targets.map((val) => (
+                <button
+                  key={val}
+                  onClick={() => setTarget(val)}
+                  className={`py-2.5 rounded-lg font-bold text-sm transition-all border ${
+                    target === val
+                      ? "bg-slate-900 text-white border-slate-900"
+                      : "bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-400"
+                  }`}
+                >
+                  {val.toFixed(1)}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleNext}
+              className="btn-primary w-full flex items-center justify-center gap-2"
+            >
+              <span>Hoàn tất hồ sơ</span>
+              <Check className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

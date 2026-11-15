@@ -1,118 +1,130 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { BookOpen, Headphones, PenTool, Mic, ArrowRight, Target, Sparkles, CheckCircle2 } from 'lucide-react';
-import { useUser } from '@/context/UserContext';
-import Link from 'next/link';
+import React from "react";
+import { BookOpen, Headphones, PenTool, Mic, ArrowRight, Target, CheckCircle2 } from "lucide-react";
+import { useUser } from "@/context/UserContext";
+import Link from "next/link";
 
 export default function StudyPlan() {
   const { user } = useUser();
 
   if (!user) return null;
 
-  // Simple logic to suggest next task based on least practiced skill
   const skillCounts = {
-    reading: user.submissions.filter(s => s.skill === 'reading').length,
-    listening: user.submissions.filter(s => s.skill === 'listening').length,
-    writing: user.submissions.filter(s => s.skill === 'writing').length,
-    speaking: user.submissions.filter(s => s.skill === 'speaking').length,
+    reading: user.submissions.filter((s) => s.skill === "reading").length,
+    listening: user.submissions.filter((s) => s.skill === "listening").length,
+    writing: user.submissions.filter((s) => s.skill === "writing").length,
+    speaking: user.submissions.filter((s) => s.skill === "speaking").length,
   };
 
-  const weakestSkill = Object.entries(skillCounts).reduce((a, b) => a[1] < b[1] ? a : b)[0] as keyof typeof skillCounts;
+  const weakestSkill = Object.entries(skillCounts).reduce((a, b) =>
+    a[1] < b[1] ? a : b
+  )[0] as keyof typeof skillCounts;
 
   const suggestions = {
     reading: {
-      title: 'Luyện tập Reading',
-      desc: 'Kỹ năng Đọc của bạn cần được "buff" thêm. Thử sức với bài đọc Academic ngay!',
+      title: "Academic Reading Practice",
+      desc: "Bạn có ít bài luyện Reading nhất. Hãy hoàn thành 1 bài đọc 13 câu để cân bằng 4 kỹ năng.",
       icon: BookOpen,
-      href: '/reading',
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-50',
+      href: "/reading",
     },
     listening: {
-      title: 'Luyện tập Listening',
-      desc: 'Luyện tai với các bài nghe thực tế để không bỏ lỡ thông tin quan trọng.',
+      title: "IELTS Listening Practice",
+      desc: "Luyện tập nghe hiểu và điền từ chính xác với các bài hội thoại và bài giảng học thuật.",
       icon: Headphones,
-      href: '/listening',
-      color: 'text-purple-500',
-      bgColor: 'bg-purple-50',
+      href: "/listening",
     },
     writing: {
-      title: 'Luyện tập Writing',
-      desc: 'Viết lách không khó với sự hỗ trợ từ AI. Thử ngay Task 2 nào!',
+      title: "Academic Writing Task 1 & 2",
+      desc: "Rèn luyện phân tích số liệu biểu đồ và viết bài luận học thuật 250+ từ theo 4 tiêu chí.",
       icon: PenTool,
-      href: '/writing',
-      color: 'text-pink-500',
-      bgColor: 'bg-pink-50',
+      href: "/writing",
     },
     speaking: {
-      title: 'Luyện tập Speaking',
-      desc: 'Tự tin giao tiếp như người bản xứ. Record bài nói của bạn ngay!',
+      title: "Speaking Examiner Simulation",
+      desc: "Thực hành trả lời phỏng vấn Part 1, trình bày Cue Card Part 2 và thảo luận học thuật Part 3.",
       icon: Mic,
-      href: '/speaking',
-      color: 'text-amber-500',
-      bgColor: 'bg-amber-50',
+      href: "/speaking",
     },
   };
 
   const suggestion = suggestions[weakestSkill];
+  const todayStr = new Date().toDateString();
+  const todaySubmissions = user.submissions.filter(
+    (s) => new Date(s.date).toDateString() === todayStr
+  );
+  const completedTask1 = todaySubmissions.length >= 1;
+  const completedTask2 = todaySubmissions.some((s) => s.band >= (user.targetScore || 6.5));
 
   return (
-    <div className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl space-y-8 relative overflow-hidden group">
-      <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-        <Sparkles className="w-24 h-24 text-purple-500" />
+    <div className="bg-white p-6 rounded-xl border border-slate-200 space-y-5">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <div>
+          <h3 className="text-base font-bold text-slate-900">Kế hoạch học tập hôm nay</h3>
+          <p className="text-slate-500 text-xs">Đề xuất dựa trên lịch sử làm bài của bạn</p>
+        </div>
+        <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+          <Target className="w-4 h-4" />
+        </div>
       </div>
 
-      <div className="relative z-10 space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+        <div className="flex items-start gap-3.5">
+          <div className="w-10 h-10 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
+            <suggestion.icon className="w-5 h-5" />
+          </div>
           <div className="space-y-1">
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Lộ trình hôm nay</h3>
-            <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Gợi ý từ AI Skibidi</p>
-          </div>
-          <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-            <Target className="w-6 h-6" />
+            <h4 className="text-sm font-bold text-slate-900">{suggestion.title}</h4>
+            <p className="text-slate-600 text-xs leading-relaxed">{suggestion.desc}</p>
           </div>
         </div>
 
-        <div className={`p-8 rounded-[2.5rem] ${suggestion.bgColor} border-2 border-white shadow-inner space-y-6`}>
-          <div className="flex items-start gap-6">
-            <div className={`w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg ${suggestion.color}`}>
-              <suggestion.icon className="w-8 h-8" />
-            </div>
-            <div className="flex-1 space-y-2">
-              <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight">{suggestion.title}</h4>
-              <p className="text-slate-600 font-medium leading-relaxed">
-                {suggestion.desc}
-              </p>
-            </div>
-          </div>
+        <Link
+          href={suggestion.href}
+          className="w-full py-2.5 bg-slate-900 hover:bg-blue-700 text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-2 transition-colors"
+        >
+          <span>Bắt đầu bài luyện tập</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
 
-          <Link href={suggestion.href}>
-            <motion.button
-              whileHover={{ x: 10 }}
-              className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 hover:bg-purple-600 transition-colors group"
+      <div className="space-y-2">
+        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+          Mục tiêu trong ngày
+        </span>
+        <div className="grid grid-cols-1 gap-2">
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2
+                className={`w-4 h-4 ${completedTask1 ? "text-emerald-600" : "text-slate-300"}`}
+              />
+              <span className="text-xs font-medium text-slate-700">Hoàn thành ít nhất 1 đề thi thử</span>
+            </div>
+            <span
+              className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
+                completedTask1 ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-600"
+              }`}
             >
-              Bắt đầu ngay
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
-            </motion.button>
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 space-y-2">
-            <div className="flex items-center gap-2 text-emerald-500">
-              <CheckCircle2 className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Nhiệm vụ 1</span>
-            </div>
-            <p className="text-sm font-bold text-slate-700">Hoàn thành 1 bài luyện tập</p>
+              {completedTask1 ? "Hoàn thành" : "Chưa xong"}
+            </span>
           </div>
-          <div className="p-6 rounded-[2rem] bg-slate-50 border border-slate-100 space-y-2 opacity-50">
-            <div className="flex items-center gap-2 text-slate-400">
-              <div className="w-4 h-4 rounded-full border-2 border-slate-300" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Nhiệm vụ 2</span>
+
+          <div className="p-3 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <CheckCircle2
+                className={`w-4 h-4 ${completedTask2 ? "text-emerald-600" : "text-slate-300"}`}
+              />
+              <span className="text-xs font-medium text-slate-700">
+                Đạt mục tiêu Band {(user.targetScore || 6.5).toFixed(1)}+ trong ngày
+              </span>
             </div>
-            <p className="text-sm font-bold text-slate-500">Đạt band 7.0+ hôm nay</p>
+            <span
+              className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
+                completedTask2 ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-600"
+              }`}
+            >
+              {completedTask2 ? "Hoàn thành" : "Đang phấn đấu"}
+            </span>
           </div>
         </div>
       </div>

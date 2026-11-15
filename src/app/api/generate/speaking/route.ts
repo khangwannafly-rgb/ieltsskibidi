@@ -1,9 +1,16 @@
-import { getGeminiModel } from "@/lib/gemini";
+import { getGeminiModel, hasGeminiApiKey } from "@/lib/gemini";
+import { aiErrorResponse, parseAIJson, readJsonBody } from "@/lib/ai-response";
+import { getFallbackSpeakingTask } from "@/lib/fallback-tasks";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    const { part, topic, targetScore = 6.5 } = await req.json();
+    const body = await readJsonBody<{ part: number | string; topic: string; targetScore: number }>(req);
+    const part = Number(body.part) || 1;
+    const { topic, targetScore = 6.5 } = body;
+    if (!hasGeminiApiKey()) {
+      return NextResponse.json(getFallbackSpeakingTask(part, targetScore, topic));
+    }
     const model = getGeminiModel();
 
     let prompt = "";
@@ -15,6 +22,7 @@ export async function POST(req: Request) {
       Return ONLY a JSON object: { 
         "topic": "string",
         "questions": ["string"],
+        "sample_answers": ["string (Band 8.0 natural 2-3 sentence model answer for each question)"],
         "difficulty_estimate_band": ${targetScore},
         "examiner_notes": "string (Briefly explain what the examiner is looking for in this part at Band ${targetScore} level)"
       }`;
@@ -27,6 +35,7 @@ export async function POST(req: Request) {
         "task": "string (The full prompt text)", 
         "bullets": ["string"], 
         "topic": "string",
+        "sample_answers": ["string (A complete Band 8.0 180-word model monologue)"],
         "difficulty_estimate_band": ${targetScore},
         "preparation_time": "1 minute",
         "speaking_time": "1-2 minutes"
@@ -39,6 +48,7 @@ export async function POST(req: Request) {
       Return ONLY a JSON object: { 
         "topic": "string",
         "questions": ["string"],
+        "sample_answers": ["string (Band 8.0 analytical model answer for each question)"],
         "difficulty_estimate_band": ${targetScore},
         "examiner_notes": "string (Explain the expected level of analysis and vocabulary for Band ${targetScore}+)"
       }`;
@@ -46,42 +56,25 @@ export async function POST(req: Request) {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const text = response.text().trim();
-    
-    // Tìm kiếm JSON trong phản hồi
-    const jsonStart = text.indexOf('{');
-    const jsonEnd = text.lastIndexOf('}') + 1;
-    
-    if (jsonStart === -1 || jsonEnd === 0) {
-      throw new Error("AI response does not contain valid JSON");
-    }
-    
-    const jsonString = text.substring(jsonStart, jsonEnd);
-    
-    try {
-      const data = JSON.parse(jsonString);
-      return NextResponse.json(data);
-    } catch (parseError) {
-      console.error("Failed to parse AI JSON:", jsonString);
-      throw new Error("Failed to parse AI response as JSON");
-    }
-  } catch (error: any) {
-    console.error("Error generating speaking task:", error);
-    
-    if (error.code === "MISSING_API_KEY" || error.message?.includes("GEMINI_API_KEY")) {
-      return NextResponse.json({ 
-        error: "Cấu hình API Key bị thiếu. Vui lòng thêm GEMINI_API_KEY vào biến môi trường trên Vercel.",
-        code: "MISSING_API_KEY"
-      }, { status: 500 });
+    const data = parseAIJson<{
+      topic?: string;
+      task?: string;
+      bullets?: string[];
+      questions?: string[];
+      [key: string]: unknown;
+    }>(response.text());
+
+    if (part === 2) {
+      if (!data.task) throw new Error("AI trả về Cue Card không đầy đủ");
+      data.bullets = Array.isArray(data.bullets) ? data.bullets.filter(Boolean).map(String) : [];
+    } else {
+      const questions = Array.isArray(data.questions) ? data.questions.filter(Boolean).map(String) : [];
+      if (questions.length === 0) throw new Error("AI trả về danh sách câu hỏi trống");
+      data.questions = questions;
     }
 
-    if (error.message?.includes("leaked") || error.message?.includes("403 Forbidden")) {
-      return NextResponse.json({ 
-        error: "API Key của bạn đã bị lộ (leaked) và bị Google vô hiệu hóa. Vui lòng tạo API Key mới tại Google AI Studio và cập nhật lại trên Vercel.",
-        code: "LEAKED_API_KEY"
-      }, { status: 403 });
-    }
-    
-    return NextResponse.json({ error: "Failed to generate speaking task: " + (error.message || "Unknown error") }, { status: 500 });
+    return NextResponse.json({ ...data, part });
+  } catch (error) {
+    return aiErrorResponse(error, "Không thể tạo câu hỏi Speaking");
   }
 }
