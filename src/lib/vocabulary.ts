@@ -24,6 +24,9 @@ export interface VocabItem {
   synonyms: string[];
   status: "learning" | "mastered";
   isCustom?: boolean;
+  masteryLevel?: 0 | 1 | 2 | 3;
+  reviewCount?: number;
+  lastReviewedAt?: string;
 }
 
 const VOCAB_STORAGE_KEY = "ielts_skibidi_vocab_v1";
@@ -748,6 +751,145 @@ export const INITIAL_ACADEMIC_VOCAB: VocabItem[] = [
     synonyms: ["built-in obsolescence", "premature product replacement"],
     status: "learning",
   },
+  {
+    id: "voc_41",
+    word: "circular economy",
+    phonetic: "/ˌsɜː.kjʊ.lər iˈkɒn.ə.mi/",
+    partOfSpeech: "noun phrase",
+    level: "C1",
+    topic: "Environment",
+    meaning: "Kinh tế tuần hoàn (tái chế và tái sử dụng tài nguyên tối đa để giảm rác thải)",
+    collocations: [
+      "transition towards a circular economy",
+      "embrace circular economy principles",
+      "foster a closed-loop circular economy",
+    ],
+    example:
+      "Transitioning towards a circular economy is imperative if industrialised nations wish to decouple economic growth from resource depletion.",
+    synonyms: ["closed-loop economy", "regenerative industrial model"],
+    status: "learning",
+  },
+  {
+    id: "voc_42",
+    word: "algorithmic bias",
+    phonetic: "/ˌæl.ɡəˈrɪð.mɪk ˈbaɪ.əs/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Technology",
+    meaning: "Thiên kiến thuật toán (sự thiếu công bằng có hệ thống do dữ liệu huấn luyện AI)",
+    collocations: [
+      "perpetuate algorithmic bias",
+      "audit automated systems for algorithmic bias",
+      "mitigate entrenched algorithmic bias",
+    ],
+    example:
+      "Unregulated recruitment software may inadvertently perpetuate algorithmic bias against underrepresented demographic groups.",
+    synonyms: ["automated prejudice", "systematic model distortion"],
+    status: "learning",
+  },
+  {
+    id: "voc_43",
+    word: "experiential learning",
+    phonetic: "/ɪkˌspɪə.riˈen.ʃəl ˈlɜː.nɪŋ/",
+    partOfSpeech: "noun phrase",
+    level: "C1",
+    topic: "Education",
+    meaning: "Học tập qua trải nghiệm thực tế (thay vì chỉ học lý thuyết sách vở)",
+    collocations: [
+      "integrate experiential learning into the curriculum",
+      "prioritise hands-on experiential learning",
+    ],
+    example:
+      "Tertiary institutions are increasingly integrating experiential learning modules to bridge the gap between academic theory and workplace readiness.",
+    synonyms: ["hands-on education", "practical pedagogy"],
+    status: "learning",
+  },
+  {
+    id: "voc_44",
+    word: "urban sprawl",
+    phonetic: "/ˈɜː.bən sprɔːl/",
+    partOfSpeech: "noun phrase",
+    level: "C1",
+    topic: "Urbanisation",
+    meaning: "Sự đô thị hóa tràn lan, mở rộng thiếu quy hoạch ra vùng ngoại ô",
+    collocations: [
+      "unregulated urban sprawl",
+      "curb horizontal urban sprawl",
+      "encroach upon arable land through urban sprawl",
+    ],
+    example:
+      "High-density vertical housing is widely regarded as an effective antidote to unregulated urban sprawl.",
+    synonyms: ["suburban expansion", "unplanned metropolitan growth"],
+    status: "learning",
+  },
+  {
+    id: "voc_45",
+    word: "intergenerational equity",
+    phonetic: "/ˌɪn.tə.dʒen.əˈreɪ.ʃən.əl ˈek.wɪ.ti/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Economy & Society",
+    meaning: "Sự công bằng giữa các thế hệ (không để thế hệ tương lai gánh chịu nợ nần/ô nhiễm)",
+    collocations: [
+      "uphold intergenerational equity",
+      "undermine long-term intergenerational equity",
+    ],
+    example:
+      "Sound fiscal and environmental policies must uphold intergenerational equity rather than prioritising short-term political gains.",
+    synonyms: ["fairness across generations", "long-term societal justice"],
+    status: "learning",
+  },
+  {
+    id: "voc_46",
+    word: "psychosomatic",
+    phonetic: "/ˌsaɪ.kəʊ.səˈmæt.ɪk/",
+    partOfSpeech: "adjective",
+    level: "C2",
+    topic: "Health & Psychology",
+    meaning: "Tâm thể (bệnh lý thể chất khởi phát hoặc trầm trọng hơn do căng thẳng tâm lý)",
+    collocations: [
+      "manifest psychosomatic symptoms",
+      "stress-induced psychosomatic disorders",
+    ],
+    example:
+      "Prolonged occupational burnout frequently manifests in acute psychosomatic ailments among corporate employees.",
+    synonyms: ["mind-body related", "stress-triggered physical"],
+    status: "learning",
+  },
+  {
+    id: "voc_47",
+    word: "presumption of innocence",
+    phonetic: "/prɪˈzʌmp.ʃən əv ˈɪn.ə.səns/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Crime & Law",
+    meaning: "Nguyên tắc suy đoán vô tội (mọi bị cáo đều vô tội cho đến khi được chứng minh phạm tội)",
+    collocations: [
+      "uphold the fundamental presumption of innocence",
+      "erode the presumption of innocence through trial by media",
+    ],
+    example:
+      "Sensationalised media coverage of ongoing trials often erodes the defendant's constitutional presumption of innocence.",
+    synonyms: ["due process protection", "burden of proof principle"],
+    status: "learning",
+  },
+  {
+    id: "voc_48",
+    word: "exponential trajectory",
+    phonetic: "/ˌek.spəˈnen.ʃəl trəˈdʒek.tər.i/",
+    partOfSpeech: "noun phrase",
+    level: "C2",
+    topic: "Academic Task 1",
+    meaning: "Quỹ đạo tăng trưởng theo cấp số nhân (tăng vọt cực nhanh trên biểu đồ)",
+    collocations: [
+      "follow a steep exponential trajectory",
+      "maintain an upward exponential trajectory between 2015 and 2025",
+    ],
+    example:
+      "Following a period of stagnation, global solar photovoltaic capacity followed a steep exponential trajectory from 2015 onwards.",
+    synonyms: ["geometric surge", "rapid upward curve"],
+    status: "learning",
+  },
 ];
 
 export function shuffleArray<T>(input: readonly T[]): T[] {
@@ -883,14 +1025,45 @@ export function addBatchToVault(batch: Partial<VocabItem>[]): {
 
 export function toggleVocabStatus(id: string): VocabItem[] {
   const current = loadVocabVault();
-  const next = current.map((item) =>
-    item.id === id
-      ? {
-          ...item,
-          status: item.status === "mastered" ? ("learning" as const) : ("mastered" as const),
-        }
-      : item
-  );
+  const next = current.map((item) => {
+    if (item.id !== id) return item;
+    const isNowMastered = item.status !== "mastered";
+    return {
+      ...item,
+      status: isNowMastered ? ("mastered" as const) : ("learning" as const),
+      masteryLevel: isNowMastered ? (3 as const) : (1 as const),
+      reviewCount: (item.reviewCount || 0) + 1,
+      lastReviewedAt: new Date().toISOString(),
+    };
+  });
+  saveVocabVault(next);
+  return next;
+}
+
+export function gradeVocabReview(
+  id: string,
+  rating: "hard" | "good" | "easy"
+): VocabItem[] {
+  const current = loadVocabVault();
+  const next = current.map((item) => {
+    if (item.id !== id) return item;
+    const prevLevel = item.masteryLevel ?? (item.status === "mastered" ? 3 : 0);
+    let nextLevel: 0 | 1 | 2 | 3 = 1;
+    if (rating === "hard") {
+      nextLevel = 1;
+    } else if (rating === "good") {
+      nextLevel = Math.min(3, Math.max(2, prevLevel + 1)) as 0 | 1 | 2 | 3;
+    } else {
+      nextLevel = 3;
+    }
+    return {
+      ...item,
+      masteryLevel: nextLevel,
+      status: nextLevel >= 3 ? ("mastered" as const) : ("learning" as const),
+      reviewCount: (item.reviewCount || 0) + 1,
+      lastReviewedAt: new Date().toISOString(),
+    };
+  });
   saveVocabVault(next);
   return next;
 }

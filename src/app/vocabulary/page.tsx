@@ -21,6 +21,12 @@ import {
   Zap,
   RefreshCw,
   Keyboard,
+  Grid,
+  PenTool,
+  Headphones,
+  Timer,
+  Award,
+  Send,
 } from "lucide-react";
 import {
   VocabItem,
@@ -29,6 +35,7 @@ import {
   addWordToVault,
   addBatchToVault,
   toggleVocabStatus,
+  gradeVocabReview,
   removeVocabItem,
   shuffleArray,
 } from "@/lib/vocabulary";
@@ -48,6 +55,7 @@ const TOPICS: { id: "all" | VocabTopic; label: string }[] = [
   { id: "Saved from Tests", label: "Đã lưu từ đề thi" },
 ];
 
+type ActiveStudyMode = "vault" | "flashcards" | "quiz" | "match" | "practice";
 type QuizQuestionType = "cloze" | "meaning" | "collocation";
 type QuizFilterMode = "mix" | QuizQuestionType;
 
@@ -59,6 +67,57 @@ interface GeneratedQuizQuestion {
   promptMain: string;
   promptSub: string;
   options: string[];
+}
+
+interface MatchTile {
+  tileId: string;
+  vocabId: string;
+  kind: "term" | "meaning";
+  text: string;
+  subText: string;
+}
+
+interface SentenceEvalResponse {
+  usedTargetWord: boolean;
+  bandEstimate: number;
+  feedbackVi: string;
+  grammarNoteVi: string;
+  upgradedSentence: string;
+  collocationSuggestions: string[];
+}
+
+function getMasteryInfo(item: VocabItem): {
+  level: 0 | 1 | 2 | 3;
+  label: string;
+  colorClass: string;
+} {
+  const lvl = item.masteryLevel ?? (item.status === "mastered" ? 3 : 0);
+  if (lvl >= 3) {
+    return {
+      level: 3,
+      label: "SRS Cấp 3 • Thành thạo",
+      colorClass: "bg-emerald-50 border-emerald-200 text-emerald-700",
+    };
+  }
+  if (lvl === 2) {
+    return {
+      level: 2,
+      label: "SRS Cấp 2 • Quen thuộc",
+      colorClass: "bg-blue-50 border-blue-200 text-blue-700",
+    };
+  }
+  if (lvl === 1) {
+    return {
+      level: 1,
+      label: "SRS Cấp 1 • Đang nhớ",
+      colorClass: "bg-amber-50 border-amber-200 text-amber-700",
+    };
+  }
+  return {
+    level: 0,
+    label: "SRS Cấp 0 • Từ mới",
+    colorClass: "bg-slate-100 border-slate-200 text-slate-600",
+  };
 }
 
 function buildRandomQuizSet(
@@ -130,7 +189,7 @@ function buildRandomQuizSet(
 
 export default function VocabularyPage() {
   const [items, setItems] = useState<VocabItem[]>([]);
-  const [activeMode, setActiveMode] = useState<"vault" | "flashcards" | "quiz">("vault");
+  const [activeMode, setActiveMode] = useState<ActiveStudyMode>("vault");
   const [selectedTopic, setSelectedTopic] = useState<"all" | VocabTopic>("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "learning" | "mastered">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -167,11 +226,37 @@ export default function VocabularyPage() {
   const [inputRecallMode, setInputRecallMode] = useState(false);
   const [typedGuess, setTypedGuess] = useState("");
 
+  // Speed Match Game state (Mode 4)
+  const [matchTiles, setMatchTiles] = useState<MatchTile[]>([]);
+  const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
+  const [matchedVocabIds, setMatchedVocabIds] = useState<string[]>([]);
+  const [wrongPairIds, setWrongPairIds] = useState<string[]>([]);
+  const [matchMoves, setMatchMoves] = useState(0);
+  const [matchSeconds, setMatchSeconds] = useState(0);
+  const [matchRunning, setMatchRunning] = useState(false);
+  const [bestMatchTime, setBestMatchTime] = useState<number | null>(null);
+
+  // Active Practice state: AI Sentence Builder & Audio Dictation (Mode 5)
+  const [practiceTab, setPracticeTab] = useState<"sentence" | "dictation">("sentence");
+  const [practiceWordId, setPracticeWordId] = useState<string | null>(null);
+  const [userSentence, setUserSentence] = useState("");
+  const [evaluatingSentence, setEvaluatingSentence] = useState(false);
+  const [sentenceEval, setSentenceEval] = useState<SentenceEvalResponse | null>(null);
+  const [dictationInput, setDictationInput] = useState("");
+  const [dictationChecked, setDictationChecked] = useState<"correct" | "wrong" | null>(null);
+  const [dictationScore, setDictationScore] = useState(0);
+
   useEffect(() => {
     const sync = () => {
       const loaded = loadVocabVault();
       setItems(loaded);
       setSpotlightId((prev) => {
+        if (prev && loaded.some((i) => i.id === prev)) return prev;
+        return loaded.length > 0
+          ? loaded[Math.floor(Math.random() * loaded.length)].id
+          : null;
+      });
+      setPracticeWordId((prev) => {
         if (prev && loaded.some((i) => i.id === prev)) return prev;
         return loaded.length > 0
           ? loaded[Math.floor(Math.random() * loaded.length)].id
@@ -183,26 +268,14 @@ export default function VocabularyPage() {
     return () => window.removeEventListener("vocab-updated", sync);
   }, []);
 
-  const speakWord = useCallback((text: string) => {
+  const speakWord = useCallback((text: string, rate = 0.92) => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = "en-GB";
-    utter.rate = 0.92;
+    utter.rate = rate;
     window.speechSynthesis.speak(utter);
   }, []);
-
-  const rollRandomSpotlight = () => {
-    if (items.length === 0) return;
-    const candidates = items.length > 1 ? items.filter((i) => i.id !== spotlightId) : items;
-    const picked = candidates[Math.floor(Math.random() * candidates.length)];
-    if (picked) setSpotlightId(picked.id);
-  };
-
-  const spotlightItem = useMemo(() => {
-    if (items.length === 0) return null;
-    return items.find((i) => i.id === spotlightId) || items[0];
-  }, [items, spotlightId]);
 
   // Base filtered items
   const baseFilteredItems = useMemo(() => {
@@ -221,6 +294,170 @@ export default function VocabularyPage() {
       return true;
     });
   }, [items, selectedTopic, statusFilter, searchQuery]);
+
+  // Speed Match Game Generator & Timer
+  const startNewMatchGame = useCallback(() => {
+    const pool = baseFilteredItems.length >= 6 ? baseFilteredItems : items;
+    const picked = shuffleArray(pool).slice(0, 6);
+    const tiles: MatchTile[] = [];
+    for (const v of picked) {
+      tiles.push({
+        tileId: `term_${v.id}`,
+        vocabId: v.id,
+        kind: "term",
+        text: v.word,
+        subText: `${v.phonetic} (${v.level})`,
+      });
+      tiles.push({
+        tileId: `mean_${v.id}`,
+        vocabId: v.id,
+        kind: "meaning",
+        text: v.meaning,
+        subText: v.topic,
+      });
+    }
+    setMatchTiles(shuffleArray(tiles));
+    setSelectedTileId(null);
+    setMatchedVocabIds([]);
+    setWrongPairIds([]);
+    setMatchMoves(0);
+    setMatchSeconds(0);
+    setMatchRunning(true);
+  }, [baseFilteredItems, items]);
+
+  useEffect(() => {
+    if (activeMode !== "match" || !matchRunning) return;
+    const timer = setInterval(() => {
+      setMatchSeconds((s) => s + 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [activeMode, matchRunning]);
+
+  const handleTileClick = (tile: MatchTile) => {
+    if (
+      matchedVocabIds.includes(tile.vocabId) ||
+      wrongPairIds.length > 0 ||
+      selectedTileId === tile.tileId
+    ) {
+      return;
+    }
+
+    if (!selectedTileId) {
+      setSelectedTileId(tile.tileId);
+      if (tile.kind === "term") speakWord(tile.text);
+      return;
+    }
+
+    const firstTile = matchTiles.find((t) => t.tileId === selectedTileId);
+    if (!firstTile) {
+      setSelectedTileId(tile.tileId);
+      return;
+    }
+
+    setMatchMoves((m) => m + 1);
+
+    if (firstTile.vocabId === tile.vocabId && firstTile.kind !== tile.kind) {
+      // Matched!
+      const nextMatched = [...matchedVocabIds, tile.vocabId];
+      setMatchedVocabIds(nextMatched);
+      setSelectedTileId(null);
+      setItems(gradeVocabReview(tile.vocabId, "good"));
+
+      if (nextMatched.length >= matchTiles.length / 2) {
+        setMatchRunning(false);
+        setBestMatchTime((prev) => (prev === null || matchSeconds < prev ? matchSeconds : prev));
+      }
+    } else {
+      // Mismatch
+      setWrongPairIds([firstTile.tileId, tile.tileId]);
+      setTimeout(() => {
+        setWrongPairIds([]);
+        setSelectedTileId(null);
+      }, 650);
+    }
+  };
+
+  // Practice Target Word (Mode 5)
+  const practiceTarget = useMemo(() => {
+    const pool = baseFilteredItems.length > 0 ? baseFilteredItems : items;
+    if (pool.length === 0) return null;
+    return pool.find((i) => i.id === practiceWordId) || pool[0];
+  }, [baseFilteredItems, items, practiceWordId]);
+
+  const rollRandomPracticeWord = useCallback(
+    (autoSpeak = false) => {
+      const pool = baseFilteredItems.length > 0 ? baseFilteredItems : items;
+      if (pool.length === 0) return;
+      const candidates =
+        pool.length > 1 ? pool.filter((i) => i.id !== practiceWordId) : pool;
+      const picked = candidates[Math.floor(Math.random() * candidates.length)];
+      if (picked) {
+        setPracticeWordId(picked.id);
+        setUserSentence("");
+        setSentenceEval(null);
+        setDictationInput("");
+        setDictationChecked(null);
+        if (autoSpeak) speakWord(picked.word);
+      }
+    },
+    [baseFilteredItems, items, practiceWordId, speakWord]
+  );
+
+  const handleEvaluateSentence = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!practiceTarget || !userSentence.trim() || evaluatingSentence) return;
+    setEvaluatingSentence(true);
+    setSentenceEval(null);
+    try {
+      const res = await fetch("/api/ai/explain", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "evaluate-sentence",
+          word: practiceTarget.word,
+          sentence: userSentence.trim(),
+          example: practiceTarget.example,
+        }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as SentenceEvalResponse;
+        setSentenceEval(data);
+        if (data.usedTargetWord && data.bandEstimate >= 7.5) {
+          setItems(gradeVocabReview(practiceTarget.id, "easy"));
+        } else {
+          setItems(gradeVocabReview(practiceTarget.id, "good"));
+        }
+      }
+    } catch {
+      // ignore
+    } finally {
+      setEvaluatingSentence(false);
+    }
+  };
+
+  const handleCheckDictation = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!practiceTarget || !dictationInput.trim()) return;
+    const isCorrect =
+      dictationInput.trim().toLowerCase() === practiceTarget.word.trim().toLowerCase();
+    setDictationChecked(isCorrect ? "correct" : "wrong");
+    if (isCorrect) {
+      setDictationScore((s) => s + 1);
+      setItems(gradeVocabReview(practiceTarget.id, "good"));
+    }
+  };
+
+  const rollRandomSpotlight = () => {
+    if (items.length === 0) return;
+    const candidates = items.length > 1 ? items.filter((i) => i.id !== spotlightId) : items;
+    const picked = candidates[Math.floor(Math.random() * candidates.length)];
+    if (picked) setSpotlightId(picked.id);
+  };
+
+  const spotlightItem = useMemo(() => {
+    if (items.length === 0) return null;
+    return items.find((i) => i.id === spotlightId) || items[0];
+  }, [items, spotlightId]);
 
   // Displayed items in Vault (supporting Shuffle & Random Sprint)
   const displayedVaultItems = useMemo(() => {
@@ -293,7 +530,6 @@ export default function VocabularyPage() {
         }
       }
     } catch {
-      // Fallback: pick 4 random words from current items
       const randomPick = shuffleArray(items).slice(0, 4);
       setRandomSprintIds(randomPick.map((i) => i.id));
       setBatchBanner("🎲 Đã chọn ngẫu nhiên 4 từ vựng trọng tâm từ kho lưu trữ!");
@@ -374,6 +610,13 @@ export default function VocabularyPage() {
     });
   }, [deck.length]);
 
+  const handleGradeFlashcard = (rating: "hard" | "good" | "easy") => {
+    if (!currentCard) return;
+    setItems(gradeVocabReview(currentCard.id, rating));
+    setIsFlipped(false);
+    setCardIdx((prev) => (prev + 1) % Math.max(1, deck.length));
+  };
+
   // Keyboard shortcuts for Flashcards
   useEffect(() => {
     if (activeMode !== "flashcards" || showAddModal) return;
@@ -424,8 +667,10 @@ export default function VocabularyPage() {
     if (isRight) {
       setQuizScore((prev) => prev + 1);
       setQuizStreak((prev) => prev + 1);
+      setItems(gradeVocabReview(currentQuiz.target.id, "good"));
     } else {
       setQuizStreak(0);
+      setItems(gradeVocabReview(currentQuiz.target.id, "hard"));
     }
   };
 
@@ -455,14 +700,15 @@ export default function VocabularyPage() {
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold uppercase tracking-wider">
               <BookMarked className="w-3.5 h-3.5" />
-              IELTS SKIBIDI • Academic Lexical Resource (C1–C2)
+              IELTS SKIBIDI • Academic Lexical Resource (C1–C2) & SRS
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-              Sổ tay Từ vựng Học thuật & Ôn luyện Ngẫu nhiên
+              Trung tâm Từ vựng Học thuật & Phản xạ Ngẫu nhiên
             </h1>
             <p className="text-slate-600 text-sm leading-relaxed">
-              Kho từ vựng & Academic Collocations C1–C2 đa chủ đề chuẩn Cambridge. Hỗ trợ rút từ
-              ngẫu nhiên, xáo trộn thẻ Flashcard và tạo đề trắc nghiệm đa dạng mỗi lần học.
+              Hệ thống 5 chế độ học tập thông minh: Sổ tay SRS 4 cấp độ, Flashcard ngẫu nhiên,
+              Trắc nghiệm đa dạng, Ghép cặp tốc độ (Speed Match) và Luyện đặt câu Band 8.5+ cùng
+              Giám khảo AI.
             </p>
           </div>
 
@@ -474,7 +720,9 @@ export default function VocabularyPage() {
               </div>
             </div>
             <div className="px-4 py-3 bg-emerald-50/70 rounded-lg border border-emerald-200 text-center">
-              <div className="text-[11px] font-semibold uppercase text-emerald-700">Đã thuộc</div>
+              <div className="text-[11px] font-semibold uppercase text-emerald-700">
+                Thành thạo
+              </div>
               <div className="text-2xl font-bold text-emerald-700 font-mono mt-0.5">
                 {masteredCount}
               </div>
@@ -561,19 +809,19 @@ export default function VocabularyPage() {
           </div>
         )}
 
-        {/* Mode Switcher & Action Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="inline-flex bg-white p-1 rounded-xl border border-slate-200 shadow-xs flex-wrap">
+        {/* 5-Mode Switcher & Action Bar */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="inline-flex bg-white p-1 rounded-xl border border-slate-200 shadow-xs flex-wrap gap-1">
             <button
               onClick={() => setActiveMode("vault")}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
                 activeMode === "vault"
                   ? "bg-slate-900 text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
               <BookMarked className="w-4 h-4" />
-              Sổ tay Từ vựng ({displayedVaultItems.length})
+              Sổ tay SRS ({displayedVaultItems.length})
             </button>
             <button
               onClick={() => {
@@ -581,21 +829,21 @@ export default function VocabularyPage() {
                 setCardIdx(0);
                 setIsFlipped(false);
               }}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
                 activeMode === "flashcards"
                   ? "bg-slate-900 text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
               <Layers className="w-4 h-4" />
-              Flashcard Ngẫu nhiên
+              Flashcard SRS
             </button>
             <button
               onClick={() => {
                 setActiveMode("quiz");
                 startNewRandomQuiz();
               }}
-              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
                 activeMode === "quiz"
                   ? "bg-slate-900 text-white shadow-xs"
                   : "text-slate-600 hover:text-slate-900"
@@ -603,6 +851,36 @@ export default function VocabularyPage() {
             >
               <BrainCircuit className="w-4 h-4" />
               Trắc nghiệm Ngẫu nhiên
+            </button>
+            <button
+              onClick={() => {
+                setActiveMode("match");
+                startNewMatchGame();
+              }}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                activeMode === "match"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <Grid className="w-4 h-4" />
+              Ghép cặp Tốc độ
+            </button>
+            <button
+              onClick={() => {
+                setActiveMode("practice");
+                if (!practiceWordId && items.length > 0) {
+                  setPracticeWordId(items[Math.floor(Math.random() * items.length)].id);
+                }
+              }}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg text-xs font-semibold transition-all ${
+                activeMode === "practice"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <PenTool className="w-4 h-4" />
+              Đặt câu AI & Chính tả
             </button>
           </div>
 
@@ -654,7 +932,7 @@ export default function VocabularyPage() {
                 [
                   { id: "all", label: "Tất cả" },
                   { id: "learning", label: "Đang học" },
-                  { id: "mastered", label: "Đã thuộc" },
+                  { id: "mastered", label: "Thành thạo" },
                 ] as const
               ).map((st) => (
                 <button
@@ -707,11 +985,11 @@ export default function VocabularyPage() {
           </div>
         </div>
 
-        {/* MODE 1: VOCABULARY VAULT */}
+        {/* MODE 1: VOCABULARY VAULT WITH SRS MASTERY */}
         {activeMode === "vault" && (
           <div className="space-y-4">
             {randomSprintIds && (
-              <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 flex items-center justify-between gap-3">
+              <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-3.5 flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2 text-xs font-semibold text-amber-900">
                   <Zap className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>
@@ -756,117 +1034,140 @@ export default function VocabularyPage() {
                   </button>
                 </div>
               ) : (
-                displayedVaultItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between space-y-4"
-                  >
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-lg font-bold text-slate-900">{item.word}</h3>
-                            <button
-                              onClick={() => speakWord(item.word)}
-                              className="p-1.5 rounded-md bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-700 transition-colors"
-                              title="Nghe phát âm chuẩn Anh-Anh"
-                            >
-                              <Volume2 className="w-4 h-4" />
-                            </button>
-                            <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-bold font-mono">
-                              {item.level}
+                displayedVaultItems.map((item) => {
+                  const srs = getMasteryInfo(item);
+                  return (
+                    <div
+                      key={item.id}
+                      className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between space-y-4"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="text-lg font-bold text-slate-900">{item.word}</h3>
+                              <button
+                                onClick={() => speakWord(item.word)}
+                                className="p-1.5 rounded-md bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-700 transition-colors"
+                                title="Nghe phát âm chuẩn Anh-Anh"
+                              >
+                                <Volume2 className="w-4 h-4" />
+                              </button>
+                              <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800 text-[11px] font-bold font-mono">
+                                {item.level}
+                              </span>
+                              <span className="text-xs text-slate-400 italic">
+                                {item.partOfSpeech}
+                              </span>
+                            </div>
+                            <p className="text-xs font-mono text-slate-500 mt-0.5">
+                              {item.phonetic}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-1 shrink-0">
+                            <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-[11px] font-semibold">
+                              {item.topic}
                             </span>
-                            <span className="text-xs text-slate-400 italic">
-                              {item.partOfSpeech}
+                            <span
+                              className={`px-2 py-0.5 rounded border text-[10px] font-bold ${srs.colorClass}`}
+                            >
+                              {srs.label}
                             </span>
                           </div>
-                          <p className="text-xs font-mono text-slate-500 mt-0.5">{item.phonetic}</p>
                         </div>
 
-                        <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-[11px] font-semibold shrink-0">
-                          {item.topic}
-                        </span>
-                      </div>
+                        <p className="text-sm font-semibold text-slate-800 bg-slate-50 p-3 rounded-lg border border-slate-200/70">
+                          {item.meaning}
+                        </p>
 
-                      <p className="text-sm font-semibold text-slate-800 bg-slate-50 p-3 rounded-lg border border-slate-200/70">
-                        {item.meaning}
-                      </p>
+                        {item.collocations.length > 0 && (
+                          <div className="space-y-1.5">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+                              Academic Collocations
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                              {item.collocations.map((col, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-2.5 py-1 rounded-md bg-blue-50/60 border border-blue-100 text-blue-900 text-xs font-medium"
+                                >
+                                  {col}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
-                      {item.collocations.length > 0 && (
-                        <div className="space-y-1.5">
-                          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
-                            Academic Collocations
-                          </span>
-                          <div className="flex flex-wrap gap-1.5">
-                            {item.collocations.map((col, idx) => (
+                        {item.synonyms && item.synonyms.length > 0 && (
+                          <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                              Synonyms:
+                            </span>
+                            {item.synonyms.map((syn, idx) => (
                               <span
                                 key={idx}
-                                className="px-2.5 py-1 rounded-md bg-blue-50/60 border border-blue-100 text-blue-900 text-xs font-medium"
+                                className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium"
                               >
-                                {col}
+                                {syn}
                               </span>
                             ))}
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      {item.synonyms && item.synonyms.length > 0 && (
-                        <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                            Synonyms:
+                        <div className="space-y-1 pt-1">
+                          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
+                            Ví dụ trong IELTS Writing / Reading
                           </span>
-                          {item.synonyms.map((syn, idx) => (
-                            <span
-                              key={idx}
-                              className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-medium"
-                            >
-                              {syn}
-                            </span>
-                          ))}
+                          <p className="text-xs text-slate-600 italic leading-relaxed">
+                            &ldquo;{item.example}&rdquo;
+                          </p>
                         </div>
-                      )}
+                      </div>
 
-                      <div className="space-y-1 pt-1">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block">
-                          Ví dụ trong IELTS Writing / Reading
-                        </span>
-                        <p className="text-xs text-slate-600 italic leading-relaxed">
-                          &ldquo;{item.example}&rdquo;
-                        </p>
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setItems(toggleVocabStatus(item.id))}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                              item.status === "mastered"
+                                ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+                                : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
+                            }`}
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            {item.status === "mastered" ? "Đã thuộc lòng" : "Đánh dấu đã thuộc"}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setPracticeWordId(item.id);
+                              setActiveMode("practice");
+                            }}
+                            className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 text-xs font-semibold transition-colors"
+                          >
+                            Đặt câu AI
+                          </button>
+                        </div>
+
+                        {item.isCustom && (
+                          <button
+                            onClick={() => setItems(removeVocabItem(item.id))}
+                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            title="Xóa từ này"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                     </div>
-
-                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-                      <button
-                        onClick={() => setItems(toggleVocabStatus(item.id))}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
-                          item.status === "mastered"
-                            ? "bg-emerald-50 border-emerald-200 text-emerald-700"
-                            : "bg-white border-slate-200 text-slate-600 hover:border-slate-300"
-                        }`}
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        {item.status === "mastered" ? "Đã thuộc lòng" : "Đánh dấu đã thuộc"}
-                      </button>
-
-                      {item.isCustom && (
-                        <button
-                          onClick={() => setItems(removeVocabItem(item.id))}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                          title="Xóa từ này"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>
         )}
 
-        {/* MODE 2: FLASHCARDS */}
+        {/* MODE 2: FLASHCARDS WITH SRS RATING */}
         {activeMode === "flashcards" && currentCard && (
           <div className="max-w-2xl mx-auto space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-slate-500 bg-white p-3.5 rounded-xl border border-slate-200">
@@ -900,8 +1201,10 @@ export default function VocabularyPage() {
                 <span className="px-2.5 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold font-mono">
                   {currentCard.level} • {currentCard.partOfSpeech}
                 </span>
-                <span className="text-xs font-semibold text-slate-400">
-                  {isFlipped ? "Mặt sau (Nghĩa & Ngữ cảnh)" : "Mặt trước (Bấm hoặc Space để lật)"}
+                <span
+                  className={`px-2.5 py-1 rounded border text-xs font-bold ${getMasteryInfo(currentCard).colorClass}`}
+                >
+                  {getMasteryInfo(currentCard).label}
                 </span>
               </div>
 
@@ -973,13 +1276,35 @@ export default function VocabularyPage() {
                   <Keyboard className="w-3.5 h-3.5" />
                   Phím tắt: Space (Lật) • ←/→ (Chuyển) • R (Ngẫu nhiên)
                 </span>
-                <span
-                  className={`font-semibold ${
-                    currentCard.status === "mastered" ? "text-emerald-600" : "text-amber-600"
-                  }`}
+                <span>Lần ôn: {currentCard.reviewCount || 0}</span>
+              </div>
+            </div>
+
+            {/* Spaced Repetition Self-Grading Bar */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 space-y-3">
+              <div className="text-xs font-semibold text-slate-500 text-center">
+                Đánh giá mức độ ghi nhớ của bạn (Spaced Repetition SRS — Tự động chuyển thẻ tiếp
+                theo):
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <button
+                  onClick={() => handleGradeFlashcard("hard")}
+                  className="py-2.5 px-3 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 text-xs font-bold transition-colors"
                 >
-                  {currentCard.status === "mastered" ? "● Đã thuộc" : "● Đang học"}
-                </span>
+                  😓 Khó nhớ (Ôn lại Cấp 1)
+                </button>
+                <button
+                  onClick={() => handleGradeFlashcard("good")}
+                  className="py-2.5 px-3 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-900 text-xs font-bold transition-colors"
+                >
+                  👍 Tạm nhớ (Lên Cấp 2)
+                </button>
+                <button
+                  onClick={() => handleGradeFlashcard("easy")}
+                  className="py-2.5 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-xs font-bold transition-colors"
+                >
+                  🎯 Nhớ rõ (Thành thạo Cấp 3)
+                </button>
               </div>
             </div>
 
@@ -993,17 +1318,6 @@ export default function VocabularyPage() {
               >
                 <ChevronLeft className="w-4 h-4" />
                 Thẻ trước
-              </button>
-
-              <button
-                onClick={() => setItems(toggleVocabStatus(currentCard.id))}
-                className={`px-5 py-2.5 rounded-lg text-xs font-semibold border transition-all ${
-                  currentCard.status === "mastered"
-                    ? "bg-emerald-600 border-emerald-600 text-white"
-                    : "bg-white border-slate-300 text-slate-800 hover:border-slate-900"
-                }`}
-              >
-                {currentCard.status === "mastered" ? "Đã thuộc lòng ✓" : "Đánh dấu Đã thuộc"}
               </button>
 
               <button
@@ -1023,7 +1337,6 @@ export default function VocabularyPage() {
         {/* MODE 3: RANDOMIZED MULTI-MODE QUIZ */}
         {activeMode === "quiz" && (
           <div className="max-w-3xl mx-auto space-y-5">
-            {/* Quiz Mode Toolbar */}
             <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-1.5 flex-wrap">
                 {(
@@ -1221,6 +1534,363 @@ export default function VocabularyPage() {
                   )}
                 </div>
               )
+            )}
+          </div>
+        )}
+
+        {/* MODE 4: RANDOM SPEED MATCHING GAME */}
+        {activeMode === "match" && (
+          <div className="max-w-5xl mx-auto space-y-5">
+            <div className="bg-white p-5 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">
+                  Lexical Reflex Arena
+                </span>
+                <h2 className="text-lg font-bold text-slate-900">
+                  Ghép Cặp Từ Vựng C1–C2 & Nghĩa Học Thuật Ngẫu Nhiên
+                </h2>
+              </div>
+
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="px-3.5 py-2 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold font-mono inline-flex items-center gap-1.5">
+                  <Timer className="w-4 h-4 text-blue-700" />
+                  Thời gian: {matchSeconds}s
+                </div>
+                <div className="px-3.5 py-2 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold font-mono">
+                  Đã ghép: {matchedVocabIds.length} / {matchTiles.length / 2} cặp ({matchMoves}{" "}
+                  lượt)
+                </div>
+                {bestMatchTime !== null && (
+                  <div className="px-3.5 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold inline-flex items-center gap-1">
+                    <Award className="w-4 h-4 text-emerald-600" />
+                    Kỷ lục: {bestMatchTime}s
+                  </div>
+                )}
+                <button
+                  onClick={startNewMatchGame}
+                  className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold inline-flex items-center gap-1.5"
+                >
+                  <Dices className="w-4 h-4" />
+                  Ván mới ngẫu nhiên
+                </button>
+              </div>
+            </div>
+
+            {matchedVocabIds.length > 0 && matchedVocabIds.length === matchTiles.length / 2 ? (
+              <div className="bg-white rounded-2xl border border-emerald-200 p-10 text-center space-y-4 shadow-sm">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center mx-auto">
+                  <Award className="w-7 h-7" />
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900">
+                  Xuất sắc! Bạn đã ghép đúng toàn bộ 6 cặp từ C1–C2 trong {matchSeconds} giây!
+                </h3>
+                <p className="text-sm text-slate-600">
+                  Tổng số lượt chọn: <strong>{matchMoves}</strong> • Tất cả 6 từ đã được tự động
+                  nâng cấp mức độ nhớ SRS.
+                </p>
+                <button
+                  onClick={startNewMatchGame}
+                  className="btn-primary !py-2.5 !px-6 !text-xs inline-flex items-center gap-2"
+                >
+                  <Dices className="w-4 h-4" />
+                  Chơi tiếp 6 cặp từ ngẫu nhiên khác
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {matchTiles.map((tile) => {
+                  const isMatched = matchedVocabIds.includes(tile.vocabId);
+                  const isSelected = selectedTileId === tile.tileId;
+                  const isWrong = wrongPairIds.includes(tile.tileId);
+
+                  let cardClass =
+                    "bg-white border-slate-200 hover:border-blue-500 text-slate-900 cursor-pointer";
+                  if (isMatched) {
+                    cardClass =
+                      "bg-emerald-50/70 border-emerald-300 text-emerald-900 opacity-50 pointer-events-none";
+                  } else if (isWrong) {
+                    cardClass = "bg-rose-50 border-rose-500 text-rose-900";
+                  } else if (isSelected) {
+                    cardClass = "bg-blue-50 border-blue-600 text-blue-950 ring-2 ring-blue-500/20";
+                  }
+
+                  return (
+                    <button
+                      key={tile.tileId}
+                      type="button"
+                      onClick={() => handleTileClick(tile)}
+                      disabled={isMatched}
+                      className={`p-5 rounded-xl border-2 text-left transition-all flex flex-col justify-between min-h-[120px] ${cardClass}`}
+                    >
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            tile.kind === "term"
+                              ? "bg-slate-900 text-white"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
+                          {tile.kind === "term" ? "Thuật ngữ C1–C2" : "Nghĩa Học thuật"}
+                        </span>
+                        {isMatched && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
+                      </div>
+                      <p
+                        className={`${
+                          tile.kind === "term" ? "text-base font-bold" : "text-xs font-semibold"
+                        } leading-snug`}
+                      >
+                        {tile.text}
+                      </p>
+                      <span className="text-[11px] text-slate-400 font-mono mt-2 block">
+                        {tile.subText}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* MODE 5: AI SENTENCE BUILDER & AUDIO DICTATION */}
+        {activeMode === "practice" && practiceTarget && (
+          <div className="max-w-3xl mx-auto space-y-5">
+            <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setPracticeTab("sentence")}
+                  className={`px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-all ${
+                    practiceTab === "sentence"
+                      ? "bg-slate-900 text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  <PenTool className="w-3.5 h-3.5" />
+                  Đặt câu Band 8.0+ cùng AI
+                </button>
+                <button
+                  onClick={() => {
+                    setPracticeTab("dictation");
+                    speakWord(practiceTarget.word);
+                  }}
+                  className={`px-4 py-2 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 transition-all ${
+                    practiceTab === "dictation"
+                      ? "bg-slate-900 text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  <Headphones className="w-3.5 h-3.5" />
+                  Nghe Chính tả Thuật ngữ (Dictation)
+                </button>
+              </div>
+
+              <button
+                onClick={() => rollRandomPracticeWord(practiceTab === "dictation")}
+                className="px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold inline-flex items-center gap-1.5"
+              >
+                <Dices className="w-3.5 h-3.5" />
+                Đổi từ ngẫu nhiên khác
+              </button>
+            </div>
+
+            {practiceTab === "sentence" ? (
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+                <div className="space-y-3 border-b border-slate-100 pb-5">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-blue-700">
+                      AI Academic Sentence Coach • {practiceTarget.topic}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold font-mono">
+                      {practiceTarget.level} • {practiceTarget.partOfSpeech}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h2 className="text-2xl font-bold text-slate-900">{practiceTarget.word}</h2>
+                    <span className="text-xs font-mono text-slate-500">
+                      {practiceTarget.phonetic}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => speakWord(practiceTarget.word)}
+                      className="p-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-700"
+                    >
+                      <Volume2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <p className="text-sm font-semibold text-slate-800">{practiceTarget.meaning}</p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {practiceTarget.collocations.map((c, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium"
+                      >
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <form onSubmit={handleEvaluateSentence} className="space-y-4">
+                  <div>
+                    <label className="text-xs font-bold text-slate-700 block mb-2">
+                      Viết 1 câu văn học thuật (IELTS Writing Task 2 / Speaking Part 3) có sử dụng{" "}
+                      <span className="text-blue-700">&ldquo;{practiceTarget.word}&rdquo;</span>:
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={userSentence}
+                      onChange={(e) => setUserSentence(e.target.value)}
+                      placeholder={`Ví dụ: ${practiceTarget.example}`}
+                      className="w-full p-4 rounded-xl border border-slate-200 text-sm text-slate-900 focus:border-blue-600 outline-none resize-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setUserSentence(practiceTarget.example)}
+                      className="text-xs font-semibold text-slate-500 hover:text-slate-800 underline"
+                    >
+                      Điền thử câu mẫu để tham khảo
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={evaluatingSentence || userSentence.trim().length < 8}
+                      className="btn-primary !py-2.5 !px-6 !text-xs inline-flex items-center gap-2 disabled:opacity-40"
+                    >
+                      <Send className="w-3.5 h-3.5" />
+                      {evaluatingSentence
+                        ? "Giám khảo AI đang chấm..."
+                        : "Chấm điểm & Nâng cấp câu (AI)"}
+                    </button>
+                  </div>
+                </form>
+
+                {sentenceEval && (
+                  <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Đánh giá từ Giám khảo AI
+                      </span>
+                      <span className="px-3 py-1 rounded-lg bg-blue-600 text-white text-xs font-bold font-mono">
+                        Ước tính Lexical &amp; GRA: Band {Number(sentenceEval.bandEstimate).toFixed(1)}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2 text-xs text-slate-700 leading-relaxed">
+                      <p>
+                        <strong className="text-slate-900">• Nhận xét Từ vựng (Lexical): </strong>
+                        {sentenceEval.feedbackVi}
+                      </p>
+                      <p>
+                        <strong className="text-slate-900">• Nhận xét Ngữ pháp (Grammar): </strong>
+                        {sentenceEval.grammarNoteVi}
+                      </p>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
+                        ✨ Bản Nâng Cấp Chuẩn Cambridge Band 8.5+
+                      </div>
+                      <p className="text-sm font-semibold text-emerald-950 italic">
+                        &ldquo;{sentenceEval.upgradedSentence}&rdquo;
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-blue-700">
+                      Academic Listening &amp; Spelling Dictation
+                    </span>
+                    <h2 className="text-lg font-bold text-slate-900 mt-0.5">
+                      Nghe phát âm Anh-Anh và gõ lại chính xác thuật ngữ C1–C2
+                    </h2>
+                  </div>
+                  <div className="px-3.5 py-1.5 rounded-lg bg-slate-100 text-slate-800 text-xs font-bold font-mono">
+                    Đúng: {dictationScore} từ
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-4">
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => speakWord(practiceTarget.word, 0.95)}
+                      className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold inline-flex items-center gap-2"
+                    >
+                      <Volume2 className="w-4 h-4" />
+                      Nghe tốc độ chuẩn (1.0x)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => speakWord(practiceTarget.word, 0.65)}
+                      className="px-4 py-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold inline-flex items-center gap-2"
+                    >
+                      <Headphones className="w-4 h-4 text-blue-700" />
+                      Nghe chậm (0.65x)
+                    </button>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-xs font-mono text-slate-500">
+                      Phiên âm: {practiceTarget.phonetic} • ({practiceTarget.partOfSpeech})
+                    </p>
+                    <p className="text-sm font-bold text-slate-900">
+                      Nghĩa: {practiceTarget.meaning}
+                    </p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleCheckDictation} className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={dictationInput}
+                      onChange={(e) => {
+                        setDictationInput(e.target.value);
+                        setDictationChecked(null);
+                      }}
+                      placeholder={`Nhập thuật ngữ tiếng Anh (${practiceTarget.word.length} ký tự, bắt đầu bằng "${practiceTarget.word.slice(0, 2)}...")`}
+                      className="flex-1 px-4 py-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-900 focus:border-blue-600 outline-none"
+                    />
+                    <button type="submit" className="btn-primary !px-6 !py-3 !text-xs shrink-0">
+                      Kiểm tra chính tả
+                    </button>
+                  </div>
+                </form>
+
+                {dictationChecked && (
+                  <div
+                    className={`p-4 rounded-xl border flex items-center justify-between gap-4 ${
+                      dictationChecked === "correct"
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+                        : "bg-rose-50 border-rose-200 text-rose-900"
+                    }`}
+                  >
+                    <div className="space-y-1 text-xs">
+                      <div className="font-bold">
+                        {dictationChecked === "correct"
+                          ? `✓ Chính xác tuyệt đối! (${practiceTarget.word})`
+                          : `✗ Chưa khớp. Đáp án đúng là: "${practiceTarget.word}"`}
+                      </div>
+                      <p className="text-slate-600 italic">Ví dụ: {practiceTarget.example}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => rollRandomPracticeWord(true)}
+                      className="px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold shrink-0"
+                    >
+                      Từ tiếp theo →
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}

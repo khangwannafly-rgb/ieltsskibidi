@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PenTool, Send, RefreshCw, BarChart2, CheckCircle, AlertTriangle, ChevronRight, BookOpen, Clock, Sparkles, Timer, Trophy, Eye, FileText } from "lucide-react";
+import { PenTool, Send, RefreshCw, BarChart2, CheckCircle, AlertTriangle, ChevronRight, BookOpen, Clock, Sparkles, Timer, Trophy, Eye, FileText, Dices, Check } from "lucide-react";
 import WritingTask1Chart from "@/components/WritingTask1Chart";
 import WritingInteractiveDiff from "@/components/WritingInteractiveDiff";
 import { useUser } from "@/context/UserContext";
+import { VocabItem, loadVocabVault, shuffleArray } from "@/lib/vocabulary";
 
 const TASK1_SUBTYPES = [
   { id: "all", label: "Ngẫu nhiên (Mọi dạng)" },
@@ -42,6 +43,23 @@ export default function WritingPage() {
   const [task2Sub, setTask2Sub] = useState<string>("all");
   const [activeTab, setActiveTab] = useState<"structure" | "vocab" | "sample">("structure");
   const [timeLeft, setTimeLeft] = useState(0);
+  const [lexicalTargets, setLexicalTargets] = useState<VocabItem[]>([]);
+  const [selectedLexicalHint, setSelectedLexicalHint] = useState<VocabItem | null>(null);
+
+  const rollLexicalTargets = useCallback((forType: "task1" | "task2") => {
+    const vault = loadVocabVault();
+    const pool =
+      forType === "task1"
+        ? vault.filter((v) => v.topic === "Academic Task 1")
+        : vault.filter((v) => v.topic !== "Academic Task 1");
+    const picked = shuffleArray(pool.length >= 5 ? pool : vault).slice(0, 5);
+    setLexicalTargets(picked);
+    setSelectedLexicalHint(null);
+  }, []);
+
+  useEffect(() => {
+    rollLexicalTargets(taskType);
+  }, [taskType, rollLexicalTargets]);
 
   useEffect(() => {
     if (!question || question.error || result) return;
@@ -492,6 +510,95 @@ export default function WritingPage() {
                     </span>
                   </div>
                 </div>
+
+                {/* Live Random C1-C2 Lexical Challenge Bar */}
+                {lexicalTargets.length > 0 && (
+                  <div className="px-6 py-3.5 bg-slate-900 text-white border-b border-slate-800 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-blue-300 flex items-center gap-1.5">
+                          <Dices className="w-3.5 h-3.5" />
+                          Thử thách Chèn Từ vựng C1–C2 Ngẫu nhiên:
+                        </span>
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold">
+                          Đã áp dụng:{" "}
+                          {
+                            lexicalTargets.filter((t) =>
+                              essay.toLowerCase().includes(t.word.toLowerCase())
+                            ).length
+                          }
+                          /{lexicalTargets.length}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => rollLexicalTargets(taskType)}
+                        className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-[11px] font-semibold inline-flex items-center gap-1 transition-colors"
+                      >
+                        <Dices className="w-3 h-3 text-blue-400" />
+                        Đổi 5 từ khác
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {lexicalTargets.map((t) => {
+                        const isUsed = essay.toLowerCase().includes(t.word.toLowerCase());
+                        const isSelected = selectedLexicalHint?.id === t.id;
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() =>
+                              setSelectedLexicalHint((prev) => (prev?.id === t.id ? null : t))
+                            }
+                            className={`px-2.5 py-1 rounded-md text-xs font-semibold border transition-all inline-flex items-center gap-1 ${
+                              isUsed
+                                ? "bg-emerald-600 border-emerald-500 text-white"
+                                : isSelected
+                                  ? "bg-blue-600 border-blue-400 text-white"
+                                  : "bg-slate-800 border-slate-700 text-slate-200 hover:border-slate-500"
+                            }`}
+                          >
+                            {isUsed && <Check className="w-3 h-3" />}
+                            <span>{t.word}</span>
+                            <span className="text-[10px] opacity-75">({t.level})</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {selectedLexicalHint && (
+                      <div className="p-2.5 rounded-lg bg-slate-800/90 border border-slate-700 flex items-center justify-between gap-3 text-xs">
+                        <div className="space-y-0.5">
+                          <div className="font-bold text-blue-300">
+                            {selectedLexicalHint.word}{" "}
+                            <span className="font-normal text-slate-300">
+                              — {selectedLexicalHint.meaning}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 italic">
+                            Collocation mẫu: &ldquo;{selectedLexicalHint.collocations[0]}&rdquo;
+                          </div>
+                        </div>
+                        {!result && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setEssay((prev) =>
+                                prev
+                                  ? `${prev.trimEnd()} ${selectedLexicalHint.word} `
+                                  : `${selectedLexicalHint.word} `
+                              )
+                            }
+                            className="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-semibold shrink-0"
+                          >
+                            + Chèn vào bài
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 <textarea 
                   className="w-full h-[500px] p-6 md:p-8 outline-none bg-white text-slate-900 font-medium text-base leading-relaxed resize-none placeholder:text-slate-400 selection:bg-purple-100"
